@@ -1,0 +1,941 @@
+2022-10-11 09:03:03,948 - mmflow - INFO - Multi-processing start method is `fork`
+2022-10-11 09:03:03,949 - mmflow - INFO - OpenCV num_threads is `32
+2022-10-11 09:03:04,071 - mmflow - INFO - Environment info:
+------------------------------------------------------------
+sys.platform: linux
+Python: 3.8.13 (default, Mar 28 2022, 11:38:47) [GCC 7.5.0]
+CUDA available: True
+CUDA_HOME: /opt/share/cuda/cuda-10.1
+NVCC: Cuda compilation tools, release 10.1, V10.1.243
+GPU 0,1,2,3: Tesla V100-SXM2-32GB
+GCC: gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-36)
+PyTorch: 1.12.1
+PyTorch compiling details: PyTorch built with:
+  - GCC 9.3
+  - C++ Version: 201402
+  - Intel(R) oneAPI Math Kernel Library Version 2021.4-Product Build 20210904 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.6.0 (Git Hash 52b5f107dd9cf10910aaa19cb47f3abf9b349815)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.3
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 8.3.2  (built against CUDA 11.5)
+  - Magma 2.5.2
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.3, CUDNN_VERSION=8.3.2, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -fabi-version=11 -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -DEDGE_PROFILER_USE_KINETO -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-unused-local-typedefs -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.12.1, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=OFF, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
+
+TorchVision: 0.13.1
+OpenCV: 4.6.0
+MMCV: 1.6.1
+MMFlow: 0.5.1+47d7ece
+MMCV Compiler: GCC 9.3
+MMCV CUDA Compiler: 11.3
+------------------------------------------------------------
+
+2022-10-11 09:03:04,072 - mmflow - INFO - Distributed training: False
+2022-10-11 09:03:04,913 - mmflow - INFO - Config:
+model = dict(
+    type='RAFT',
+    num_levels=4,
+    radius=4,
+    cxt_channels=128,
+    h_channels=128,
+    encoder=dict(
+        type='RAFTEncoder',
+        in_channels=3,
+        out_channels=256,
+        net_type='Basic',
+        norm_cfg=dict(type='IN'),
+        init_cfg=[
+            dict(
+                type='Kaiming',
+                layer=['Conv2d'],
+                mode='fan_out',
+                nonlinearity='relu'),
+            dict(type='Constant', layer=['InstanceNorm2d'], val=1, bias=0)
+        ]),
+    cxt_encoder=dict(
+        type='RAFTEncoder',
+        in_channels=3,
+        out_channels=256,
+        net_type='Basic',
+        norm_cfg=dict(type='SyncBN'),
+        init_cfg=[
+            dict(
+                type='Kaiming',
+                layer=['Conv2d'],
+                mode='fan_out',
+                nonlinearity='relu'),
+            dict(type='Constant', layer=['SyncBatchNorm2d'], val=1, bias=0)
+        ]),
+    decoder=dict(
+        type='RAFTDecoder',
+        net_type='Basic',
+        num_levels=4,
+        radius=4,
+        iters=12,
+        corr_op_cfg=dict(type='CorrLookup', align_corners=True),
+        gru_type='SeqConv',
+        flow_loss=dict(type='SequenceLoss', gamma=0.85),
+        act_cfg=dict(type='ReLU')),
+    freeze_bn=True,
+    train_cfg=dict(),
+    test_cfg=dict(iters=32))
+caddy_data_root = '/home/s.starace/Dataset/dCADDY'
+caddy_dataset_type = 'CADDY'
+caddy_img_norm_cfg = dict(
+    mean=[0.0, 0.0, 0.0], std=[255.0, 255.0, 255.0], to_rgb=False)
+crop_size_caddy = (320, 240)
+kitti_data_root = '/home/s.starace/Dataset/Depthstillation_mix/dKITTI'
+kitti_dataset_type = 'KITTI2015AUG'
+kitti_img_norm_cfg = dict(
+    mean=[127.5, 127.5, 127.5], std=[127.5, 127.5, 127.5], to_rgb=False)
+crop_size_kitti = (288, 960)
+global_transform = dict(
+    translates=(0.02, 0.02),
+    zoom=(0.98, 1.02),
+    shear=(1.0, 1.0),
+    rotate=(-0.5, 0.5))
+relative_transform = dict(
+    translates=(0.0025, 0.0025),
+    zoom=(0.99, 1.01),
+    shear=(1.0, 1.0),
+    rotate=(-0.5, 0.5))
+kitti_train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', sparse=True),
+    dict(
+        type='ColorJitter',
+        asymmetric_prob=0.0,
+        brightness=0.4,
+        contrast=0.4,
+        saturation=0.4,
+        hue=0.1592356687898089),
+    dict(type='Erase', prob=0.5, bounds=[50, 100], max_num=3),
+    dict(
+        type='SpacialTransform',
+        spacial_prob=0.8,
+        stretch_prob=0.8,
+        crop_size=(288, 960),
+        min_scale=-0.2,
+        max_scale=0.4,
+        max_stretch=0.2),
+    dict(type='RandomCrop', crop_size=(288, 960)),
+    dict(
+        type='Normalize',
+        mean=[0.0, 0.0, 0.0],
+        std=[255.0, 255.0, 255.0],
+        to_rgb=False),
+    dict(type='DefaultFormatBundle'),
+    dict(
+        type='Collect',
+        keys=['imgs', 'flow_gt', 'valid'],
+        meta_keys=[
+            'filename1', 'filename2', 'ori_filename1', 'ori_filename2',
+            'filename_flow', 'ori_filename_flow', 'ori_shape', 'img_shape',
+            'erase_bounds', 'erase_num', 'scale_factor'
+        ])
+]
+caddy_train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', sparse=True),
+    dict(
+        type='ColorJitter',
+        brightness=0.05,
+        contrast=0.2,
+        saturation=0.25,
+        hue=0.1),
+    dict(type='RandomGamma', gamma_range=(0.7, 1.5)),
+    dict(
+        type='Normalize',
+        mean=[0.0, 0.0, 0.0],
+        std=[255.0, 255.0, 255.0],
+        to_rgb=False),
+    dict(type='GaussianNoise', sigma_range=(0, 0.04), clamp_range=(0.0, 1.0)),
+    dict(type='RandomFlip', prob=0.5, direction='horizontal'),
+    dict(type='RandomFlip', prob=0.5, direction='vertical'),
+    dict(
+        type='RandomAffine',
+        global_transform=dict(
+            translates=(0.02, 0.02),
+            zoom=(0.98, 1.02),
+            shear=(1.0, 1.0),
+            rotate=(-0.5, 0.5)),
+        relative_transform=dict(
+            translates=(0.0025, 0.0025),
+            zoom=(0.99, 1.01),
+            shear=(1.0, 1.0),
+            rotate=(-0.5, 0.5))),
+    dict(type='RandomCrop', crop_size=(320, 240)),
+    dict(type='DefaultFormatBundle'),
+    dict(
+        type='Collect',
+        keys=['imgs', 'flow_gt', 'valid'],
+        meta_keys=[
+            'img_fields', 'ann_fields', 'filename1', 'filename2',
+            'ori_filename1', 'ori_filename2', 'filename_flow',
+            'ori_filename_flow', 'ori_shape', 'img_shape', 'img_norm_cfg'
+        ])
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', sparse=True),
+    dict(type='InputResize', exponent=6),
+    dict(
+        type='Normalize',
+        mean=[0.0, 0.0, 0.0],
+        std=[255.0, 255.0, 255.0],
+        to_rgb=False),
+    dict(type='TestFormatBundle'),
+    dict(
+        type='Collect',
+        keys=['imgs'],
+        meta_keys=[
+            'flow_gt', 'valid', 'filename1', 'filename2', 'ori_filename1',
+            'ori_filename2', 'ori_shape', 'img_shape', 'img_norm_cfg',
+            'scale_factor', 'pad_shape'
+        ])
+]
+sintel_test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations'),
+    dict(type='InputPad', exponent=3),
+    dict(
+        type='Normalize',
+        mean=[0.0, 0.0, 0.0],
+        std=[255.0, 255.0, 255.0],
+        to_rgb=False),
+    dict(type='TestFormatBundle'),
+    dict(
+        type='Collect',
+        keys=['imgs'],
+        meta_keys=[
+            'flow_gt', 'filename1', 'filename2', 'ori_filename1',
+            'ori_filename2', 'ori_shape', 'img_shape', 'img_norm_cfg',
+            'scale_factor', 'pad_shape', 'pad'
+        ])
+]
+d_caddy_train = dict(
+    type='CADDY',
+    data_root='/home/s.starace/Dataset/dCADDY',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations', sparse=True),
+        dict(
+            type='ColorJitter',
+            brightness=0.05,
+            contrast=0.2,
+            saturation=0.25,
+            hue=0.1),
+        dict(type='RandomGamma', gamma_range=(0.7, 1.5)),
+        dict(
+            type='Normalize',
+            mean=[0.0, 0.0, 0.0],
+            std=[255.0, 255.0, 255.0],
+            to_rgb=False),
+        dict(
+            type='GaussianNoise',
+            sigma_range=(0, 0.04),
+            clamp_range=(0.0, 1.0)),
+        dict(type='RandomFlip', prob=0.5, direction='horizontal'),
+        dict(type='RandomFlip', prob=0.5, direction='vertical'),
+        dict(
+            type='RandomAffine',
+            global_transform=dict(
+                translates=(0.02, 0.02),
+                zoom=(0.98, 1.02),
+                shear=(1.0, 1.0),
+                rotate=(-0.5, 0.5)),
+            relative_transform=dict(
+                translates=(0.0025, 0.0025),
+                zoom=(0.99, 1.01),
+                shear=(1.0, 1.0),
+                rotate=(-0.5, 0.5))),
+        dict(type='RandomCrop', crop_size=(320, 240)),
+        dict(type='DefaultFormatBundle'),
+        dict(
+            type='Collect',
+            keys=['imgs', 'flow_gt', 'valid'],
+            meta_keys=[
+                'img_fields', 'ann_fields', 'filename1', 'filename2',
+                'ori_filename1', 'ori_filename2', 'filename_flow',
+                'ori_filename_flow', 'ori_shape', 'img_shape', 'img_norm_cfg'
+            ])
+    ],
+    test_mode=False)
+d_kitti_train = dict(
+    type='KITTI2015AUG',
+    data_root='/home/s.starace/Dataset/Depthstillation_mix/dKITTI',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations', sparse=True),
+        dict(
+            type='ColorJitter',
+            asymmetric_prob=0.0,
+            brightness=0.4,
+            contrast=0.4,
+            saturation=0.4,
+            hue=0.1592356687898089),
+        dict(type='Erase', prob=0.5, bounds=[50, 100], max_num=3),
+        dict(
+            type='SpacialTransform',
+            spacial_prob=0.8,
+            stretch_prob=0.8,
+            crop_size=(288, 960),
+            min_scale=-0.2,
+            max_scale=0.4,
+            max_stretch=0.2),
+        dict(type='RandomCrop', crop_size=(288, 960)),
+        dict(
+            type='Normalize',
+            mean=[0.0, 0.0, 0.0],
+            std=[255.0, 255.0, 255.0],
+            to_rgb=False),
+        dict(type='DefaultFormatBundle'),
+        dict(
+            type='Collect',
+            keys=['imgs', 'flow_gt', 'valid'],
+            meta_keys=[
+                'filename1', 'filename2', 'ori_filename1', 'ori_filename2',
+                'filename_flow', 'ori_filename_flow', 'ori_shape', 'img_shape',
+                'erase_bounds', 'erase_num', 'scale_factor'
+            ])
+    ],
+    test_mode=False)
+kitti2015_val_test = dict(
+    type='KITTI2015',
+    data_root='data/KITTI_2015',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations', sparse=True),
+        dict(type='InputResize', exponent=6),
+        dict(
+            type='Normalize',
+            mean=[0.0, 0.0, 0.0],
+            std=[255.0, 255.0, 255.0],
+            to_rgb=False),
+        dict(type='TestFormatBundle'),
+        dict(
+            type='Collect',
+            keys=['imgs'],
+            meta_keys=[
+                'flow_gt', 'valid', 'filename1', 'filename2', 'ori_filename1',
+                'ori_filename2', 'ori_shape', 'img_shape', 'img_norm_cfg',
+                'scale_factor', 'pad_shape'
+            ])
+    ],
+    test_mode=True)
+sintel_clean_test = dict(
+    type='Sintel',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations'),
+        dict(type='InputPad', exponent=3),
+        dict(
+            type='Normalize',
+            mean=[0.0, 0.0, 0.0],
+            std=[255.0, 255.0, 255.0],
+            to_rgb=False),
+        dict(type='TestFormatBundle'),
+        dict(
+            type='Collect',
+            keys=['imgs'],
+            meta_keys=[
+                'flow_gt', 'filename1', 'filename2', 'ori_filename1',
+                'ori_filename2', 'ori_shape', 'img_shape', 'img_norm_cfg',
+                'scale_factor', 'pad_shape', 'pad'
+            ])
+    ],
+    data_root='data/Sintel',
+    test_mode=True,
+    pass_style='clean')
+sintel_final_test = dict(
+    type='Sintel',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations'),
+        dict(type='InputPad', exponent=3),
+        dict(
+            type='Normalize',
+            mean=[0.0, 0.0, 0.0],
+            std=[255.0, 255.0, 255.0],
+            to_rgb=False),
+        dict(type='TestFormatBundle'),
+        dict(
+            type='Collect',
+            keys=['imgs'],
+            meta_keys=[
+                'flow_gt', 'filename1', 'filename2', 'ori_filename1',
+                'ori_filename2', 'ori_shape', 'img_shape', 'img_norm_cfg',
+                'scale_factor', 'pad_shape', 'pad'
+            ])
+    ],
+    data_root='data/Sintel',
+    test_mode=True,
+    pass_style='final')
+data = dict(
+    train_dataloader=dict(
+        samples_per_gpu=2,
+        workers_per_gpu=5,
+        drop_last=True,
+        shuffle=False,
+        persistent_workers=True),
+    val_dataloader=dict(
+        samples_per_gpu=1,
+        workers_per_gpu=5,
+        shuffle=False,
+        persistent_workers=True),
+    test_dataloader=dict(samples_per_gpu=1, workers_per_gpu=5, shuffle=False),
+    train=[
+        dict(
+            type='CADDY',
+            data_root='/home/s.starace/Dataset/dCADDY',
+            pipeline=[
+                dict(type='LoadImageFromFile'),
+                dict(type='LoadAnnotations', sparse=True),
+                dict(
+                    type='ColorJitter',
+                    brightness=0.05,
+                    contrast=0.2,
+                    saturation=0.25,
+                    hue=0.1),
+                dict(type='RandomGamma', gamma_range=(0.7, 1.5)),
+                dict(
+                    type='Normalize',
+                    mean=[0.0, 0.0, 0.0],
+                    std=[255.0, 255.0, 255.0],
+                    to_rgb=False),
+                dict(
+                    type='GaussianNoise',
+                    sigma_range=(0, 0.04),
+                    clamp_range=(0.0, 1.0)),
+                dict(type='RandomFlip', prob=0.5, direction='horizontal'),
+                dict(type='RandomFlip', prob=0.5, direction='vertical'),
+                dict(
+                    type='RandomAffine',
+                    global_transform=dict(
+                        translates=(0.02, 0.02),
+                        zoom=(0.98, 1.02),
+                        shear=(1.0, 1.0),
+                        rotate=(-0.5, 0.5)),
+                    relative_transform=dict(
+                        translates=(0.0025, 0.0025),
+                        zoom=(0.99, 1.01),
+                        shear=(1.0, 1.0),
+                        rotate=(-0.5, 0.5))),
+                dict(type='RandomCrop', crop_size=(320, 240)),
+                dict(type='DefaultFormatBundle'),
+                dict(
+                    type='Collect',
+                    keys=['imgs', 'flow_gt', 'valid'],
+                    meta_keys=[
+                        'img_fields', 'ann_fields', 'filename1', 'filename2',
+                        'ori_filename1', 'ori_filename2', 'filename_flow',
+                        'ori_filename_flow', 'ori_shape', 'img_shape',
+                        'img_norm_cfg'
+                    ])
+            ],
+            test_mode=False),
+        dict(
+            type='KITTI2015AUG',
+            data_root='/home/s.starace/Dataset/Depthstillation_mix/dKITTI',
+            pipeline=[
+                dict(type='LoadImageFromFile'),
+                dict(type='LoadAnnotations', sparse=True),
+                dict(
+                    type='ColorJitter',
+                    asymmetric_prob=0.0,
+                    brightness=0.4,
+                    contrast=0.4,
+                    saturation=0.4,
+                    hue=0.1592356687898089),
+                dict(type='Erase', prob=0.5, bounds=[50, 100], max_num=3),
+                dict(
+                    type='SpacialTransform',
+                    spacial_prob=0.8,
+                    stretch_prob=0.8,
+                    crop_size=(288, 960),
+                    min_scale=-0.2,
+                    max_scale=0.4,
+                    max_stretch=0.2),
+                dict(type='RandomCrop', crop_size=(288, 960)),
+                dict(
+                    type='Normalize',
+                    mean=[0.0, 0.0, 0.0],
+                    std=[255.0, 255.0, 255.0],
+                    to_rgb=False),
+                dict(type='DefaultFormatBundle'),
+                dict(
+                    type='Collect',
+                    keys=['imgs', 'flow_gt', 'valid'],
+                    meta_keys=[
+                        'filename1', 'filename2', 'ori_filename1',
+                        'ori_filename2', 'filename_flow', 'ori_filename_flow',
+                        'ori_shape', 'img_shape', 'erase_bounds', 'erase_num',
+                        'scale_factor'
+                    ])
+            ],
+            test_mode=False)
+    ],
+    val=dict(
+        type='ConcatDataset',
+        datasets=[
+            dict(
+                type='KITTI2015',
+                data_root='data/KITTI_2015',
+                pipeline=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations', sparse=True),
+                    dict(type='InputResize', exponent=6),
+                    dict(
+                        type='Normalize',
+                        mean=[0.0, 0.0, 0.0],
+                        std=[255.0, 255.0, 255.0],
+                        to_rgb=False),
+                    dict(type='TestFormatBundle'),
+                    dict(
+                        type='Collect',
+                        keys=['imgs'],
+                        meta_keys=[
+                            'flow_gt', 'valid', 'filename1', 'filename2',
+                            'ori_filename1', 'ori_filename2', 'ori_shape',
+                            'img_shape', 'img_norm_cfg', 'scale_factor',
+                            'pad_shape'
+                        ])
+                ],
+                test_mode=True),
+            dict(
+                type='Sintel',
+                pipeline=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations'),
+                    dict(type='InputPad', exponent=3),
+                    dict(
+                        type='Normalize',
+                        mean=[0.0, 0.0, 0.0],
+                        std=[255.0, 255.0, 255.0],
+                        to_rgb=False),
+                    dict(type='TestFormatBundle'),
+                    dict(
+                        type='Collect',
+                        keys=['imgs'],
+                        meta_keys=[
+                            'flow_gt', 'filename1', 'filename2',
+                            'ori_filename1', 'ori_filename2', 'ori_shape',
+                            'img_shape', 'img_norm_cfg', 'scale_factor',
+                            'pad_shape', 'pad'
+                        ])
+                ],
+                data_root='data/Sintel',
+                test_mode=True,
+                pass_style='clean'),
+            dict(
+                type='Sintel',
+                pipeline=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations'),
+                    dict(type='InputPad', exponent=3),
+                    dict(
+                        type='Normalize',
+                        mean=[0.0, 0.0, 0.0],
+                        std=[255.0, 255.0, 255.0],
+                        to_rgb=False),
+                    dict(type='TestFormatBundle'),
+                    dict(
+                        type='Collect',
+                        keys=['imgs'],
+                        meta_keys=[
+                            'flow_gt', 'filename1', 'filename2',
+                            'ori_filename1', 'ori_filename2', 'ori_shape',
+                            'img_shape', 'img_norm_cfg', 'scale_factor',
+                            'pad_shape', 'pad'
+                        ])
+                ],
+                data_root='data/Sintel',
+                test_mode=True,
+                pass_style='final')
+        ],
+        separate_eval=True),
+    test=dict(
+        type='ConcatDataset',
+        datasets=[
+            dict(
+                type='KITTI2015',
+                data_root='data/KITTI_2015',
+                pipeline=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations', sparse=True),
+                    dict(type='InputResize', exponent=6),
+                    dict(
+                        type='Normalize',
+                        mean=[0.0, 0.0, 0.0],
+                        std=[255.0, 255.0, 255.0],
+                        to_rgb=False),
+                    dict(type='TestFormatBundle'),
+                    dict(
+                        type='Collect',
+                        keys=['imgs'],
+                        meta_keys=[
+                            'flow_gt', 'valid', 'filename1', 'filename2',
+                            'ori_filename1', 'ori_filename2', 'ori_shape',
+                            'img_shape', 'img_norm_cfg', 'scale_factor',
+                            'pad_shape'
+                        ])
+                ],
+                test_mode=True),
+            dict(
+                type='Sintel',
+                pipeline=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations'),
+                    dict(type='InputPad', exponent=3),
+                    dict(
+                        type='Normalize',
+                        mean=[0.0, 0.0, 0.0],
+                        std=[255.0, 255.0, 255.0],
+                        to_rgb=False),
+                    dict(type='TestFormatBundle'),
+                    dict(
+                        type='Collect',
+                        keys=['imgs'],
+                        meta_keys=[
+                            'flow_gt', 'filename1', 'filename2',
+                            'ori_filename1', 'ori_filename2', 'ori_shape',
+                            'img_shape', 'img_norm_cfg', 'scale_factor',
+                            'pad_shape', 'pad'
+                        ])
+                ],
+                data_root='data/Sintel',
+                test_mode=True,
+                pass_style='clean'),
+            dict(
+                type='Sintel',
+                pipeline=[
+                    dict(type='LoadImageFromFile'),
+                    dict(type='LoadAnnotations'),
+                    dict(type='InputPad', exponent=3),
+                    dict(
+                        type='Normalize',
+                        mean=[0.0, 0.0, 0.0],
+                        std=[255.0, 255.0, 255.0],
+                        to_rgb=False),
+                    dict(type='TestFormatBundle'),
+                    dict(
+                        type='Collect',
+                        keys=['imgs'],
+                        meta_keys=[
+                            'flow_gt', 'filename1', 'filename2',
+                            'ori_filename1', 'ori_filename2', 'ori_shape',
+                            'img_shape', 'img_norm_cfg', 'scale_factor',
+                            'pad_shape', 'pad'
+                        ])
+                ],
+                data_root='data/Sintel',
+                test_mode=True,
+                pass_style='final')
+        ],
+        separate_eval=True))
+log_config = dict(
+    interval=50,
+    hooks=[dict(type='TextLoggerHook'),
+           dict(type='TensorboardLoggerHook')])
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = None
+resume_from = 'work_dir/raft_dCADDY_mix_freezed_10/latest.pth'
+workflow = [('train', 1)]
+optimizer = dict(
+    type='Adam', lr=1e-05, weight_decay=0.0004, betas=(0.9, 0.999))
+optimizer_config = dict(grad_clip=None)
+lr_config = dict(
+    policy='step',
+    by_epoch=False,
+    gamma=0.5,
+    step=[10000, 15000, 20000, 25000, 30000, 40000])
+runner = dict(type='IterBasedRunner', max_iters=50000)
+checkpoint_config = dict(by_epoch=False, interval=2000)
+evaluation = dict(interval=2000, metric='EPE')
+work_dir = '/home/s.starace/FlowNets/mmflow//work_dir/raft_dCADDY_mix_freezed_10'
+auto_resume = False
+gpu_ids = [0]
+
+2022-10-11 09:03:04,915 - mmflow - INFO - Set random seed to 1381059994, deterministic: False
+2022-10-11 09:03:04,995 - mmflow - INFO - initialize RAFTEncoder with init_cfg [{'type': 'Kaiming', 'layer': ['Conv2d'], 'mode': 'fan_out', 'nonlinearity': 'relu'}, {'type': 'Constant', 'layer': ['InstanceNorm2d'], 'val': 1, 'bias': 0}]
+2022-10-11 09:03:05,319 - mmflow - INFO - initialize RAFTEncoder with init_cfg [{'type': 'Kaiming', 'layer': ['Conv2d'], 'mode': 'fan_out', 'nonlinearity': 'relu'}, {'type': 'Constant', 'layer': ['SyncBatchNorm2d'], 'val': 1, 'bias': 0}]
+2022-10-11 09:03:05,359 - mmflow - INFO - RAFT(
+  (encoder): RAFTEncoder(
+    (conv1): Conv2d(3, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3))
+    (in1): InstanceNorm2d(64, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+    (relu): ReLU(inplace=True)
+    (res_layer1): ResLayer(
+      (0): BasicBlock(
+        (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (in1): InstanceNorm2d(64, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (in2): InstanceNorm2d(64, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (relu): ReLU()
+      )
+      (1): BasicBlock(
+        (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (in1): InstanceNorm2d(64, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (in2): InstanceNorm2d(64, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (relu): ReLU()
+      )
+    )
+    (conv2): Conv2d(128, 256, kernel_size=(1, 1), stride=(1, 1))
+    (res_layer2): ResLayer(
+      (0): BasicBlock(
+        (conv1): Conv2d(64, 96, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+        (in1): InstanceNorm2d(96, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (conv2): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (in2): InstanceNorm2d(96, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (relu): ReLU()
+        (downsample): Sequential(
+          (0): Conv2d(64, 96, kernel_size=(1, 1), stride=(2, 2))
+          (1): InstanceNorm2d(96, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        )
+      )
+      (1): BasicBlock(
+        (conv1): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (in1): InstanceNorm2d(96, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (conv2): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (in2): InstanceNorm2d(96, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (relu): ReLU()
+      )
+    )
+    (res_layer3): ResLayer(
+      (0): BasicBlock(
+        (conv1): Conv2d(96, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+        (in1): InstanceNorm2d(128, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (in2): InstanceNorm2d(128, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (relu): ReLU()
+        (downsample): Sequential(
+          (0): Conv2d(96, 128, kernel_size=(1, 1), stride=(2, 2))
+          (1): InstanceNorm2d(128, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        )
+      )
+      (1): BasicBlock(
+        (conv1): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (in1): InstanceNorm2d(128, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (in2): InstanceNorm2d(128, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (relu): ReLU()
+      )
+    )
+  )
+  init_cfg=[{'type': 'Kaiming', 'layer': ['Conv2d'], 'mode': 'fan_out', 'nonlinearity': 'relu'}, {'type': 'Constant', 'layer': ['InstanceNorm2d'], 'val': 1, 'bias': 0}]
+  (decoder): RAFTDecoder(
+    (corr_block): CorrelationPyramid(
+      (pool): AvgPool2d(kernel_size=2, stride=2, padding=0)
+    )
+    (corr_lookup): CorrLookup()
+    (encoder): MotionEncoder(
+      (corr_net): Sequential(
+        (0): ConvModule(
+          (conv): Conv2d(324, 256, kernel_size=(1, 1), stride=(1, 1))
+          (activate): ReLU(inplace=True)
+        )
+        (1): ConvModule(
+          (conv): Conv2d(256, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (activate): ReLU(inplace=True)
+        )
+      )
+      (flow_net): Sequential(
+        (0): ConvModule(
+          (conv): Conv2d(2, 128, kernel_size=(7, 7), stride=(1, 1), padding=(3, 3))
+          (activate): ReLU(inplace=True)
+        )
+        (1): ConvModule(
+          (conv): Conv2d(128, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (activate): ReLU(inplace=True)
+        )
+      )
+      (out_net): Sequential(
+        (0): ConvModule(
+          (conv): Conv2d(256, 126, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (activate): ReLU(inplace=True)
+        )
+      )
+    )
+    (gru): ConvGRU(
+      (conv_z): ModuleList(
+        (0): ConvModule(
+          (conv): Conv2d(384, 128, kernel_size=(1, 5), stride=(1, 1), padding=(0, 2))
+          (activate): Sigmoid()
+        )
+        (1): ConvModule(
+          (conv): Conv2d(384, 128, kernel_size=(5, 1), stride=(1, 1), padding=(2, 0))
+          (activate): Sigmoid()
+        )
+      )
+      (conv_r): ModuleList(
+        (0): ConvModule(
+          (conv): Conv2d(384, 128, kernel_size=(1, 5), stride=(1, 1), padding=(0, 2))
+          (activate): Sigmoid()
+        )
+        (1): ConvModule(
+          (conv): Conv2d(384, 128, kernel_size=(5, 1), stride=(1, 1), padding=(2, 0))
+          (activate): Sigmoid()
+        )
+      )
+      (conv_q): ModuleList(
+        (0): ConvModule(
+          (conv): Conv2d(384, 128, kernel_size=(1, 5), stride=(1, 1), padding=(0, 2))
+          (activate): Tanh()
+        )
+        (1): ConvModule(
+          (conv): Conv2d(384, 128, kernel_size=(5, 1), stride=(1, 1), padding=(2, 0))
+          (activate): Tanh()
+        )
+      )
+    )
+    (flow_pred): XHead(
+      (layers): Sequential(
+        (0): ConvModule(
+          (conv): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (activate): ReLU(inplace=True)
+        )
+      )
+      (predict_layer): Conv2d(256, 2, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    )
+    (mask_pred): XHead(
+      (layers): Sequential(
+        (0): ConvModule(
+          (conv): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (activate): ReLU(inplace=True)
+        )
+      )
+      (predict_layer): Conv2d(256, 576, kernel_size=(1, 1), stride=(1, 1))
+    )
+    (flow_loss): SequenceLoss()
+  )
+  (context): RAFTEncoder(
+    (conv1): Conv2d(3, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3))
+    (bn1): SyncBatchNorm(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (relu): ReLU(inplace=True)
+    (res_layer1): ResLayer(
+      (0): BasicBlock(
+        (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (bn1): SyncBatchNorm(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (bn2): SyncBatchNorm(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (relu): ReLU()
+      )
+      (1): BasicBlock(
+        (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (bn1): SyncBatchNorm(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (bn2): SyncBatchNorm(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (relu): ReLU()
+      )
+    )
+    (conv2): Conv2d(128, 256, kernel_size=(1, 1), stride=(1, 1))
+    (res_layer2): ResLayer(
+      (0): BasicBlock(
+        (conv1): Conv2d(64, 96, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+        (bn1): SyncBatchNorm(96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (conv2): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (bn2): SyncBatchNorm(96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (relu): ReLU()
+        (downsample): Sequential(
+          (0): Conv2d(64, 96, kernel_size=(1, 1), stride=(2, 2))
+          (1): SyncBatchNorm(96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        )
+      )
+      (1): BasicBlock(
+        (conv1): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (bn1): SyncBatchNorm(96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (conv2): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (bn2): SyncBatchNorm(96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (relu): ReLU()
+      )
+    )
+    (res_layer3): ResLayer(
+      (0): BasicBlock(
+        (conv1): Conv2d(96, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+        (bn1): SyncBatchNorm(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (bn2): SyncBatchNorm(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (relu): ReLU()
+        (downsample): Sequential(
+          (0): Conv2d(96, 128, kernel_size=(1, 1), stride=(2, 2))
+          (1): SyncBatchNorm(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        )
+      )
+      (1): BasicBlock(
+        (conv1): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (bn1): SyncBatchNorm(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (bn2): SyncBatchNorm(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (relu): ReLU()
+      )
+    )
+  )
+  init_cfg=[{'type': 'Kaiming', 'layer': ['Conv2d'], 'mode': 'fan_out', 'nonlinearity': 'relu'}, {'type': 'Constant', 'layer': ['SyncBatchNorm2d'], 'val': 1, 'bias': 0}]
+)
+2022-10-11 09:03:06,556 - mmflow - INFO - dataset size 10406
+/home/s.starace/FlowNets/mmflow/mmflow/apis/train.py:151: UserWarning: SyncBN is only supported with DDP. To be compatible with DP, we convert SyncBN to BN. Please use dist_train.sh which can avoid this error.
+  warnings.warn(
+2022-10-11 09:03:08,741 - mmflow - INFO - load checkpoint from local path: work_dir/raft_dCADDY_mix_freezed_10/latest.pth
+2022-10-11 09:03:08,909 - mmflow - INFO - resumed from epoch: 1, iter 7999
+2022-10-11 09:03:08,911 - mmflow - INFO - Start running, host: s.starace@gnode01, work_dir: /home/s.starace/FlowNets/mmflow/work_dir/raft_dCADDY_mix_freezed_10
+2022-10-11 09:03:08,912 - mmflow - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(NORMAL      ) CheckpointHook                     
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_train_iter:
+(ABOVE_NORMAL) OptimizerHook                      
+(NORMAL      ) CheckpointHook                     
+(LOW         ) IterTimerHook                      
+(LOW         ) EvalHook                           
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) CheckpointHook                     
+(LOW         ) EvalHook                           
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_val_epoch:
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_epoch:
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+after_run:
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+2022-10-11 09:03:08,926 - mmflow - INFO - workflow: [('train', 1)], max: 50000 iters
+2022-10-11 09:03:08,928 - mmflow - INFO - Checkpoints will be saved to /home/s.starace/FlowNets/mmflow/work_dir/raft_dCADDY_mix_freezed_10 by HardDiskBackend.
+********** NOT DISTRIBUTED --- DEBUG SS ******************
+/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/torch/functional.py:478: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at  /opt/conda/conda-bld/pytorch_1659484810403/work/aten/src/ATen/native/TensorShape.cpp:2894.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+2022-10-11 09:03:11,789 - mmflow - INFO - Saving checkpoint at 8000 iterations
+[                                                  ] 0/200, elapsed: 0s, ETA:[                                 ] 1/200, 1.6 task/s, elapsed: 1s, ETA:   128s[                                 ] 2/200, 2.3 task/s, elapsed: 1s, ETA:    87s[                                 ] 3/200, 2.7 task/s, elapsed: 1s, ETA:    73s[                                 ] 4/200, 2.9 task/s, elapsed: 1s, ETA:    68s[                                 ] 5/200, 3.1 task/s, elapsed: 2s, ETA:    64s[                                 ] 6/200, 3.1 task/s, elapsed: 2s, ETA:    62s[>                                ] 7/200, 3.3 task/s, elapsed: 2s, ETA:    59s[>                                ] 8/200, 3.3 task/s, elapsed: 2s, ETA:    58s[>                                ] 9/200, 3.4 task/s, elapsed: 3s, ETA:    57s[>                               ] 10/200, 3.4 task/s, elapsed: 3s, ETA:    56s[>                               ] 11/200, 3.4 task/s, elapsed: 3s, ETA:    55s[>                               ] 12/200, 3.5 task/s, elapsed: 3s, ETA:    54s[>>                              ] 13/200, 3.5 task/s, elapsed: 4s, ETA:    53s[>>                              ] 14/200, 3.5 task/s, elapsed: 4s, ETA:    53s[>>                              ] 15/200, 3.6 task/s, elapsed: 4s, ETA:    52s[>>                              ] 16/200, 3.6 task/s, elapsed: 4s, ETA:    52s[>>                              ] 17/200, 3.6 task/s, elapsed: 5s, ETA:    51s[>>                              ] 18/200, 3.6 task/s, elapsed: 5s, ETA:    50s[>>>                             ] 19/200, 3.6 task/s, elapsed: 5s, ETA:    50s[>>>                             ] 20/200, 3.6 task/s, elapsed: 5s, ETA:    49s[>>>                             ] 21/200, 3.6 task/s, elapsed: 6s, ETA:    49s[>>>                             ] 22/200, 3.7 task/s, elapsed: 6s, ETA:    48s[>>>                             ] 23/200, 3.7 task/s, elapsed: 6s, ETA:    48s[>>>                             ] 24/200, 3.7 task/s, elapsed: 7s, ETA:    48s[>>>>                            ] 25/200, 3.7 task/s, elapsed: 7s, ETA:    47s[>>>>                            ] 26/200, 3.7 task/s, elapsed: 7s, ETA:    47s[>>>>                            ] 27/200, 3.7 task/s, elapsed: 7s, ETA:    47s[>>>>                            ] 28/200, 3.7 task/s, elapsed: 8s, ETA:    46s[>>>>                            ] 29/200, 3.7 task/s, elapsed: 8s, ETA:    46s[>>>>                            ] 30/200, 3.7 task/s, elapsed: 8s, ETA:    46s[>>>>                            ] 31/200, 3.7 task/s, elapsed: 8s, ETA:    45s[>>>>>                           ] 32/200, 3.7 task/s, elapsed: 9s, ETA:    45s[>>>>>                           ] 33/200, 3.7 task/s, elapsed: 9s, ETA:    45s[>>>>>                           ] 34/200, 3.7 task/s, elapsed: 9s, ETA:    44s[>>>>>                           ] 35/200, 3.7 task/s, elapsed: 9s, ETA:    44s[>>>>>                          ] 36/200, 3.7 task/s, elapsed: 10s, ETA:    44s[>>>>>                          ] 37/200, 3.8 task/s, elapsed: 10s, ETA:    43s[>>>>>                          ] 38/200, 3.8 task/s, elapsed: 10s, ETA:    43s[>>>>>>                         ] 39/200, 3.8 task/s, elapsed: 10s, ETA:    43s[>>>>>>                         ] 40/200, 3.8 task/s, elapsed: 11s, ETA:    42s[>>>>>>                         ] 41/200, 3.8 task/s, elapsed: 11s, ETA:    42s[>>>>>>                         ] 42/200, 3.8 task/s, elapsed: 11s, ETA:    42s[>>>>>>                         ] 43/200, 3.8 task/s, elapsed: 11s, ETA:    42s[>>>>>>                         ] 44/200, 3.8 task/s, elapsed: 12s, ETA:    41s[>>>>>>                         ] 45/200, 3.8 task/s, elapsed: 12s, ETA:    41s[>>>>>>>                        ] 46/200, 3.8 task/s, elapsed: 12s, ETA:    41s[>>>>>>>                        ] 47/200, 3.8 task/s, elapsed: 12s, ETA:    40s[>>>>>>>                        ] 48/200, 3.8 task/s, elapsed: 13s, ETA:    40s[>>>>>>>                        ] 49/200, 3.8 task/s, elapsed: 13s, ETA:    40s[>>>>>>>                        ] 50/200, 3.8 task/s, elapsed: 13s, ETA:    40s[>>>>>>>                        ] 51/200, 3.8 task/s, elapsed: 13s, ETA:    39s[>>>>>>>>                       ] 52/200, 3.8 task/s, elapsed: 14s, ETA:    39s[>>>>>>>>                       ] 53/200, 3.8 task/s, elapsed: 14s, ETA:    39s[>>>>>>>>                       ] 54/200, 3.8 task/s, elapsed: 14s, ETA:    38s[>>>>>>>>                       ] 55/200, 3.8 task/s, elapsed: 14s, ETA:    38s[>>>>>>>>                       ] 56/200, 3.8 task/s, elapsed: 15s, ETA:    38s[>>>>>>>>                       ] 57/200, 3.8 task/s, elapsed: 15s, ETA:    37s[>>>>>>>>                       ] 58/200, 3.8 task/s, elapsed: 15s, ETA:    37s[>>>>>>>>>                      ] 59/200, 3.8 task/s, elapsed: 15s, ETA:    37s[>>>>>>>>>                      ] 60/200, 3.8 task/s, elapsed: 16s, ETA:    37s[>>>>>>>>>                      ] 61/200, 3.8 task/s, elapsed: 16s, ETA:    36s[>>>>>>>>>                      ] 62/200, 3.8 task/s, elapsed: 16s, ETA:    36s[>>>>>>>>>                      ] 63/200, 3.8 task/s, elapsed: 16s, ETA:    36s[>>>>>>>>>                      ] 64/200, 3.8 task/s, elapsed: 17s, ETA:    35s[>>>>>>>>>>                     ] 65/200, 3.8 task/s, elapsed: 17s, ETA:    35s[>>>>>>>>>>                     ] 66/200, 3.8 task/s, elapsed: 17s, ETA:    35s[>>>>>>>>>>                     ] 67/200, 3.8 task/s, elapsed: 17s, ETA:    35s[>>>>>>>>>>                     ] 68/200, 3.8 task/s, elapsed: 18s, ETA:    34s[>>>>>>>>>>                     ] 69/200, 3.8 task/s, elapsed: 18s, ETA:    34s[>>>>>>>>>>                     ] 70/200, 3.8 task/s, elapsed: 18s, ETA:    34s[>>>>>>>>>>>                    ] 71/200, 3.8 task/s, elapsed: 19s, ETA:    34s[>>>>>>>>>>>                    ] 72/200, 3.8 task/s, elapsed: 19s, ETA:    33s[>>>>>>>>>>>                    ] 73/200, 3.8 task/s, elapsed: 19s, ETA:    33s[>>>>>>>>>>>                    ] 74/200, 3.8 task/s, elapsed: 19s, ETA:    33s[>>>>>>>>>>>                    ] 75/200, 3.8 task/s, elapsed: 20s, ETA:    33s[>>>>>>>>>>>                    ] 76/200, 3.8 task/s, elapsed: 20s, ETA:    32s[>>>>>>>>>>>                    ] 77/200, 3.8 task/s, elapsed: 20s, ETA:    32s[>>>>>>>>>>>>                   ] 78/200, 3.8 task/s, elapsed: 20s, ETA:    32s[>>>>>>>>>>>>                   ] 79/200, 3.8 task/s, elapsed: 21s, ETA:    31s[>>>>>>>>>>>>                   ] 80/200, 3.8 task/s, elapsed: 21s, ETA:    31s[>>>>>>>>>>>>                   ] 81/200, 3.8 task/s, elapsed: 21s, ETA:    31s[>>>>>>>>>>>>                   ] 82/200, 3.8 task/s, elapsed: 21s, ETA:    31s[>>>>>>>>>>>>                   ] 83/200, 3.8 task/s, elapsed: 22s, ETA:    30s[>>>>>>>>>>>>>                  ] 84/200, 3.8 task/s, elapsed: 22s, ETA:    30s[>>>>>>>>>>>>>                  ] 85/200, 3.8 task/s, elapsed: 22s, ETA:    30s[>>>>>>>>>>>>>                  ] 86/200, 3.8 task/s, elapsed: 22s, ETA:    30s[>>>>>>>>>>>>>                  ] 87/200, 3.9 task/s, elapsed: 23s, ETA:    29s[>>>>>>>>>>>>>                  ] 88/200, 3.9 task/s, elapsed: 23s, ETA:    29s[>>>>>>>>>>>>>                  ] 89/200, 3.9 task/s, elapsed: 23s, ETA:    29s[>>>>>>>>>>>>>                  ] 90/200, 3.9 task/s, elapsed: 23s, ETA:    29s[>>>>>>>>>>>>>>                 ] 91/200, 3.9 task/s, elapsed: 24s, ETA:    28s[>>>>>>>>>>>>>>                 ] 92/200, 3.9 task/s, elapsed: 24s, ETA:    28s[>>>>>>>>>>>>>>                 ] 93/200, 3.9 task/s, elapsed: 24s, ETA:    28s[>>>>>>>>>>>>>>                 ] 94/200, 3.9 task/s, elapsed: 24s, ETA:    27s[>>>>>>>>>>>>>>                 ] 95/200, 3.9 task/s, elapsed: 25s, ETA:    27s[>>>>>>>>>>>>>>                 ] 96/200, 3.9 task/s, elapsed: 25s, ETA:    27s[>>>>>>>>>>>>>>>                ] 97/200, 3.9 task/s, elapsed: 25s, ETA:    27s[>>>>>>>>>>>>>>>                ] 98/200, 3.9 task/s, elapsed: 25s, ETA:    26s[>>>>>>>>>>>>>>>                ] 99/200, 3.9 task/s, elapsed: 26s, ETA:    26s[>>>>>>>>>>>>>>>               ] 100/200, 3.9 task/s, elapsed: 26s, ETA:    26s[>>>>>>>>>>>>>>>               ] 101/200, 3.9 task/s, elapsed: 26s, ETA:    26s[>>>>>>>>>>>>>>>               ] 102/200, 3.9 task/s, elapsed: 26s, ETA:    25s[>>>>>>>>>>>>>>>               ] 103/200, 3.9 task/s, elapsed: 27s, ETA:    25s[>>>>>>>>>>>>>>>               ] 104/200, 3.9 task/s, elapsed: 27s, ETA:    25s[>>>>>>>>>>>>>>>               ] 105/200, 3.9 task/s, elapsed: 27s, ETA:    25s[>>>>>>>>>>>>>>>               ] 106/200, 3.9 task/s, elapsed: 27s, ETA:    24s[>>>>>>>>>>>>>>>>              ] 107/200, 3.9 task/s, elapsed: 28s, ETA:    24s[>>>>>>>>>>>>>>>>              ] 108/200, 3.9 task/s, elapsed: 28s, ETA:    24s[>>>>>>>>>>>>>>>>              ] 109/200, 3.9 task/s, elapsed: 28s, ETA:    24s[>>>>>>>>>>>>>>>>              ] 110/200, 3.9 task/s, elapsed: 29s, ETA:    23s[>>>>>>>>>>>>>>>>              ] 111/200, 3.9 task/s, elapsed: 29s, ETA:    23s[>>>>>>>>>>>>>>>>              ] 112/200, 3.9 task/s, elapsed: 29s, ETA:    23s[>>>>>>>>>>>>>>>>              ] 113/200, 3.9 task/s, elapsed: 29s, ETA:    23s[>>>>>>>>>>>>>>>>>             ] 114/200, 3.9 task/s, elapsed: 30s, ETA:    22s[>>>>>>>>>>>>>>>>>             ] 115/200, 3.9 task/s, elapsed: 30s, ETA:    22s[>>>>>>>>>>>>>>>>>             ] 116/200, 3.9 task/s, elapsed: 30s, ETA:    22s[>>>>>>>>>>>>>>>>>             ] 117/200, 3.9 task/s, elapsed: 30s, ETA:    22s[>>>>>>>>>>>>>>>>>             ] 118/200, 3.9 task/s, elapsed: 31s, ETA:    21s[>>>>>>>>>>>>>>>>>             ] 119/200, 3.9 task/s, elapsed: 31s, ETA:    21s[>>>>>>>>>>>>>>>>>>            ] 120/200, 3.9 task/s, elapsed: 31s, ETA:    21s[>>>>>>>>>>>>>>>>>>            ] 121/200, 3.9 task/s, elapsed: 31s, ETA:    20s[>>>>>>>>>>>>>>>>>>            ] 122/200, 3.9 task/s, elapsed: 32s, ETA:    20s[>>>>>>>>>>>>>>>>>>            ] 123/200, 3.9 task/s, elapsed: 32s, ETA:    20s[>>>>>>>>>>>>>>>>>>            ] 124/200, 3.9 task/s, elapsed: 32s, ETA:    20s[>>>>>>>>>>>>>>>>>>            ] 125/200, 3.9 task/s, elapsed: 32s, ETA:    19s[>>>>>>>>>>>>>>>>>>            ] 126/200, 3.9 task/s, elapsed: 33s, ETA:    19s[>>>>>>>>>>>>>>>>>>>           ] 127/200, 3.9 task/s, elapsed: 33s, ETA:    19s[>>>>>>>>>>>>>>>>>>>           ] 128/200, 3.9 task/s, elapsed: 33s, ETA:    19s[>>>>>>>>>>>>>>>>>>>           ] 129/200, 3.9 task/s, elapsed: 33s, ETA:    18s[>>>>>>>>>>>>>>>>>>>           ] 130/200, 3.9 task/s, elapsed: 34s, ETA:    18s[>>>>>>>>>>>>>>>>>>>           ] 131/200, 3.9 task/s, elapsed: 34s, ETA:    18s[>>>>>>>>>>>>>>>>>>>           ] 132/200, 3.9 task/s, elapsed: 34s, ETA:    18s[>>>>>>>>>>>>>>>>>>>           ] 133/200, 3.9 task/s, elapsed: 34s, ETA:    17s[>>>>>>>>>>>>>>>>>>>>          ] 134/200, 3.9 task/s, elapsed: 35s, ETA:    17s[>>>>>>>>>>>>>>>>>>>>          ] 135/200, 3.9 task/s, elapsed: 35s, ETA:    17s[>>>>>>>>>>>>>>>>>>>>          ] 136/200, 3.9 task/s, elapsed: 35s, ETA:    17s[>>>>>>>>>>>>>>>>>>>>          ] 137/200, 3.9 task/s, elapsed: 36s, ETA:    16s[>>>>>>>>>>>>>>>>>>>>          ] 138/200, 3.9 task/s, elapsed: 36s, ETA:    16s[>>>>>>>>>>>>>>>>>>>>          ] 139/200, 3.9 task/s, elapsed: 36s, ETA:    16s[>>>>>>>>>>>>>>>>>>>>>         ] 140/200, 3.9 task/s, elapsed: 36s, ETA:    16s[>>>>>>>>>>>>>>>>>>>>>         ] 141/200, 3.9 task/s, elapsed: 37s, ETA:    15s[>>>>>>>>>>>>>>>>>>>>>         ] 142/200, 3.9 task/s, elapsed: 37s, ETA:    15s[>>>>>>>>>>>>>>>>>>>>>         ] 143/200, 3.9 task/s, elapsed: 37s, ETA:    15s[>>>>>>>>>>>>>>>>>>>>>         ] 144/200, 3.9 task/s, elapsed: 37s, ETA:    15s[>>>>>>>>>>>>>>>>>>>>>         ] 145/200, 3.9 task/s, elapsed: 38s, ETA:    14s[>>>>>>>>>>>>>>>>>>>>>         ] 146/200, 3.9 task/s, elapsed: 38s, ETA:    14s[>>>>>>>>>>>>>>>>>>>>>>        ] 147/200, 3.9 task/s, elapsed: 38s, ETA:    14s[>>>>>>>>>>>>>>>>>>>>>>        ] 148/200, 3.9 task/s, elapsed: 38s, ETA:    13s[>>>>>>>>>>>>>>>>>>>>>>        ] 149/200, 3.9 task/s, elapsed: 39s, ETA:    13s[>>>>>>>>>>>>>>>>>>>>>>        ] 150/200, 3.9 task/s, elapsed: 39s, ETA:    13s[>>>>>>>>>>>>>>>>>>>>>>        ] 151/200, 3.9 task/s, elapsed: 39s, ETA:    13s[>>>>>>>>>>>>>>>>>>>>>>        ] 152/200, 3.9 task/s, elapsed: 39s, ETA:    12s[>>>>>>>>>>>>>>>>>>>>>>        ] 153/200, 3.9 task/s, elapsed: 40s, ETA:    12s[>>>>>>>>>>>>>>>>>>>>>>>       ] 154/200, 3.9 task/s, elapsed: 40s, ETA:    12s[>>>>>>>>>>>>>>>>>>>>>>>       ] 155/200, 3.9 task/s, elapsed: 40s, ETA:    12s[>>>>>>>>>>>>>>>>>>>>>>>       ] 156/200, 3.9 task/s, elapsed: 40s, ETA:    11s[>>>>>>>>>>>>>>>>>>>>>>>       ] 157/200, 3.9 task/s, elapsed: 41s, ETA:    11s[>>>>>>>>>>>>>>>>>>>>>>>       ] 158/200, 3.9 task/s, elapsed: 41s, ETA:    11s[>>>>>>>>>>>>>>>>>>>>>>>       ] 159/200, 3.9 task/s, elapsed: 41s, ETA:    11s[>>>>>>>>>>>>>>>>>>>>>>>>      ] 160/200, 3.9 task/s, elapsed: 41s, ETA:    10s[>>>>>>>>>>>>>>>>>>>>>>>>      ] 161/200, 3.9 task/s, elapsed: 42s, ETA:    10s[>>>>>>>>>>>>>>>>>>>>>>>>      ] 162/200, 3.9 task/s, elapsed: 42s, ETA:    10s[>>>>>>>>>>>>>>>>>>>>>>>>      ] 163/200, 3.9 task/s, elapsed: 42s, ETA:    10s[>>>>>>>>>>>>>>>>>>>>>>>>      ] 164/200, 3.9 task/s, elapsed: 42s, ETA:     9s[>>>>>>>>>>>>>>>>>>>>>>>>      ] 165/200, 3.9 task/s, elapsed: 43s, ETA:     9s[>>>>>>>>>>>>>>>>>>>>>>>>      ] 166/200, 3.9 task/s, elapsed: 43s, ETA:     9s[>>>>>>>>>>>>>>>>>>>>>>>>>     ] 167/200, 3.9 task/s, elapsed: 43s, ETA:     9s[>>>>>>>>>>>>>>>>>>>>>>>>>     ] 168/200, 3.9 task/s, elapsed: 43s, ETA:     8s[>>>>>>>>>>>>>>>>>>>>>>>>>     ] 169/200, 3.9 task/s, elapsed: 44s, ETA:     8s[>>>>>>>>>>>>>>>>>>>>>>>>>     ] 170/200, 3.9 task/s, elapsed: 44s, ETA:     8s[>>>>>>>>>>>>>>>>>>>>>>>>>     ] 171/200, 3.9 task/s, elapsed: 44s, ETA:     8s[>>>>>>>>>>>>>>>>>>>>>>>>>     ] 172/200, 3.9 task/s, elapsed: 44s, ETA:     7s[>>>>>>>>>>>>>>>>>>>>>>>>>     ] 173/200, 3.9 task/s, elapsed: 45s, ETA:     7s[>>>>>>>>>>>>>>>>>>>>>>>>>>    ] 174/200, 3.9 task/s, elapsed: 45s, ETA:     7s[>>>>>>>>>>>>>>>>>>>>>>>>>>    ] 175/200, 3.9 task/s, elapsed: 45s, ETA:     6s[>>>>>>>>>>>>>>>>>>>>>>>>>>    ] 176/200, 3.9 task/s, elapsed: 46s, ETA:     6s[>>>>>>>>>>>>>>>>>>>>>>>>>>    ] 177/200, 3.9 task/s, elapsed: 46s, ETA:     6s[>>>>>>>>>>>>>>>>>>>>>>>>>>    ] 178/200, 3.9 task/s, elapsed: 46s, ETA:     6s[>>>>>>>>>>>>>>>>>>>>>>>>>>    ] 179/200, 3.9 task/s, elapsed: 46s, ETA:     5s[>>>>>>>>>>>>>>>>>>>>>>>>>>>   ] 180/200, 3.9 task/s, elapsed: 47s, ETA:     5s[>>>>>>>>>>>>>>>>>>>>>>>>>>>   ] 181/200, 3.9 task/s, elapsed: 47s, ETA:     5s[>>>>>>>>>>>>>>>>>>>>>>>>>>>   ] 182/200, 3.9 task/s, elapsed: 47s, ETA:     5s[>>>>>>>>>>>>>>>>>>>>>>>>>>>   ] 183/200, 3.9 task/s, elapsed: 47s, ETA:     4s[>>>>>>>>>>>>>>>>>>>>>>>>>>>   ] 184/200, 3.9 task/s, elapsed: 48s, ETA:     4s[>>>>>>>>>>>>>>>>>>>>>>>>>>>   ] 185/200, 3.9 task/s, elapsed: 48s, ETA:     4s[>>>>>>>>>>>>>>>>>>>>>>>>>>>   ] 186/200, 3.9 task/s, elapsed: 48s, ETA:     4s[>>>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 187/200, 3.9 task/s, elapsed: 48s, ETA:     3s[>>>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 188/200, 3.9 task/s, elapsed: 49s, ETA:     3s[>>>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 189/200, 3.9 task/s, elapsed: 49s, ETA:     3s[>>>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 190/200, 3.9 task/s, elapsed: 49s, ETA:     3s[>>>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 191/200, 3.9 task/s, elapsed: 49s, ETA:     2s[>>>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 192/200, 3.9 task/s, elapsed: 50s, ETA:     2s[>>>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 193/200, 3.9 task/s, elapsed: 50s, ETA:     2s[>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ] 194/200, 3.9 task/s, elapsed: 50s, ETA:     2s[>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ] 195/200, 3.9 task/s, elapsed: 50s, ETA:     1s[>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ] 196/200, 3.9 task/s, elapsed: 51s, ETA:     1s[>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ] 197/200, 3.9 task/s, elapsed: 51s, ETA:     1s[>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ] 198/200, 3.9 task/s, elapsed: 51s, ETA:     1s[>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ] 199/200, 3.9 task/s, elapsed: 51s, ETA:     0s[>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>] 200/200, 3.9 task/s, elapsed: 52s, ETA:     0s[                                                  ] 0/1041, elapsed: 0s, ETA:[                                ] 1/1041, 1.4 task/s, elapsed: 1s, ETA:   725s[                                ] 2/1041, 2.2 task/s, elapsed: 1s, ETA:   478s[                                ] 3/1041, 2.5 task/s, elapsed: 1s, ETA:   409s[                                ] 4/1041, 2.9 task/s, elapsed: 1s, ETA:   364s[                                ] 5/1041, 3.0 task/s, elapsed: 2s, ETA:   342s[                                ] 6/1041, 3.2 task/s, elapsed: 2s, ETA:   324s[                                ] 7/1041, 3.3 task/s, elapsed: 2s, ETA:   310s[                                ] 8/1041, 3.4 task/s, elapsed: 2s, ETA:   302s[                                ] 9/1041, 3.5 task/s, elapsed: 3s, ETA:   293s[                               ] 10/1041, 3.6 task/s, elapsed: 3s, ETA:   287s[                               ] 11/1041, 3.6 task/s, elapsed: 3s, ETA:   286s[                               ] 12/1041, 3.7 task/s, elapsed: 3s, ETA:   281s[                               ] 13/1041, 3.7 task/s, elapsed: 4s, ETA:   278s[                               ] 14/1041, 3.7 task/s, elapsed: 4s, ETA:   275s[                               ] 15/1041, 3.8 task/s, elapsed: 4s, ETA:   273s[                               ] 16/1041, 3.8 task/s, elapsed: 4s, ETA:   271s[                               ] 17/1041, 3.8 task/s, elapsed: 4s, ETA:   267s[                               ] 18/1041, 3.9 task/s, elapsed: 5s, ETA:   266s[                               ] 19/1041, 3.9 task/s, elapsed: 5s, ETA:   263s[                               ] 20/1041, 3.9 task/s, elapsed: 5s, ETA:   263s[                               ] 21/1041, 3.9 task/s, elapsed: 5s, ETA:   262s[                               ] 22/1041, 3.9 task/s, elapsed: 6s, ETA:   260s[                               ] 23/1041, 3.9 task/s, elapsed: 6s, ETA:   259s[                               ] 24/1041, 4.0 task/s, elapsed: 6s, ETA:   257s[                               ] 25/1041, 4.0 task/s, elapsed: 6s, ETA:   256s[                               ] 26/1041, 4.0 task/s, elapsed: 7s, ETA:   255s[                               ] 27/1041, 4.0 task/s, elapsed: 7s, ETA:   254s[                               ] 28/1041, 4.0 task/s, elapsed: 7s, ETA:   253s[                               ] 29/1041, 4.0 task/s, elapsed: 7s, ETA:   252s[                               ] 30/1041, 4.0 task/s, elapsed: 7s, ETA:   252s[                               ] 31/1041, 4.0 task/s, elapsed: 8s, ETA:   251s[                               ] 32/1041, 4.0 task/s, elapsed: 8s, ETA:   250s[                               ] 33/1041, 4.0 task/s, elapsed: 8s, ETA:   249s[>                              ] 34/1041, 4.1 task/s, elapsed: 8s, ETA:   248s[>                              ] 35/1041, 4.1 task/s, elapsed: 9s, ETA:   247s[>                              ] 36/1041, 4.1 task/s, elapsed: 9s, ETA:   247s[>                              ] 37/1041, 4.1 task/s, elapsed: 9s, ETA:   246s[>                              ] 38/1041, 4.1 task/s, elapsed: 9s, ETA:   245s[>                             ] 39/1041, 4.1 task/s, elapsed: 10s, ETA:   245s[>                             ] 40/1041, 4.1 task/s, elapsed: 10s, ETA:   244s[>                             ] 41/1041, 4.1 task/s, elapsed: 10s, ETA:   244s[>                             ] 42/1041, 4.1 task/s, elapsed: 10s, ETA:   243s[>                             ] 43/1041, 4.1 task/s, elapsed: 10s, ETA:   242s[>                             ] 44/1041, 4.1 task/s, elapsed: 11s, ETA:   241s[>                             ] 45/1041, 4.1 task/s, elapsed: 11s, ETA:   241s[>                             ] 46/1041, 4.1 task/s, elapsed: 11s, ETA:   241s[>                             ] 47/1041, 4.1 task/s, elapsed: 11s, ETA:   240s[>                             ] 48/1041, 4.1 task/s, elapsed: 12s, ETA:   239s[>                             ] 49/1041, 4.2 task/s, elapsed: 12s, ETA:   239s[>                             ] 50/1041, 4.2 task/s, elapsed: 12s, ETA:   238s[>                             ] 51/1041, 4.2 task/s, elapsed: 12s, ETA:   238s[>                             ] 52/1041, 4.2 task/s, elapsed: 12s, ETA:   237s[>                             ] 53/1041, 4.2 task/s, elapsed: 13s, ETA:   238s[>                             ] 54/1041, 4.2 task/s, elapsed: 13s, ETA:   237s[>                             ] 55/1041, 4.2 task/s, elapsed: 13s, ETA:   237s[>                             ] 56/1041, 4.2 task/s, elapsed: 13s, ETA:   237s[>                             ] 57/1041, 4.2 task/s, elapsed: 14s, ETA:   236s[>                             ] 58/1041, 4.2 task/s, elapsed: 14s, ETA:   236s[>                             ] 59/1041, 4.2 task/s, elapsed: 14s, ETA:   235s[>                             ] 60/1041, 4.2 task/s, elapsed: 14s, ETA:   235s[>                             ] 61/1041, 4.2 task/s, elapsed: 15s, ETA:   235s[>                             ] 62/1041, 4.2 task/s, elapsed: 15s, ETA:   234s[>                             ] 63/1041, 4.2 task/s, elapsed: 15s, ETA:   234s[>                             ] 64/1041, 4.2 task/s, elapsed: 15s, ETA:   234s[>                             ] 65/1041, 4.2 task/s, elapsed: 16s, ETA:   234s[>                             ] 66/1041, 4.2 task/s, elapsed: 16s, ETA:   233s[>                             ] 67/1041, 4.2 task/s, elapsed: 16s, ETA:   233s[>                             ] 68/1041, 4.2 task/s, elapsed: 16s, ETA:   233s[>                             ] 69/1041, 4.2 task/s, elapsed: 16s, ETA:   232s[>>                            ] 70/1041, 4.2 task/s, elapsed: 17s, ETA:   232s[>>                            ] 71/1041, 4.2 task/s, elapsed: 17s, ETA:   232s[>>                            ] 72/1041, 4.2 task/s, elapsed: 17s, ETA:   232s[>>                            ] 73/1041, 4.2 task/s, elapsed: 17s, ETA:   231s[>>                            ] 74/1041, 4.2 task/s, elapsed: 18s, ETA:   231s[>>                            ] 75/1041, 4.2 task/s, elapsed: 18s, ETA:   231s[>>                            ] 76/1041, 4.2 task/s, elapsed: 18s, ETA:   231s[>>                            ] 77/1041, 4.2 task/s, elapsed: 18s, ETA:   230s[>>                            ] 78/1041, 4.2 task/s, elapsed: 19s, ETA:   230s[>>                            ] 79/1041, 4.2 task/s, elapsed: 19s, ETA:   230s[>>                            ] 80/1041, 4.2 task/s, elapsed: 19s, ETA:   230s[>>                            ] 81/1041, 4.2 task/s, elapsed: 19s, ETA:   229s[>>                            ] 82/1041, 4.2 task/s, elapsed: 20s, ETA:   229s[>>                            ] 83/1041, 4.2 task/s, elapsed: 20s, ETA:   229s[>>                            ] 84/1041, 4.2 task/s, elapsed: 20s, ETA:   228s[>>                            ] 85/1041, 4.2 task/s, elapsed: 20s, ETA:   228s[>>                            ] 86/1041, 4.2 task/s, elapsed: 21s, ETA:   228s[>>                            ] 87/1041, 4.2 task/s, elapsed: 21s, ETA:   227s[>>                            ] 88/1041, 4.2 task/s, elapsed: 21s, ETA:   227s[>>                            ] 89/1041, 4.2 task/s, elapsed: 21s, ETA:   227s[>>                            ] 90/1041, 4.2 task/s, elapsed: 21s, ETA:   226s[>>                            ] 91/1041, 4.2 task/s, elapsed: 22s, ETA:   226s[>>                            ] 92/1041, 4.2 task/s, elapsed: 22s, ETA:   226s[>>                            ] 93/1041, 4.2 task/s, elapsed: 22s, ETA:   226s[>>                            ] 94/1041, 4.2 task/s, elapsed: 22s, ETA:   225s[>>                            ] 95/1041, 4.2 task/s, elapsed: 23s, ETA:   225s[>>                            ] 96/1041, 4.2 task/s, elapsed: 23s, ETA:   225s[>>                            ] 97/1041, 4.2 task/s, elapsed: 23s, ETA:   224s[>>                            ] 98/1041, 4.2 task/s, elapsed: 23s, ETA:   224s[>>                            ] 99/1041, 4.2 task/s, elapsed: 23s, ETA:   224s[>>                           ] 100/1041, 4.2 task/s, elapsed: 24s, ETA:   223s[>>                           ] 101/1041, 4.2 task/s, elapsed: 24s, ETA:   223s[>>                           ] 102/1041, 4.2 task/s, elapsed: 24s, ETA:   223s[>>                           ] 103/1041, 4.2 task/s, elapsed: 24s, ETA:   222s[>>                           ] 104/1041, 4.2 task/s, elapsed: 25s, ETA:   222s[>>                           ] 105/1041, 4.2 task/s, elapsed: 25s, ETA:   222s[>>                           ] 106/1041, 4.2 task/s, elapsed: 25s, ETA:   222s[>>                           ] 107/1041, 4.2 task/s, elapsed: 25s, ETA:   221s[>>>                          ] 108/1041, 4.2 task/s, elapsed: 26s, ETA:   221s[>>>                          ] 109/1041, 4.2 task/s, elapsed: 26s, ETA:   221s[>>>                          ] 110/1041, 4.2 task/s, elapsed: 26s, ETA:   220s[>>>                          ] 111/1041, 4.2 task/s, elapsed: 26s, ETA:   220s[>>>                          ] 112/1041, 4.2 task/s, elapsed: 26s, ETA:   220s[>>>                          ] 113/1041, 4.2 task/s, elapsed: 27s, ETA:   220s[>>>                          ] 114/1041, 4.2 task/s, elapsed: 27s, ETA:   219s[>>>                          ] 115/1041, 4.2 task/s, elapsed: 27s, ETA:   219s[>>>                          ] 116/1041, 4.2 task/s, elapsed: 27s, ETA:   219s[>>>                          ] 117/1041, 4.2 task/s, elapsed: 28s, ETA:   218s[>>>                          ] 118/1041, 4.2 task/s, elapsed: 28s, ETA:   218s[>>>                          ] 119/1041, 4.2 task/s, elapsed: 28s, ETA:   218s[>>>                          ] 120/1041, 4.2 task/s, elapsed: 28s, ETA:   217s[>>>                          ] 121/1041, 4.2 task/s, elapsed: 29s, ETA:   217s[>>>                          ] 122/1041, 4.2 task/s, elapsed: 29s, ETA:   217s[>>>                          ] 123/1041, 4.2 task/s, elapsed: 29s, ETA:   217s[>>>                          ] 124/1041, 4.2 task/s, elapsed: 29s, ETA:   216s[>>>                          ] 125/1041, 4.2 task/s, elapsed: 29s, ETA:   216s[>>>                          ] 126/1041, 4.2 task/s, elapsed: 30s, ETA:   216s[>>>                          ] 127/1041, 4.2 task/s, elapsed: 30s, ETA:   215s[>>>                          ] 128/1041, 4.2 task/s, elapsed: 30s, ETA:   215s[>>>                          ] 129/1041, 4.2 task/s, elapsed: 30s, ETA:   215s[>>>                          ] 130/1041, 4.2 task/s, elapsed: 31s, ETA:   214s[>>>                          ] 131/1041, 4.2 task/s, elapsed: 31s, ETA:   214s[>>>                          ] 132/1041, 4.3 task/s, elapsed: 31s, ETA:   214s[>>>                          ] 133/1041, 4.2 task/s, elapsed: 31s, ETA:   214s[>>>                          ] 134/1041, 4.3 task/s, elapsed: 32s, ETA:   213s[>>>                          ] 135/1041, 4.3 task/s, elapsed: 32s, ETA:   213s[>>>                          ] 136/1041, 4.3 task/s, elapsed: 32s, ETA:   213s[>>>                          ] 137/1041, 4.3 task/s, elapsed: 32s, ETA:   212s[>>>                          ] 138/1041, 4.3 task/s, elapsed: 32s, ETA:   212s[>>>                          ] 139/1041, 4.3 task/s, elapsed: 33s, ETA:   212s[>>>                          ] 140/1041, 4.3 task/s, elapsed: 33s, ETA:   211s[>>>                          ] 141/1041, 4.3 task/s, elapsed: 33s, ETA:   211s[>>>                          ] 142/1041, 4.3 task/s, elapsed: 33s, ETA:   211s[>>>                          ] 143/1041, 4.3 task/s, elapsed: 34s, ETA:   211s[>>>>                         ] 144/1041, 4.3 task/s, elapsed: 34s, ETA:   210s[>>>>                         ] 145/1041, 4.3 task/s, elapsed: 34s, ETA:   210s[>>>>                         ] 146/1041, 4.3 task/s, elapsed: 34s, ETA:   210s[>>>>                         ] 147/1041, 4.3 task/s, elapsed: 34s, ETA:   210s[>>>>                         ] 148/1041, 4.3 task/s, elapsed: 35s, ETA:   209s[>>>>                         ] 149/1041, 4.3 task/s, elapsed: 35s, ETA:   209s[>>>>                         ] 150/1041, 4.3 task/s, elapsed: 35s, ETA:   209s[>>>>                         ] 151/1041, 4.3 task/s, elapsed: 35s, ETA:   209s[>>>>                         ] 152/1041, 4.3 task/s, elapsed: 36s, ETA:   208s[>>>>                         ] 153/1041, 4.3 task/s, elapsed: 36s, ETA:   208s[>>>>                         ] 154/1041, 4.3 task/s, elapsed: 36s, ETA:   208s[>>>>                         ] 155/1041, 4.3 task/s, elapsed: 36s, ETA:   208s[>>>>                         ] 156/1041, 4.3 task/s, elapsed: 37s, ETA:   208s[>>>>                         ] 157/1041, 4.3 task/s, elapsed: 37s, ETA:   207s[>>>>                         ] 158/1041, 4.3 task/s, elapsed: 37s, ETA:   207s[>>>>                         ] 159/1041, 4.3 task/s, elapsed: 37s, ETA:   207s[>>>>                         ] 160/1041, 4.3 task/s, elapsed: 37s, ETA:   206s[>>>>                         ] 161/1041, 4.3 task/s, elapsed: 38s, ETA:   206s[>>>>                         ] 162/1041, 4.3 task/s, elapsed: 38s, ETA:   206s[>>>>                         ] 163/1041, 4.3 task/s, elapsed: 38s, ETA:   206s[>>>>                         ] 164/1041, 4.3 task/s, elapsed: 38s, ETA:   205s[>>>>                         ] 165/1041, 4.3 task/s, elapsed: 39s, ETA:   205s[>>>>                         ] 166/1041, 4.3 task/s, elapsed: 39s, ETA:   205s[>>>>                         ] 167/1041, 4.3 task/s, elapsed: 39s, ETA:   205s[>>>>                         ] 168/1041, 4.3 task/s, elapsed: 39s, ETA:   204s[>>>>                         ] 169/1041, 4.3 task/s, elapsed: 40s, ETA:   204s[>>>>                         ] 170/1041, 4.3 task/s, elapsed: 40s, ETA:   204s[>>>>                         ] 171/1041, 4.3 task/s, elapsed: 40s, ETA:   204s[>>>>                         ] 172/1041, 4.3 task/s, elapsed: 40s, ETA:   203s[>>>>                         ] 173/1041, 4.3 task/s, elapsed: 40s, ETA:   203s[>>>>                         ] 174/1041, 4.3 task/s, elapsed: 41s, ETA:   203s[>>>>                         ] 175/1041, 4.3 task/s, elapsed: 41s, ETA:   202s[>>>>                         ] 176/1041, 4.3 task/s, elapsed: 41s, ETA:   202s[>>>>                         ] 177/1041, 4.3 task/s, elapsed: 41s, ETA:   202s[>>>>                         ] 178/1041, 4.3 task/s, elapsed: 42s, ETA:   202s[>>>>                         ] 179/1041, 4.3 task/s, elapsed: 42s, ETA:   201s[>>>>>                        ] 180/1041, 4.3 task/s, elapsed: 42s, ETA:   201s[>>>>>                        ] 181/1041, 4.3 task/s, elapsed: 42s, ETA:   201s[>>>>>                        ] 182/1041, 4.3 task/s, elapsed: 42s, ETA:   201s[>>>>>                        ] 183/1041, 4.3 task/s, elapsed: 43s, ETA:   200s[>>>>>                        ] 184/1041, 4.3 task/s, elapsed: 43s, ETA:   200s[>>>>>                        ] 185/1041, 4.3 task/s, elapsed: 43s, ETA:   200s[>>>>>                        ] 186/1041, 4.3 task/s, elapsed: 43s, ETA:   200s[>>>>>                        ] 187/1041, 4.3 task/s, elapsed: 44s, ETA:   199s[>>>>>                        ] 188/1041, 4.3 task/s, elapsed: 44s, ETA:   199s[>>>>>                        ] 189/1041, 4.3 task/s, elapsed: 44s, ETA:   199s[>>>>>                        ] 190/1041, 4.3 task/s, elapsed: 44s, ETA:   199s[>>>>>                        ] 191/1041, 4.3 task/s, elapsed: 45s, ETA:   199s[>>>>>                        ] 192/1041, 4.3 task/s, elapsed: 45s, ETA:   198s[>>>>>                        ] 193/1041, 4.3 task/s, elapsed: 45s, ETA:   198s[>>>>>                        ] 194/1041, 4.3 task/s, elapsed: 45s, ETA:   198s[>>>>>                        ] 195/1041, 4.3 task/s, elapsed: 46s, ETA:   197s[>>>>>                        ] 196/1041, 4.3 task/s, elapsed: 46s, ETA:   197s[>>>>>                        ] 197/1041, 4.3 task/s, elapsed: 46s, ETA:   197s[>>>>>                        ] 198/1041, 4.3 task/s, elapsed: 46s, ETA:   197s[>>>>>                        ] 199/1041, 4.3 task/s, elapsed: 46s, ETA:   196s[>>>>>                        ] 200/1041, 4.3 task/s, elapsed: 47s, ETA:   196s[>>>>>                        ] 201/1041, 4.3 task/s, elapsed: 47s, ETA:   196s[>>>>>                        ] 202/1041, 4.3 task/s, elapsed: 47s, ETA:   196s[>>>>>                        ] 203/1041, 4.3 task/s, elapsed: 47s, ETA:   195s[>>>>>                        ] 204/1041, 4.3 task/s, elapsed: 48s, ETA:   195s[>>>>>                        ] 205/1041, 4.3 task/s, elapsed: 48s, ETA:   195s[>>>>>                        ] 206/1041, 4.3 task/s, elapsed: 48s, ETA:   195s[>>>>>                        ] 207/1041, 4.3 task/s, elapsed: 48s, ETA:   194s[>>>>>                        ] 208/1041, 4.3 task/s, elapsed: 48s, ETA:   194s[>>>>>                        ] 209/1041, 4.3 task/s, elapsed: 49s, ETA:   194s[>>>>>                        ] 210/1041, 4.3 task/s, elapsed: 49s, ETA:   193s[>>>>>                        ] 211/1041, 4.3 task/s, elapsed: 49s, ETA:   193s[>>>>>                        ] 212/1041, 4.3 task/s, elapsed: 49s, ETA:   193s[>>>>>                        ] 213/1041, 4.3 task/s, elapsed: 50s, ETA:   193s[>>>>>                        ] 214/1041, 4.3 task/s, elapsed: 50s, ETA:   192s[>>>>>                        ] 215/1041, 4.3 task/s, elapsed: 50s, ETA:   192s[>>>>>>                       ] 216/1041, 4.3 task/s, elapsed: 50s, ETA:   192s[>>>>>>                       ] 217/1041, 4.3 task/s, elapsed: 50s, ETA:   192s[>>>>>>                       ] 218/1041, 4.3 task/s, elapsed: 51s, ETA:   192s[>>>>>>                       ] 219/1041, 4.3 task/s, elapsed: 51s, ETA:   191s[>>>>>>                       ] 220/1041, 4.3 task/s, elapsed: 51s, ETA:   191s[>>>>>>                       ] 221/1041, 4.3 task/s, elapsed: 51s, ETA:   191s[>>>>>>                       ] 222/1041, 4.3 task/s, elapsed: 52s, ETA:   191s[>>>>>>                       ] 223/1041, 4.3 task/s, elapsed: 52s, ETA:   190s[>>>>>>                       ] 224/1041, 4.3 task/s, elapsed: 52s, ETA:   190s[>>>>>>                       ] 225/1041, 4.3 task/s, elapsed: 52s, ETA:   190s[>>>>>>                       ] 226/1041, 4.3 task/s, elapsed: 53s, ETA:   190s[>>>>>>                       ] 227/1041, 4.3 task/s, elapsed: 53s, ETA:   189s[>>>>>>                       ] 228/1041, 4.3 task/s, elapsed: 53s, ETA:   189s[>>>>>>                       ] 229/1041, 4.3 task/s, elapsed: 53s, ETA:   189s[>>>>>>                       ] 230/1041, 4.3 task/s, elapsed: 53s, ETA:   189s[>>>>>>                       ] 231/1041, 4.3 task/s, elapsed: 54s, ETA:   188s[>>>>>>                       ] 232/1041, 4.3 task/s, elapsed: 54s, ETA:   188s[>>>>>>                       ] 233/1041, 4.3 task/s, elapsed: 54s, ETA:   188s[>>>>>>                       ] 234/1041, 4.3 task/s, elapsed: 54s, ETA:   188s[>>>>>>                       ] 235/1041, 4.3 task/s, elapsed: 55s, ETA:   187s[>>>>>>                       ] 236/1041, 4.3 task/s, elapsed: 55s, ETA:   187s[>>>>>>                       ] 237/1041, 4.3 task/s, elapsed: 55s, ETA:   187s[>>>>>>                       ] 238/1041, 4.3 task/s, elapsed: 55s, ETA:   187s[>>>>>>                       ] 239/1041, 4.3 task/s, elapsed: 56s, ETA:   186s[>>>>>>                       ] 240/1041, 4.3 task/s, elapsed: 56s, ETA:   186s[>>>>>>                       ] 241/1041, 4.3 task/s, elapsed: 56s, ETA:   186s[>>>>>>                       ] 242/1041, 4.3 task/s, elapsed: 56s, ETA:   186s[>>>>>>                       ] 243/1041, 4.3 task/s, elapsed: 56s, ETA:   185s[>>>>>>                       ] 244/1041, 4.3 task/s, elapsed: 57s, ETA:   185s[>>>>>>                       ] 245/1041, 4.3 task/s, elapsed: 57s, ETA:   185s[>>>>>>                       ] 246/1041, 4.3 task/s, elapsed: 57s, ETA:   185s[>>>>>>                       ] 247/1041, 4.3 task/s, elapsed: 57s, ETA:   185s[>>>>>>                       ] 248/1041, 4.3 task/s, elapsed: 58s, ETA:   184s[>>>>>>                       ] 249/1041, 4.3 task/s, elapsed: 58s, ETA:   184s[>>>>>>                       ] 250/1041, 4.3 task/s, elapsed: 58s, ETA:   184s[>>>>>>                       ] 251/1041, 4.3 task/s, elapsed: 58s, ETA:   184s[>>>>>>>                      ] 252/1041, 4.3 task/s, elapsed: 59s, ETA:   183s[>>>>>>>                      ] 253/1041, 4.3 task/s, elapsed: 59s, ETA:   183s[>>>>>>>                      ] 254/1041, 4.3 task/s, elapsed: 59s, ETA:   183s[>>>>>>>                      ] 255/1041, 4.3 task/s, elapsed: 59s, ETA:   183s[>>>>>>>                      ] 256/1041, 4.3 task/s, elapsed: 59s, ETA:   182s[>>>>>>>                      ] 257/1041, 4.3 task/s, elapsed: 60s, ETA:   182s[>>>>>>>                      ] 258/1041, 4.3 task/s, elapsed: 60s, ETA:   182s[>>>>>>>                      ] 259/1041, 4.3 task/s, elapsed: 60s, ETA:   182s[>>>>>>>                      ] 260/1041, 4.3 task/s, elapsed: 60s, ETA:   181s[>>>>>>>                      ] 261/1041, 4.3 task/s, elapsed: 61s, ETA:   181s[>>>>>>>                      ] 262/1041, 4.3 task/s, elapsed: 61s, ETA:   181s[>>>>>>>                      ] 263/1041, 4.3 task/s, elapsed: 61s, ETA:   181s[>>>>>>>                      ] 264/1041, 4.3 task/s, elapsed: 61s, ETA:   181s[>>>>>>>                      ] 265/1041, 4.3 task/s, elapsed: 62s, ETA:   180s[>>>>>>>                      ] 266/1041, 4.3 task/s, elapsed: 62s, ETA:   180s[>>>>>>>                      ] 267/1041, 4.3 task/s, elapsed: 62s, ETA:   180s[>>>>>>>                      ] 268/1041, 4.3 task/s, elapsed: 62s, ETA:   180s[>>>>>>>                      ] 269/1041, 4.3 task/s, elapsed: 63s, ETA:   179s[>>>>>>>                      ] 270/1041, 4.3 task/s, elapsed: 63s, ETA:   179s[>>>>>>>                      ] 271/1041, 4.3 task/s, elapsed: 63s, ETA:   179s[>>>>>>>                      ] 272/1041, 4.3 task/s, elapsed: 63s, ETA:   179s[>>>>>>>                      ] 273/1041, 4.3 task/s, elapsed: 63s, ETA:   179s[>>>>>>>                      ] 274/1041, 4.3 task/s, elapsed: 64s, ETA:   178s[>>>>>>>                      ] 275/1041, 4.3 task/s, elapsed: 64s, ETA:   178s[>>>>>>>                      ] 276/1041, 4.3 task/s, elapsed: 64s, ETA:   178s[>>>>>>>                      ] 277/1041, 4.3 task/s, elapsed: 64s, ETA:   178s[>>>>>>>                      ] 278/1041, 4.3 task/s, elapsed: 65s, ETA:   177s[>>>>>>>                      ] 279/1041, 4.3 task/s, elapsed: 65s, ETA:   177s[>>>>>>>                      ] 280/1041, 4.3 task/s, elapsed: 65s, ETA:   177s[>>>>>>>                      ] 281/1041, 4.3 task/s, elapsed: 65s, ETA:   177s[>>>>>>>                      ] 282/1041, 4.3 task/s, elapsed: 66s, ETA:   176s[>>>>>>>                      ] 283/1041, 4.3 task/s, elapsed: 66s, ETA:   176s[>>>>>>>                      ] 284/1041, 4.3 task/s, elapsed: 66s, ETA:   176s[>>>>>>>                      ] 285/1041, 4.3 task/s, elapsed: 66s, ETA:   176s[>>>>>>>                      ] 286/1041, 4.3 task/s, elapsed: 66s, ETA:   175s[>>>>>>>                      ] 287/1041, 4.3 task/s, elapsed: 67s, ETA:   175s[>>>>>>>>                     ] 288/1041, 4.3 task/s, elapsed: 67s, ETA:   175s[>>>>>>>>                     ] 289/1041, 4.3 task/s, elapsed: 67s, ETA:   175s[>>>>>>>>                     ] 290/1041, 4.3 task/s, elapsed: 67s, ETA:   174s[>>>>>>>>                     ] 291/1041, 4.3 task/s, elapsed: 68s, ETA:   174s[>>>>>>>>                     ] 292/1041, 4.3 task/s, elapsed: 68s, ETA:   174s[>>>>>>>>                     ] 293/1041, 4.3 task/s, elapsed: 68s, ETA:   174s[>>>>>>>>                     ] 294/1041, 4.3 task/s, elapsed: 68s, ETA:   173s[>>>>>>>>                     ] 295/1041, 4.3 task/s, elapsed: 68s, ETA:   173s[>>>>>>>>                     ] 296/1041, 4.3 task/s, elapsed: 69s, ETA:   173s[>>>>>>>>                     ] 297/1041, 4.3 task/s, elapsed: 69s, ETA:   173s[>>>>>>>>                     ] 298/1041, 4.3 task/s, elapsed: 69s, ETA:   172s[>>>>>>>>                     ] 299/1041, 4.3 task/s, elapsed: 69s, ETA:   172s[>>>>>>>>                     ] 300/1041, 4.3 task/s, elapsed: 70s, ETA:   172s[>>>>>>>>                     ] 301/1041, 4.3 task/s, elapsed: 70s, ETA:   172s[>>>>>>>>                     ] 302/1041, 4.3 task/s, elapsed: 70s, ETA:   171s[>>>>>>>>                     ] 303/1041, 4.3 task/s, elapsed: 70s, ETA:   171s[>>>>>>>>                     ] 304/1041, 4.3 task/s, elapsed: 70s, ETA:   171s[>>>>>>>>                     ] 305/1041, 4.3 task/s, elapsed: 71s, ETA:   171s[>>>>>>>>                     ] 306/1041, 4.3 task/s, elapsed: 71s, ETA:   170s[>>>>>>>>                     ] 307/1041, 4.3 task/s, elapsed: 71s, ETA:   170s[>>>>>>>>                     ] 308/1041, 4.3 task/s, elapsed: 71s, ETA:   170s[>>>>>>>>                     ] 309/1041, 4.3 task/s, elapsed: 72s, ETA:   170s[>>>>>>>>                     ] 310/1041, 4.3 task/s, elapsed: 72s, ETA:   169s[>>>>>>>>                     ] 311/1041, 4.3 task/s, elapsed: 72s, ETA:   169s[>>>>>>>>                     ] 312/1041, 4.3 task/s, elapsed: 72s, ETA:   169s[>>>>>>>>                     ] 313/1041, 4.3 task/s, elapsed: 73s, ETA:   169s[>>>>>>>>                     ] 314/1041, 4.3 task/s, elapsed: 73s, ETA:   169s[>>>>>>>>                     ] 315/1041, 4.3 task/s, elapsed: 73s, ETA:   168s[>>>>>>>>                     ] 316/1041, 4.3 task/s, elapsed: 73s, ETA:   168s[>>>>>>>>                     ] 317/1041, 4.3 task/s, elapsed: 74s, ETA:   168s[>>>>>>>>                     ] 318/1041, 4.3 task/s, elapsed: 74s, ETA:   168s[>>>>>>>>                     ] 319/1041, 4.3 task/s, elapsed: 74s, ETA:   167s[>>>>>>>>                     ] 320/1041, 4.3 task/s, elapsed: 74s, ETA:   167s[>>>>>>>>                     ] 321/1041, 4.3 task/s, elapsed: 74s, ETA:   167s[>>>>>>>>                     ] 322/1041, 4.3 task/s, elapsed: 75s, ETA:   167s[>>>>>>>>                     ] 323/1041, 4.3 task/s, elapsed: 75s, ETA:   166s[>>>>>>>>>                    ] 324/1041, 4.3 task/s, elapsed: 75s, ETA:   166s[>>>>>>>>>                    ] 325/1041, 4.3 task/s, elapsed: 75s, ETA:   166s[>>>>>>>>>                    ] 326/1041, 4.3 task/s, elapsed: 76s, ETA:   166s[>>>>>>>>>                    ] 327/1041, 4.3 task/s, elapsed: 76s, ETA:   165s[>>>>>>>>>                    ] 328/1041, 4.3 task/s, elapsed: 76s, ETA:   165s[>>>>>>>>>                    ] 329/1041, 4.3 task/s, elapsed: 76s, ETA:   165s[>>>>>>>>>                    ] 330/1041, 4.3 task/s, elapsed: 76s, ETA:   165s[>>>>>>>>>                    ] 331/1041, 4.3 task/s, elapsed: 77s, ETA:   165s[>>>>>>>>>                    ] 332/1041, 4.3 task/s, elapsed: 77s, ETA:   164s[>>>>>>>>>                    ] 333/1041, 4.3 task/s, elapsed: 77s, ETA:   164s[>>>>>>>>>                    ] 334/1041, 4.3 task/s, elapsed: 77s, ETA:   164s[>>>>>>>>>                    ] 335/1041, 4.3 task/s, elapsed: 78s, ETA:   164s[>>>>>>>>>                    ] 336/1041, 4.3 task/s, elapsed: 78s, ETA:   163s[>>>>>>>>>                    ] 337/1041, 4.3 task/s, elapsed: 78s, ETA:   163s[>>>>>>>>>                    ] 338/1041, 4.3 task/s, elapsed: 78s, ETA:   163s[>>>>>>>>>                    ] 339/1041, 4.3 task/s, elapsed: 79s, ETA:   163s[>>>>>>>>>                    ] 340/1041, 4.3 task/s, elapsed: 79s, ETA:   162s[>>>>>>>>>                    ] 341/1041, 4.3 task/s, elapsed: 79s, ETA:   162s[>>>>>>>>>                    ] 342/1041, 4.3 task/s, elapsed: 79s, ETA:   162s[>>>>>>>>>                    ] 343/1041, 4.3 task/s, elapsed: 79s, ETA:   162s[>>>>>>>>>                    ] 344/1041, 4.3 task/s, elapsed: 80s, ETA:   161s[>>>>>>>>>                    ] 345/1041, 4.3 task/s, elapsed: 80s, ETA:   161s[>>>>>>>>>                    ] 346/1041, 4.3 task/s, elapsed: 80s, ETA:   161s[>>>>>>>>>                    ] 347/1041, 4.3 task/s, elapsed: 80s, ETA:   161s[>>>>>>>>>                    ] 348/1041, 4.3 task/s, elapsed: 81s, ETA:   160s[>>>>>>>>>                    ] 349/1041, 4.3 task/s, elapsed: 81s, ETA:   160s[>>>>>>>>>                    ] 350/1041, 4.3 task/s, elapsed: 81s, ETA:   160s[>>>>>>>>>                    ] 351/1041, 4.3 task/s, elapsed: 81s, ETA:   160s[>>>>>>>>>                    ] 352/1041, 4.3 task/s, elapsed: 81s, ETA:   159s[>>>>>>>>>                    ] 353/1041, 4.3 task/s, elapsed: 82s, ETA:   159s[>>>>>>>>>                    ] 354/1041, 4.3 task/s, elapsed: 82s, ETA:   159s[>>>>>>>>>                    ] 355/1041, 4.3 task/s, elapsed: 82s, ETA:   159s[>>>>>>>>>                    ] 356/1041, 4.3 task/s, elapsed: 82s, ETA:   159s[>>>>>>>>>                    ] 357/1041, 4.3 task/s, elapsed: 83s, ETA:   158s[>>>>>>>>>                    ] 358/1041, 4.3 task/s, elapsed: 83s, ETA:   158s[>>>>>>>>>>                   ] 359/1041, 4.3 task/s, elapsed: 83s, ETA:   158s[>>>>>>>>>>                   ] 360/1041, 4.3 task/s, elapsed: 83s, ETA:   158s[>>>>>>>>>>                   ] 361/1041, 4.3 task/s, elapsed: 84s, ETA:   157s[>>>>>>>>>>                   ] 362/1041, 4.3 task/s, elapsed: 84s, ETA:   157s[>>>>>>>>>>                   ] 363/1041, 4.3 task/s, elapsed: 84s, ETA:   157s[>>>>>>>>>>                   ] 364/1041, 4.3 task/s, elapsed: 84s, ETA:   157s[>>>>>>>>>>                   ] 365/1041, 4.3 task/s, elapsed: 84s, ETA:   156s[>>>>>>>>>>                   ] 366/1041, 4.3 task/s, elapsed: 85s, ETA:   156s[>>>>>>>>>>                   ] 367/1041, 4.3 task/s, elapsed: 85s, ETA:   156s[>>>>>>>>>>                   ] 368/1041, 4.3 task/s, elapsed: 85s, ETA:   156s[>>>>>>>>>>                   ] 369/1041, 4.3 task/s, elapsed: 85s, ETA:   155s[>>>>>>>>>>                   ] 370/1041, 4.3 task/s, elapsed: 86s, ETA:   155s[>>>>>>>>>>                   ] 371/1041, 4.3 task/s, elapsed: 86s, ETA:   155s[>>>>>>>>>>                   ] 372/1041, 4.3 task/s, elapsed: 86s, ETA:   155s[>>>>>>>>>>                   ] 373/1041, 4.3 task/s, elapsed: 86s, ETA:   154s[>>>>>>>>>>                   ] 374/1041, 4.3 task/s, elapsed: 86s, ETA:   154s[>>>>>>>>>>                   ] 375/1041, 4.3 task/s, elapsed: 87s, ETA:   154s[>>>>>>>>>>                   ] 376/1041, 4.3 task/s, elapsed: 87s, ETA:   154s[>>>>>>>>>>                   ] 377/1041, 4.3 task/s, elapsed: 87s, ETA:   153s[>>>>>>>>>>                   ] 378/1041, 4.3 task/s, elapsed: 87s, ETA:   153s[>>>>>>>>>>                   ] 379/1041, 4.3 task/s, elapsed: 88s, ETA:   153s[>>>>>>>>>>                   ] 380/1041, 4.3 task/s, elapsed: 88s, ETA:   153s[>>>>>>>>>>                   ] 381/1041, 4.3 task/s, elapsed: 88s, ETA:   152s[>>>>>>>>>>                   ] 382/1041, 4.3 task/s, elapsed: 88s, ETA:   152s[>>>>>>>>>>                   ] 383/1041, 4.3 task/s, elapsed: 88s, ETA:   152s[>>>>>>>>>>                   ] 384/1041, 4.3 task/s, elapsed: 89s, ETA:   152s[>>>>>>>>>>                   ] 385/1041, 4.3 task/s, elapsed: 89s, ETA:   152s[>>>>>>>>>>                   ] 386/1041, 4.3 task/s, elapsed: 89s, ETA:   151s[>>>>>>>>>>                   ] 387/1041, 4.3 task/s, elapsed: 89s, ETA:   151s[>>>>>>>>>>                   ] 388/1041, 4.3 task/s, elapsed: 90s, ETA:   151s[>>>>>>>>>>                   ] 389/1041, 4.3 task/s, elapsed: 90s, ETA:   151s[>>>>>>>>>>                   ] 390/1041, 4.3 task/s, elapsed: 90s, ETA:   150s[>>>>>>>>>>                   ] 391/1041, 4.3 task/s, elapsed: 90s, ETA:   150s[>>>>>>>>>>                   ] 392/1041, 4.3 task/s, elapsed: 91s, ETA:   150s[>>>>>>>>>>                   ] 393/1041, 4.3 task/s, elapsed: 91s, ETA:   150s[>>>>>>>>>>                   ] 394/1041, 4.3 task/s, elapsed: 91s, ETA:   149s[>>>>>>>>>>>                  ] 395/1041, 4.3 task/s, elapsed: 91s, ETA:   149s[>>>>>>>>>>>                  ] 396/1041, 4.3 task/s, elapsed: 91s, ETA:   149s[>>>>>>>>>>>                  ] 397/1041, 4.3 task/s, elapsed: 92s, ETA:   149s[>>>>>>>>>>>                  ] 398/1041, 4.3 task/s, elapsed: 92s, ETA:   149s[>>>>>>>>>>>                  ] 399/1041, 4.3 task/s, elapsed: 92s, ETA:   148s[>>>>>>>>>>>                  ] 400/1041, 4.3 task/s, elapsed: 92s, ETA:   148s[>>>>>>>>>>>                  ] 401/1041, 4.3 task/s, elapsed: 93s, ETA:   148s[>>>>>>>>>>>                  ] 402/1041, 4.3 task/s, elapsed: 93s, ETA:   148s[>>>>>>>>>>>                  ] 403/1041, 4.3 task/s, elapsed: 93s, ETA:   147s[>>>>>>>>>>>                  ] 404/1041, 4.3 task/s, elapsed: 93s, ETA:   147s[>>>>>>>>>>>                  ] 405/1041, 4.3 task/s, elapsed: 94s, ETA:   147s[>>>>>>>>>>>                  ] 406/1041, 4.3 task/s, elapsed: 94s, ETA:   147s[>>>>>>>>>>>                  ] 407/1041, 4.3 task/s, elapsed: 94s, ETA:   146s[>>>>>>>>>>>                  ] 408/1041, 4.3 task/s, elapsed: 94s, ETA:   146s[>>>>>>>>>>>                  ] 409/1041, 4.3 task/s, elapsed: 94s, ETA:   146s[>>>>>>>>>>>                  ] 410/1041, 4.3 task/s, elapsed: 95s, ETA:   146s[>>>>>>>>>>>                  ] 411/1041, 4.3 task/s, elapsed: 95s, ETA:   145s[>>>>>>>>>>>                  ] 412/1041, 4.3 task/s, elapsed: 95s, ETA:   145s[>>>>>>>>>>>                  ] 413/1041, 4.3 task/s, elapsed: 95s, ETA:   145s[>>>>>>>>>>>                  ] 414/1041, 4.3 task/s, elapsed: 96s, ETA:   145s[>>>>>>>>>>>                  ] 415/1041, 4.3 task/s, elapsed: 96s, ETA:   144s[>>>>>>>>>>>                  ] 416/1041, 4.3 task/s, elapsed: 96s, ETA:   144s[>>>>>>>>>>>                  ] 417/1041, 4.3 task/s, elapsed: 96s, ETA:   144s[>>>>>>>>>>>                  ] 418/1041, 4.3 task/s, elapsed: 96s, ETA:   144s[>>>>>>>>>>>                  ] 419/1041, 4.3 task/s, elapsed: 97s, ETA:   144s[>>>>>>>>>>>                  ] 420/1041, 4.3 task/s, elapsed: 97s, ETA:   143s[>>>>>>>>>>>                  ] 421/1041, 4.3 task/s, elapsed: 97s, ETA:   143s[>>>>>>>>>>>                  ] 422/1041, 4.3 task/s, elapsed: 97s, ETA:   143s[>>>>>>>>>>>                  ] 423/1041, 4.3 task/s, elapsed: 98s, ETA:   143s[>>>>>>>>>>>                  ] 424/1041, 4.3 task/s, elapsed: 98s, ETA:   142s[>>>>>>>>>>>                  ] 425/1041, 4.3 task/s, elapsed: 98s, ETA:   142s[>>>>>>>>>>>                  ] 426/1041, 4.3 task/s, elapsed: 98s, ETA:   142s[>>>>>>>>>>>                  ] 427/1041, 4.3 task/s, elapsed: 98s, ETA:   142s[>>>>>>>>>>>                  ] 428/1041, 4.3 task/s, elapsed: 99s, ETA:   141s[>>>>>>>>>>>                  ] 429/1041, 4.3 task/s, elapsed: 99s, ETA:   141s[>>>>>>>>>>>                  ] 430/1041, 4.3 task/s, elapsed: 99s, ETA:   141s[>>>>>>>>>>>>                 ] 431/1041, 4.3 task/s, elapsed: 99s, ETA:   141s[>>>>>>>>>>>                 ] 432/1041, 4.3 task/s, elapsed: 100s, ETA:   140s[>>>>>>>>>>>                 ] 433/1041, 4.3 task/s, elapsed: 100s, ETA:   140s[>>>>>>>>>>>                 ] 434/1041, 4.3 task/s, elapsed: 100s, ETA:   140s[>>>>>>>>>>>                 ] 435/1041, 4.3 task/s, elapsed: 100s, ETA:   140s[>>>>>>>>>>>                 ] 436/1041, 4.3 task/s, elapsed: 101s, ETA:   139s[>>>>>>>>>>>                 ] 437/1041, 4.3 task/s, elapsed: 101s, ETA:   139s[>>>>>>>>>>>                 ] 438/1041, 4.3 task/s, elapsed: 101s, ETA:   139s[>>>>>>>>>>>                 ] 439/1041, 4.3 task/s, elapsed: 101s, ETA:   139s[>>>>>>>>>>>                 ] 440/1041, 4.3 task/s, elapsed: 101s, ETA:   139s[>>>>>>>>>>>                 ] 441/1041, 4.3 task/s, elapsed: 102s, ETA:   138s[>>>>>>>>>>>                 ] 442/1041, 4.3 task/s, elapsed: 102s, ETA:   138s[>>>>>>>>>>>                 ] 443/1041, 4.3 task/s, elapsed: 102s, ETA:   138s[>>>>>>>>>>>                 ] 444/1041, 4.3 task/s, elapsed: 102s, ETA:   138s[>>>>>>>>>>>                 ] 445/1041, 4.3 task/s, elapsed: 103s, ETA:   137s[>>>>>>>>>>>                 ] 446/1041, 4.3 task/s, elapsed: 103s, ETA:   137s[>>>>>>>>>>>>                ] 447/1041, 4.3 task/s, elapsed: 103s, ETA:   137s[>>>>>>>>>>>>                ] 448/1041, 4.3 task/s, elapsed: 103s, ETA:   137s[>>>>>>>>>>>>                ] 449/1041, 4.3 task/s, elapsed: 103s, ETA:   136s[>>>>>>>>>>>>                ] 450/1041, 4.3 task/s, elapsed: 104s, ETA:   136s[>>>>>>>>>>>>                ] 451/1041, 4.3 task/s, elapsed: 104s, ETA:   136s[>>>>>>>>>>>>                ] 452/1041, 4.3 task/s, elapsed: 104s, ETA:   136s[>>>>>>>>>>>>                ] 453/1041, 4.3 task/s, elapsed: 104s, ETA:   136s[>>>>>>>>>>>>                ] 454/1041, 4.3 task/s, elapsed: 105s, ETA:   135s[>>>>>>>>>>>>                ] 455/1041, 4.3 task/s, elapsed: 105s, ETA:   135s[>>>>>>>>>>>>                ] 456/1041, 4.3 task/s, elapsed: 105s, ETA:   135s[>>>>>>>>>>>>                ] 457/1041, 4.3 task/s, elapsed: 105s, ETA:   135s[>>>>>>>>>>>>                ] 458/1041, 4.3 task/s, elapsed: 106s, ETA:   134s[>>>>>>>>>>>>                ] 459/1041, 4.3 task/s, elapsed: 106s, ETA:   134s[>>>>>>>>>>>>                ] 460/1041, 4.3 task/s, elapsed: 106s, ETA:   134s[>>>>>>>>>>>>                ] 461/1041, 4.3 task/s, elapsed: 106s, ETA:   134s[>>>>>>>>>>>>                ] 462/1041, 4.3 task/s, elapsed: 106s, ETA:   133s[>>>>>>>>>>>>                ] 463/1041, 4.3 task/s, elapsed: 107s, ETA:   133s[>>>>>>>>>>>>                ] 464/1041, 4.3 task/s, elapsed: 107s, ETA:   133s[>>>>>>>>>>>>                ] 465/1041, 4.3 task/s, elapsed: 107s, ETA:   133s[>>>>>>>>>>>>                ] 466/1041, 4.3 task/s, elapsed: 107s, ETA:   132s[>>>>>>>>>>>>                ] 467/1041, 4.3 task/s, elapsed: 108s, ETA:   132s[>>>>>>>>>>>>                ] 468/1041, 4.3 task/s, elapsed: 108s, ETA:   132s[>>>>>>>>>>>>                ] 469/1041, 4.3 task/s, elapsed: 108s, ETA:   132s[>>>>>>>>>>>>                ] 470/1041, 4.3 task/s, elapsed: 108s, ETA:   131s[>>>>>>>>>>>>                ] 471/1041, 4.3 task/s, elapsed: 108s, ETA:   131s[>>>>>>>>>>>>                ] 472/1041, 4.3 task/s, elapsed: 109s, ETA:   131s[>>>>>>>>>>>>                ] 473/1041, 4.3 task/s, elapsed: 109s, ETA:   131s[>>>>>>>>>>>>                ] 474/1041, 4.3 task/s, elapsed: 109s, ETA:   131s[>>>>>>>>>>>>                ] 475/1041, 4.3 task/s, elapsed: 109s, ETA:   130s[>>>>>>>>>>>>                ] 476/1041, 4.3 task/s, elapsed: 110s, ETA:   130s[>>>>>>>>>>>>                ] 477/1041, 4.3 task/s, elapsed: 110s, ETA:   130s[>>>>>>>>>>>>                ] 478/1041, 4.3 task/s, elapsed: 110s, ETA:   130s[>>>>>>>>>>>>                ] 479/1041, 4.3 task/s, elapsed: 110s, ETA:   129s[>>>>>>>>>>>>                ] 480/1041, 4.3 task/s, elapsed: 111s, ETA:   129s[>>>>>>>>>>>>                ] 481/1041, 4.3 task/s, elapsed: 111s, ETA:   129s[>>>>>>>>>>>>                ] 482/1041, 4.3 task/s, elapsed: 111s, ETA:   129s[>>>>>>>>>>>>                ] 483/1041, 4.3 task/s, elapsed: 111s, ETA:   128s[>>>>>>>>>>>>>               ] 484/1041, 4.3 task/s, elapsed: 111s, ETA:   128s[>>>>>>>>>>>>>               ] 485/1041, 4.3 task/s, elapsed: 112s, ETA:   128s[>>>>>>>>>>>>>               ] 486/1041, 4.3 task/s, elapsed: 112s, ETA:   128s[>>>>>>>>>>>>>               ] 487/1041, 4.3 task/s, elapsed: 112s, ETA:   128s[>>>>>>>>>>>>>               ] 488/1041, 4.3 task/s, elapsed: 112s, ETA:   127s[>>>>>>>>>>>>>               ] 489/1041, 4.3 task/s, elapsed: 113s, ETA:   127s[>>>>>>>>>>>>>               ] 490/1041, 4.3 task/s, elapsed: 113s, ETA:   127s[>>>>>>>>>>>>>               ] 491/1041, 4.3 task/s, elapsed: 113s, ETA:   127s[>>>>>>>>>>>>>               ] 492/1041, 4.3 task/s, elapsed: 113s, ETA:   126s[>>>>>>>>>>>>>               ] 493/1041, 4.3 task/s, elapsed: 114s, ETA:   126s[>>>>>>>>>>>>>               ] 494/1041, 4.3 task/s, elapsed: 114s, ETA:   126s[>>>>>>>>>>>>>               ] 495/1041, 4.3 task/s, elapsed: 114s, ETA:   126s[>>>>>>>>>>>>>               ] 496/1041, 4.3 task/s, elapsed: 114s, ETA:   125s[>>>>>>>>>>>>>               ] 497/1041, 4.3 task/s, elapsed: 114s, ETA:   125s[>>>>>>>>>>>>>               ] 498/1041, 4.3 task/s, elapsed: 115s, ETA:   125s[>>>>>>>>>>>>>               ] 499/1041, 4.3 task/s, elapsed: 115s, ETA:   125s[>>>>>>>>>>>>>               ] 500/1041, 4.3 task/s, elapsed: 115s, ETA:   125s[>>>>>>>>>>>>>               ] 501/1041, 4.3 task/s, elapsed: 115s, ETA:   124s[>>>>>>>>>>>>>               ] 502/1041, 4.3 task/s, elapsed: 116s, ETA:   124s[>>>>>>>>>>>>>               ] 503/1041, 4.3 task/s, elapsed: 116s, ETA:   124s[>>>>>>>>>>>>>               ] 504/1041, 4.3 task/s, elapsed: 116s, ETA:   124s[>>>>>>>>>>>>>               ] 505/1041, 4.3 task/s, elapsed: 116s, ETA:   123s[>>>>>>>>>>>>>               ] 506/1041, 4.3 task/s, elapsed: 117s, ETA:   123s[>>>>>>>>>>>>>               ] 507/1041, 4.3 task/s, elapsed: 117s, ETA:   123s[>>>>>>>>>>>>>               ] 508/1041, 4.3 task/s, elapsed: 117s, ETA:   123s[>>>>>>>>>>>>>               ] 509/1041, 4.3 task/s, elapsed: 117s, ETA:   122s[>>>>>>>>>>>>>               ] 510/1041, 4.3 task/s, elapsed: 117s, ETA:   122s[>>>>>>>>>>>>>               ] 511/1041, 4.3 task/s, elapsed: 118s, ETA:   122s[>>>>>>>>>>>>>               ] 512/1041, 4.3 task/s, elapsed: 118s, ETA:   122s[>>>>>>>>>>>>>               ] 513/1041, 4.3 task/s, elapsed: 118s, ETA:   122s[>>>>>>>>>>>>>               ] 514/1041, 4.3 task/s, elapsed: 118s, ETA:   121s[>>>>>>>>>>>>>               ] 515/1041, 4.3 task/s, elapsed: 119s, ETA:   121s[>>>>>>>>>>>>>               ] 516/1041, 4.3 task/s, elapsed: 119s, ETA:   121s[>>>>>>>>>>>>>               ] 517/1041, 4.3 task/s, elapsed: 119s, ETA:   121s[>>>>>>>>>>>>>               ] 518/1041, 4.3 task/s, elapsed: 119s, ETA:   120s[>>>>>>>>>>>>>               ] 519/1041, 4.3 task/s, elapsed: 119s, ETA:   120s[>>>>>>>>>>>>>               ] 520/1041, 4.3 task/s, elapsed: 120s, ETA:   120s[>>>>>>>>>>>>>>              ] 521/1041, 4.3 task/s, elapsed: 120s, ETA:   120s[>>>>>>>>>>>>>>              ] 522/1041, 4.3 task/s, elapsed: 120s, ETA:   119s[>>>>>>>>>>>>>>              ] 523/1041, 4.3 task/s, elapsed: 120s, ETA:   119s[>>>>>>>>>>>>>>              ] 524/1041, 4.3 task/s, elapsed: 121s, ETA:   119s[>>>>>>>>>>>>>>              ] 525/1041, 4.3 task/s, elapsed: 121s, ETA:   119s[>>>>>>>>>>>>>>              ] 526/1041, 4.3 task/s, elapsed: 121s, ETA:   118s[>>>>>>>>>>>>>>              ] 527/1041, 4.3 task/s, elapsed: 121s, ETA:   118s[>>>>>>>>>>>>>>              ] 528/1041, 4.3 task/s, elapsed: 121s, ETA:   118s[>>>>>>>>>>>>>>              ] 529/1041, 4.3 task/s, elapsed: 122s, ETA:   118s[>>>>>>>>>>>>>>              ] 530/1041, 4.3 task/s, elapsed: 122s, ETA:   118s[>>>>>>>>>>>>>>              ] 531/1041, 4.3 task/s, elapsed: 122s, ETA:   117s[>>>>>>>>>>>>>>              ] 532/1041, 4.3 task/s, elapsed: 122s, ETA:   117s[>>>>>>>>>>>>>>              ] 533/1041, 4.3 task/s, elapsed: 123s, ETA:   117s[>>>>>>>>>>>>>>              ] 534/1041, 4.3 task/s, elapsed: 123s, ETA:   117s[>>>>>>>>>>>>>>              ] 535/1041, 4.3 task/s, elapsed: 123s, ETA:   116s[>>>>>>>>>>>>>>              ] 536/1041, 4.3 task/s, elapsed: 123s, ETA:   116s[>>>>>>>>>>>>>>              ] 537/1041, 4.3 task/s, elapsed: 123s, ETA:   116s[>>>>>>>>>>>>>>              ] 538/1041, 4.3 task/s, elapsed: 124s, ETA:   116s[>>>>>>>>>>>>>>              ] 539/1041, 4.3 task/s, elapsed: 124s, ETA:   115s[>>>>>>>>>>>>>>              ] 540/1041, 4.3 task/s, elapsed: 124s, ETA:   115s[>>>>>>>>>>>>>>              ] 541/1041, 4.3 task/s, elapsed: 124s, ETA:   115s[>>>>>>>>>>>>>>              ] 542/1041, 4.3 task/s, elapsed: 125s, ETA:   115s[>>>>>>>>>>>>>>              ] 543/1041, 4.3 task/s, elapsed: 125s, ETA:   115s[>>>>>>>>>>>>>>              ] 544/1041, 4.3 task/s, elapsed: 125s, ETA:   114s[>>>>>>>>>>>>>>              ] 545/1041, 4.3 task/s, elapsed: 125s, ETA:   114s[>>>>>>>>>>>>>>              ] 546/1041, 4.3 task/s, elapsed: 126s, ETA:   114s[>>>>>>>>>>>>>>              ] 547/1041, 4.3 task/s, elapsed: 126s, ETA:   114s[>>>>>>>>>>>>>>              ] 548/1041, 4.3 task/s, elapsed: 126s, ETA:   113s[>>>>>>>>>>>>>>              ] 549/1041, 4.3 task/s, elapsed: 126s, ETA:   113s[>>>>>>>>>>>>>>              ] 550/1041, 4.3 task/s, elapsed: 126s, ETA:   113s[>>>>>>>>>>>>>>              ] 551/1041, 4.3 task/s, elapsed: 127s, ETA:   113s[>>>>>>>>>>>>>>              ] 552/1041, 4.3 task/s, elapsed: 127s, ETA:   112s[>>>>>>>>>>>>>>              ] 553/1041, 4.3 task/s, elapsed: 127s, ETA:   112s[>>>>>>>>>>>>>>              ] 554/1041, 4.4 task/s, elapsed: 127s, ETA:   112s[>>>>>>>>>>>>>>              ] 555/1041, 4.4 task/s, elapsed: 128s, ETA:   112s[>>>>>>>>>>>>>>              ] 556/1041, 4.4 task/s, elapsed: 128s, ETA:   111s[>>>>>>>>>>>>>>              ] 557/1041, 4.4 task/s, elapsed: 128s, ETA:   111s[>>>>>>>>>>>>>>>             ] 558/1041, 4.4 task/s, elapsed: 128s, ETA:   111s[>>>>>>>>>>>>>>>             ] 559/1041, 4.4 task/s, elapsed: 128s, ETA:   111s[>>>>>>>>>>>>>>>             ] 560/1041, 4.4 task/s, elapsed: 129s, ETA:   111s[>>>>>>>>>>>>>>>             ] 561/1041, 4.4 task/s, elapsed: 129s, ETA:   110s[>>>>>>>>>>>>>>>             ] 562/1041, 4.4 task/s, elapsed: 129s, ETA:   110s[>>>>>>>>>>>>>>>             ] 563/1041, 4.4 task/s, elapsed: 129s, ETA:   110s[>>>>>>>>>>>>>>>             ] 564/1041, 4.4 task/s, elapsed: 130s, ETA:   110s[>>>>>>>>>>>>>>>             ] 565/1041, 4.4 task/s, elapsed: 130s, ETA:   109s[>>>>>>>>>>>>>>>             ] 566/1041, 4.4 task/s, elapsed: 130s, ETA:   109s[>>>>>>>>>>>>>>>             ] 567/1041, 4.4 task/s, elapsed: 130s, ETA:   109s[>>>>>>>>>>>>>>>             ] 568/1041, 4.4 task/s, elapsed: 131s, ETA:   109s[>>>>>>>>>>>>>>>             ] 569/1041, 4.4 task/s, elapsed: 131s, ETA:   108s[>>>>>>>>>>>>>>>             ] 570/1041, 4.4 task/s, elapsed: 131s, ETA:   108s[>>>>>>>>>>>>>>>             ] 571/1041, 4.4 task/s, elapsed: 131s, ETA:   108s[>>>>>>>>>>>>>>>             ] 572/1041, 4.4 task/s, elapsed: 131s, ETA:   108s[>>>>>>>>>>>>>>>             ] 573/1041, 4.4 task/s, elapsed: 132s, ETA:   108s[>>>>>>>>>>>>>>>             ] 574/1041, 4.4 task/s, elapsed: 132s, ETA:   107s[>>>>>>>>>>>>>>>             ] 575/1041, 4.4 task/s, elapsed: 132s, ETA:   107s[>>>>>>>>>>>>>>>             ] 576/1041, 4.4 task/s, elapsed: 132s, ETA:   107s[>>>>>>>>>>>>>>>             ] 577/1041, 4.4 task/s, elapsed: 133s, ETA:   107s[>>>>>>>>>>>>>>>             ] 578/1041, 4.4 task/s, elapsed: 133s, ETA:   106s[>>>>>>>>>>>>>>>             ] 579/1041, 4.4 task/s, elapsed: 133s, ETA:   106s[>>>>>>>>>>>>>>>             ] 580/1041, 4.4 task/s, elapsed: 133s, ETA:   106s[>>>>>>>>>>>>>>>             ] 581/1041, 4.4 task/s, elapsed: 133s, ETA:   106s[>>>>>>>>>>>>>>>             ] 582/1041, 4.4 task/s, elapsed: 134s, ETA:   105s[>>>>>>>>>>>>>>>             ] 583/1041, 4.4 task/s, elapsed: 134s, ETA:   105s[>>>>>>>>>>>>>>>             ] 584/1041, 4.4 task/s, elapsed: 134s, ETA:   105s[>>>>>>>>>>>>>>>             ] 585/1041, 4.4 task/s, elapsed: 134s, ETA:   105s[>>>>>>>>>>>>>>>             ] 586/1041, 4.4 task/s, elapsed: 135s, ETA:   104s[>>>>>>>>>>>>>>>             ] 587/1041, 4.4 task/s, elapsed: 135s, ETA:   104s[>>>>>>>>>>>>>>>             ] 588/1041, 4.4 task/s, elapsed: 135s, ETA:   104s[>>>>>>>>>>>>>>>             ] 589/1041, 4.4 task/s, elapsed: 135s, ETA:   104s[>>>>>>>>>>>>>>>             ] 590/1041, 4.4 task/s, elapsed: 135s, ETA:   104s[>>>>>>>>>>>>>>>             ] 591/1041, 4.4 task/s, elapsed: 136s, ETA:   103s[>>>>>>>>>>>>>>>             ] 592/1041, 4.4 task/s, elapsed: 136s, ETA:   103s[>>>>>>>>>>>>>>>             ] 593/1041, 4.4 task/s, elapsed: 136s, ETA:   103s[>>>>>>>>>>>>>>>             ] 594/1041, 4.4 task/s, elapsed: 136s, ETA:   103s[>>>>>>>>>>>>>>>>            ] 595/1041, 4.4 task/s, elapsed: 137s, ETA:   102s[>>>>>>>>>>>>>>>>            ] 596/1041, 4.4 task/s, elapsed: 137s, ETA:   102s[>>>>>>>>>>>>>>>>            ] 597/1041, 4.4 task/s, elapsed: 137s, ETA:   102s[>>>>>>>>>>>>>>>>            ] 598/1041, 4.4 task/s, elapsed: 137s, ETA:   102s[>>>>>>>>>>>>>>>>            ] 599/1041, 4.4 task/s, elapsed: 138s, ETA:   101s[>>>>>>>>>>>>>>>>            ] 600/1041, 4.4 task/s, elapsed: 138s, ETA:   101s[>>>>>>>>>>>>>>>>            ] 601/1041, 4.4 task/s, elapsed: 138s, ETA:   101s[>>>>>>>>>>>>>>>>            ] 602/1041, 4.4 task/s, elapsed: 138s, ETA:   101s[>>>>>>>>>>>>>>>>            ] 603/1041, 4.4 task/s, elapsed: 138s, ETA:   101s[>>>>>>>>>>>>>>>>            ] 604/1041, 4.4 task/s, elapsed: 139s, ETA:   100s[>>>>>>>>>>>>>>>>            ] 605/1041, 4.4 task/s, elapsed: 139s, ETA:   100s[>>>>>>>>>>>>>>>>            ] 606/1041, 4.4 task/s, elapsed: 139s, ETA:   100s[>>>>>>>>>>>>>>>>            ] 607/1041, 4.4 task/s, elapsed: 139s, ETA:   100s[>>>>>>>>>>>>>>>>            ] 608/1041, 4.4 task/s, elapsed: 140s, ETA:    99s[>>>>>>>>>>>>>>>>            ] 609/1041, 4.4 task/s, elapsed: 140s, ETA:    99s[>>>>>>>>>>>>>>>>            ] 610/1041, 4.4 task/s, elapsed: 140s, ETA:    99s[>>>>>>>>>>>>>>>>            ] 611/1041, 4.4 task/s, elapsed: 140s, ETA:    99s[>>>>>>>>>>>>>>>>            ] 612/1041, 4.4 task/s, elapsed: 140s, ETA:    98s[>>>>>>>>>>>>>>>>            ] 613/1041, 4.4 task/s, elapsed: 141s, ETA:    98s[>>>>>>>>>>>>>>>>            ] 614/1041, 4.4 task/s, elapsed: 141s, ETA:    98s[>>>>>>>>>>>>>>>>            ] 615/1041, 4.4 task/s, elapsed: 141s, ETA:    98s[>>>>>>>>>>>>>>>>            ] 616/1041, 4.4 task/s, elapsed: 141s, ETA:    98s[>>>>>>>>>>>>>>>>            ] 617/1041, 4.4 task/s, elapsed: 142s, ETA:    97s[>>>>>>>>>>>>>>>>            ] 618/1041, 4.4 task/s, elapsed: 142s, ETA:    97s[>>>>>>>>>>>>>>>>            ] 619/1041, 4.4 task/s, elapsed: 142s, ETA:    97s[>>>>>>>>>>>>>>>>            ] 620/1041, 4.4 task/s, elapsed: 142s, ETA:    97s[>>>>>>>>>>>>>>>>            ] 621/1041, 4.4 task/s, elapsed: 143s, ETA:    96s[>>>>>>>>>>>>>>>>            ] 622/1041, 4.4 task/s, elapsed: 143s, ETA:    96s[>>>>>>>>>>>>>>>>            ] 623/1041, 4.4 task/s, elapsed: 143s, ETA:    96s[>>>>>>>>>>>>>>>>            ] 624/1041, 4.4 task/s, elapsed: 143s, ETA:    96s[>>>>>>>>>>>>>>>>            ] 625/1041, 4.4 task/s, elapsed: 144s, ETA:    96s[>>>>>>>>>>>>>>>>            ] 626/1041, 4.4 task/s, elapsed: 144s, ETA:    95s[>>>>>>>>>>>>>>>>            ] 627/1041, 4.4 task/s, elapsed: 144s, ETA:    95s[>>>>>>>>>>>>>>>>            ] 628/1041, 4.4 task/s, elapsed: 144s, ETA:    95s[>>>>>>>>>>>>>>>>            ] 629/1041, 4.4 task/s, elapsed: 144s, ETA:    95s[>>>>>>>>>>>>>>>>            ] 630/1041, 4.4 task/s, elapsed: 145s, ETA:    94s[>>>>>>>>>>>>>>>>            ] 631/1041, 4.4 task/s, elapsed: 145s, ETA:    94s[>>>>>>>>>>>>>>>>            ] 632/1041, 4.4 task/s, elapsed: 145s, ETA:    94s[>>>>>>>>>>>>>>>>>           ] 633/1041, 4.4 task/s, elapsed: 145s, ETA:    94s[>>>>>>>>>>>>>>>>>           ] 634/1041, 4.4 task/s, elapsed: 146s, ETA:    93s[>>>>>>>>>>>>>>>>>           ] 635/1041, 4.4 task/s, elapsed: 146s, ETA:    93s[>>>>>>>>>>>>>>>>>           ] 636/1041, 4.4 task/s, elapsed: 146s, ETA:    93s[>>>>>>>>>>>>>>>>>           ] 637/1041, 4.4 task/s, elapsed: 146s, ETA:    93s[>>>>>>>>>>>>>>>>>           ] 638/1041, 4.4 task/s, elapsed: 146s, ETA:    93s[>>>>>>>>>>>>>>>>>           ] 639/1041, 4.4 task/s, elapsed: 147s, ETA:    92s[>>>>>>>>>>>>>>>>>           ] 640/1041, 4.4 task/s, elapsed: 147s, ETA:    92s[>>>>>>>>>>>>>>>>>           ] 641/1041, 4.4 task/s, elapsed: 147s, ETA:    92s[>>>>>>>>>>>>>>>>>           ] 642/1041, 4.4 task/s, elapsed: 147s, ETA:    92s[>>>>>>>>>>>>>>>>>           ] 643/1041, 4.4 task/s, elapsed: 148s, ETA:    91s[>>>>>>>>>>>>>>>>>           ] 644/1041, 4.4 task/s, elapsed: 148s, ETA:    91s[>>>>>>>>>>>>>>>>>           ] 645/1041, 4.4 task/s, elapsed: 148s, ETA:    91s[>>>>>>>>>>>>>>>>>           ] 646/1041, 4.4 task/s, elapsed: 148s, ETA:    91s[>>>>>>>>>>>>>>>>>           ] 647/1041, 4.4 task/s, elapsed: 148s, ETA:    90s[>>>>>>>>>>>>>>>>>           ] 648/1041, 4.4 task/s, elapsed: 149s, ETA:    90s[>>>>>>>>>>>>>>>>>           ] 649/1041, 4.4 task/s, elapsed: 149s, ETA:    90s[>>>>>>>>>>>>>>>>>           ] 650/1041, 4.4 task/s, elapsed: 149s, ETA:    90s[>>>>>>>>>>>>>>>>>           ] 651/1041, 4.4 task/s, elapsed: 149s, ETA:    90s[>>>>>>>>>>>>>>>>>           ] 652/1041, 4.4 task/s, elapsed: 150s, ETA:    89s[>>>>>>>>>>>>>>>>>           ] 653/1041, 4.4 task/s, elapsed: 150s, ETA:    89s[>>>>>>>>>>>>>>>>>           ] 654/1041, 4.4 task/s, elapsed: 150s, ETA:    89s[>>>>>>>>>>>>>>>>>           ] 655/1041, 4.4 task/s, elapsed: 150s, ETA:    89s[>>>>>>>>>>>>>>>>>           ] 656/1041, 4.4 task/s, elapsed: 151s, ETA:    88s[>>>>>>>>>>>>>>>>>           ] 657/1041, 4.4 task/s, elapsed: 151s, ETA:    88s[>>>>>>>>>>>>>>>>>           ] 658/1041, 4.4 task/s, elapsed: 151s, ETA:    88s[>>>>>>>>>>>>>>>>>           ] 659/1041, 4.4 task/s, elapsed: 151s, ETA:    88s[>>>>>>>>>>>>>>>>>           ] 660/1041, 4.4 task/s, elapsed: 151s, ETA:    87s[>>>>>>>>>>>>>>>>>           ] 661/1041, 4.4 task/s, elapsed: 152s, ETA:    87s[>>>>>>>>>>>>>>>>>           ] 662/1041, 4.4 task/s, elapsed: 152s, ETA:    87s[>>>>>>>>>>>>>>>>>           ] 663/1041, 4.4 task/s, elapsed: 152s, ETA:    87s[>>>>>>>>>>>>>>>>>           ] 664/1041, 4.4 task/s, elapsed: 152s, ETA:    86s[>>>>>>>>>>>>>>>>>           ] 665/1041, 4.4 task/s, elapsed: 153s, ETA:    86s[>>>>>>>>>>>>>>>>>           ] 666/1041, 4.4 task/s, elapsed: 153s, ETA:    86s[>>>>>>>>>>>>>>>>>           ] 667/1041, 4.4 task/s, elapsed: 153s, ETA:    86s[>>>>>>>>>>>>>>>>>           ] 668/1041, 4.4 task/s, elapsed: 153s, ETA:    86s[>>>>>>>>>>>>>>>>>           ] 669/1041, 4.4 task/s, elapsed: 153s, ETA:    85s[>>>>>>>>>>>>>>>>>>          ] 670/1041, 4.4 task/s, elapsed: 154s, ETA:    85s[>>>>>>>>>>>>>>>>>>          ] 671/1041, 4.4 task/s, elapsed: 154s, ETA:    85s[>>>>>>>>>>>>>>>>>>          ] 672/1041, 4.4 task/s, elapsed: 154s, ETA:    85s[>>>>>>>>>>>>>>>>>>          ] 673/1041, 4.4 task/s, elapsed: 154s, ETA:    84s[>>>>>>>>>>>>>>>>>>          ] 674/1041, 4.4 task/s, elapsed: 155s, ETA:    84s[>>>>>>>>>>>>>>>>>>          ] 675/1041, 4.4 task/s, elapsed: 155s, ETA:    84s[>>>>>>>>>>>>>>>>>>          ] 676/1041, 4.4 task/s, elapsed: 155s, ETA:    84s[>>>>>>>>>>>>>>>>>>          ] 677/1041, 4.4 task/s, elapsed: 155s, ETA:    84s[>>>>>>>>>>>>>>>>>>          ] 678/1041, 4.4 task/s, elapsed: 156s, ETA:    83s[>>>>>>>>>>>>>>>>>>          ] 679/1041, 4.4 task/s, elapsed: 156s, ETA:    83s[>>>>>>>>>>>>>>>>>>          ] 680/1041, 4.4 task/s, elapsed: 156s, ETA:    83s[>>>>>>>>>>>>>>>>>>          ] 681/1041, 4.4 task/s, elapsed: 156s, ETA:    83s[>>>>>>>>>>>>>>>>>>          ] 682/1041, 4.4 task/s, elapsed: 156s, ETA:    82s[>>>>>>>>>>>>>>>>>>          ] 683/1041, 4.4 task/s, elapsed: 157s, ETA:    82s[>>>>>>>>>>>>>>>>>>          ] 684/1041, 4.4 task/s, elapsed: 157s, ETA:    82s[>>>>>>>>>>>>>>>>>>          ] 685/1041, 4.4 task/s, elapsed: 157s, ETA:    82s[>>>>>>>>>>>>>>>>>>          ] 686/1041, 4.4 task/s, elapsed: 157s, ETA:    81s[>>>>>>>>>>>>>>>>>>          ] 687/1041, 4.4 task/s, elapsed: 158s, ETA:    81s[>>>>>>>>>>>>>>>>>>          ] 688/1041, 4.4 task/s, elapsed: 158s, ETA:    81s[>>>>>>>>>>>>>>>>>>          ] 689/1041, 4.4 task/s, elapsed: 158s, ETA:    81s[>>>>>>>>>>>>>>>>>>          ] 690/1041, 4.4 task/s, elapsed: 158s, ETA:    81s[>>>>>>>>>>>>>>>>>>          ] 691/1041, 4.4 task/s, elapsed: 159s, ETA:    80s[>>>>>>>>>>>>>>>>>>          ] 692/1041, 4.4 task/s, elapsed: 159s, ETA:    80s[>>>>>>>>>>>>>>>>>>          ] 693/1041, 4.4 task/s, elapsed: 159s, ETA:    80s[>>>>>>>>>>>>>>>>>>          ] 694/1041, 4.4 task/s, elapsed: 159s, ETA:    80s[>>>>>>>>>>>>>>>>>>          ] 695/1041, 4.4 task/s, elapsed: 159s, ETA:    79s[>>>>>>>>>>>>>>>>>>          ] 696/1041, 4.4 task/s, elapsed: 160s, ETA:    79s[>>>>>>>>>>>>>>>>>>          ] 697/1041, 4.4 task/s, elapsed: 160s, ETA:    79s[>>>>>>>>>>>>>>>>>>          ] 698/1041, 4.4 task/s, elapsed: 160s, ETA:    79s[>>>>>>>>>>>>>>>>>>          ] 699/1041, 4.4 task/s, elapsed: 160s, ETA:    78s[>>>>>>>>>>>>>>>>>>          ] 700/1041, 4.4 task/s, elapsed: 161s, ETA:    78s[>>>>>>>>>>>>>>>>>>          ] 701/1041, 4.4 task/s, elapsed: 161s, ETA:    78s[>>>>>>>>>>>>>>>>>>          ] 702/1041, 4.4 task/s, elapsed: 161s, ETA:    78s[>>>>>>>>>>>>>>>>>>          ] 703/1041, 4.4 task/s, elapsed: 161s, ETA:    78s[>>>>>>>>>>>>>>>>>>          ] 704/1041, 4.4 task/s, elapsed: 161s, ETA:    77s[>>>>>>>>>>>>>>>>>>          ] 705/1041, 4.4 task/s, elapsed: 162s, ETA:    77s[>>>>>>>>>>>>>>>>>>          ] 706/1041, 4.4 task/s, elapsed: 162s, ETA:    77s[>>>>>>>>>>>>>>>>>>>         ] 707/1041, 4.4 task/s, elapsed: 162s, ETA:    77s[>>>>>>>>>>>>>>>>>>>         ] 708/1041, 4.4 task/s, elapsed: 162s, ETA:    76s[>>>>>>>>>>>>>>>>>>>         ] 709/1041, 4.4 task/s, elapsed: 163s, ETA:    76s[>>>>>>>>>>>>>>>>>>>         ] 710/1041, 4.4 task/s, elapsed: 163s, ETA:    76s[>>>>>>>>>>>>>>>>>>>         ] 711/1041, 4.4 task/s, elapsed: 163s, ETA:    76s[>>>>>>>>>>>>>>>>>>>         ] 712/1041, 4.4 task/s, elapsed: 163s, ETA:    75s[>>>>>>>>>>>>>>>>>>>         ] 713/1041, 4.4 task/s, elapsed: 164s, ETA:    75s[>>>>>>>>>>>>>>>>>>>         ] 714/1041, 4.4 task/s, elapsed: 164s, ETA:    75s[>>>>>>>>>>>>>>>>>>>         ] 715/1041, 4.4 task/s, elapsed: 164s, ETA:    75s[>>>>>>>>>>>>>>>>>>>         ] 716/1041, 4.4 task/s, elapsed: 164s, ETA:    75s[>>>>>>>>>>>>>>>>>>>         ] 717/1041, 4.4 task/s, elapsed: 165s, ETA:    74s[>>>>>>>>>>>>>>>>>>>         ] 718/1041, 4.4 task/s, elapsed: 165s, ETA:    74s[>>>>>>>>>>>>>>>>>>>         ] 719/1041, 4.4 task/s, elapsed: 165s, ETA:    74s[>>>>>>>>>>>>>>>>>>>         ] 720/1041, 4.4 task/s, elapsed: 165s, ETA:    74s[>>>>>>>>>>>>>>>>>>>         ] 721/1041, 4.4 task/s, elapsed: 165s, ETA:    73s[>>>>>>>>>>>>>>>>>>>         ] 722/1041, 4.4 task/s, elapsed: 166s, ETA:    73s[>>>>>>>>>>>>>>>>>>>         ] 723/1041, 4.4 task/s, elapsed: 166s, ETA:    73s[>>>>>>>>>>>>>>>>>>>         ] 724/1041, 4.4 task/s, elapsed: 166s, ETA:    73s[>>>>>>>>>>>>>>>>>>>         ] 725/1041, 4.4 task/s, elapsed: 166s, ETA:    72s[>>>>>>>>>>>>>>>>>>>         ] 726/1041, 4.4 task/s, elapsed: 167s, ETA:    72s[>>>>>>>>>>>>>>>>>>>         ] 727/1041, 4.4 task/s, elapsed: 167s, ETA:    72s[>>>>>>>>>>>>>>>>>>>         ] 728/1041, 4.4 task/s, elapsed: 167s, ETA:    72s[>>>>>>>>>>>>>>>>>>>         ] 729/1041, 4.4 task/s, elapsed: 167s, ETA:    72s[>>>>>>>>>>>>>>>>>>>         ] 730/1041, 4.4 task/s, elapsed: 167s, ETA:    71s[>>>>>>>>>>>>>>>>>>>         ] 731/1041, 4.4 task/s, elapsed: 168s, ETA:    71s[>>>>>>>>>>>>>>>>>>>         ] 732/1041, 4.4 task/s, elapsed: 168s, ETA:    71s[>>>>>>>>>>>>>>>>>>>         ] 733/1041, 4.4 task/s, elapsed: 168s, ETA:    71s[>>>>>>>>>>>>>>>>>>>         ] 734/1041, 4.4 task/s, elapsed: 168s, ETA:    70s[>>>>>>>>>>>>>>>>>>>         ] 735/1041, 4.4 task/s, elapsed: 169s, ETA:    70s[>>>>>>>>>>>>>>>>>>>         ] 736/1041, 4.4 task/s, elapsed: 169s, ETA:    70s[>>>>>>>>>>>>>>>>>>>         ] 737/1041, 4.4 task/s, elapsed: 169s, ETA:    70s[>>>>>>>>>>>>>>>>>>>         ] 738/1041, 4.4 task/s, elapsed: 169s, ETA:    69s[>>>>>>>>>>>>>>>>>>>         ] 739/1041, 4.4 task/s, elapsed: 169s, ETA:    69s[>>>>>>>>>>>>>>>>>>>         ] 740/1041, 4.4 task/s, elapsed: 170s, ETA:    69s[>>>>>>>>>>>>>>>>>>>         ] 741/1041, 4.4 task/s, elapsed: 170s, ETA:    69s[>>>>>>>>>>>>>>>>>>>         ] 742/1041, 4.4 task/s, elapsed: 170s, ETA:    69s[>>>>>>>>>>>>>>>>>>>         ] 743/1041, 4.4 task/s, elapsed: 170s, ETA:    68s[>>>>>>>>>>>>>>>>>>>>        ] 744/1041, 4.4 task/s, elapsed: 171s, ETA:    68s[>>>>>>>>>>>>>>>>>>>>        ] 745/1041, 4.4 task/s, elapsed: 171s, ETA:    68s[>>>>>>>>>>>>>>>>>>>>        ] 746/1041, 4.4 task/s, elapsed: 171s, ETA:    68s[>>>>>>>>>>>>>>>>>>>>        ] 747/1041, 4.4 task/s, elapsed: 171s, ETA:    67s[>>>>>>>>>>>>>>>>>>>>        ] 748/1041, 4.4 task/s, elapsed: 172s, ETA:    67s[>>>>>>>>>>>>>>>>>>>>        ] 749/1041, 4.4 task/s, elapsed: 172s, ETA:    67s[>>>>>>>>>>>>>>>>>>>>        ] 750/1041, 4.4 task/s, elapsed: 172s, ETA:    67s[>>>>>>>>>>>>>>>>>>>>        ] 751/1041, 4.4 task/s, elapsed: 172s, ETA:    66s[>>>>>>>>>>>>>>>>>>>>        ] 752/1041, 4.4 task/s, elapsed: 172s, ETA:    66s[>>>>>>>>>>>>>>>>>>>>        ] 753/1041, 4.4 task/s, elapsed: 173s, ETA:    66s[>>>>>>>>>>>>>>>>>>>>        ] 754/1041, 4.4 task/s, elapsed: 173s, ETA:    66s[>>>>>>>>>>>>>>>>>>>>        ] 755/1041, 4.4 task/s, elapsed: 173s, ETA:    66s[>>>>>>>>>>>>>>>>>>>>        ] 756/1041, 4.4 task/s, elapsed: 173s, ETA:    65s[>>>>>>>>>>>>>>>>>>>>        ] 757/1041, 4.4 task/s, elapsed: 174s, ETA:    65s[>>>>>>>>>>>>>>>>>>>>        ] 758/1041, 4.4 task/s, elapsed: 174s, ETA:    65s[>>>>>>>>>>>>>>>>>>>>        ] 759/1041, 4.4 task/s, elapsed: 174s, ETA:    65s[>>>>>>>>>>>>>>>>>>>>        ] 760/1041, 4.4 task/s, elapsed: 174s, ETA:    64s[>>>>>>>>>>>>>>>>>>>>        ] 761/1041, 4.4 task/s, elapsed: 174s, ETA:    64s[>>>>>>>>>>>>>>>>>>>>        ] 762/1041, 4.4 task/s, elapsed: 175s, ETA:    64s[>>>>>>>>>>>>>>>>>>>>        ] 763/1041, 4.4 task/s, elapsed: 175s, ETA:    64s[>>>>>>>>>>>>>>>>>>>>        ] 764/1041, 4.4 task/s, elapsed: 175s, ETA:    64s[>>>>>>>>>>>>>>>>>>>>        ] 765/1041, 4.4 task/s, elapsed: 175s, ETA:    63s[>>>>>>>>>>>>>>>>>>>>        ] 766/1041, 4.4 task/s, elapsed: 176s, ETA:    63s[>>>>>>>>>>>>>>>>>>>>        ] 767/1041, 4.4 task/s, elapsed: 176s, ETA:    63s[>>>>>>>>>>>>>>>>>>>>        ] 768/1041, 4.4 task/s, elapsed: 176s, ETA:    63s[>>>>>>>>>>>>>>>>>>>>        ] 769/1041, 4.4 task/s, elapsed: 176s, ETA:    62s[>>>>>>>>>>>>>>>>>>>>        ] 770/1041, 4.4 task/s, elapsed: 176s, ETA:    62s[>>>>>>>>>>>>>>>>>>>>        ] 771/1041, 4.4 task/s, elapsed: 177s, ETA:    62s[>>>>>>>>>>>>>>>>>>>>        ] 772/1041, 4.4 task/s, elapsed: 177s, ETA:    62s[>>>>>>>>>>>>>>>>>>>>        ] 773/1041, 4.4 task/s, elapsed: 177s, ETA:    61s[>>>>>>>>>>>>>>>>>>>>        ] 774/1041, 4.4 task/s, elapsed: 177s, ETA:    61s[>>>>>>>>>>>>>>>>>>>>        ] 775/1041, 4.4 task/s, elapsed: 178s, ETA:    61s[>>>>>>>>>>>>>>>>>>>>        ] 776/1041, 4.4 task/s, elapsed: 178s, ETA:    61s[>>>>>>>>>>>>>>>>>>>>        ] 777/1041, 4.4 task/s, elapsed: 178s, ETA:    61s[>>>>>>>>>>>>>>>>>>>>        ] 778/1041, 4.4 task/s, elapsed: 178s, ETA:    60s[>>>>>>>>>>>>>>>>>>>>        ] 779/1041, 4.4 task/s, elapsed: 179s, ETA:    60s[>>>>>>>>>>>>>>>>>>>>        ] 780/1041, 4.4 task/s, elapsed: 179s, ETA:    60s[>>>>>>>>>>>>>>>>>>>>>       ] 781/1041, 4.4 task/s, elapsed: 179s, ETA:    60s[>>>>>>>>>>>>>>>>>>>>>       ] 782/1041, 4.4 task/s, elapsed: 179s, ETA:    59s[>>>>>>>>>>>>>>>>>>>>>       ] 783/1041, 4.4 task/s, elapsed: 179s, ETA:    59s[>>>>>>>>>>>>>>>>>>>>>       ] 784/1041, 4.4 task/s, elapsed: 180s, ETA:    59s[>>>>>>>>>>>>>>>>>>>>>       ] 785/1041, 4.4 task/s, elapsed: 180s, ETA:    59s[>>>>>>>>>>>>>>>>>>>>>       ] 786/1041, 4.4 task/s, elapsed: 180s, ETA:    58s[>>>>>>>>>>>>>>>>>>>>>       ] 787/1041, 4.4 task/s, elapsed: 180s, ETA:    58s[>>>>>>>>>>>>>>>>>>>>>       ] 788/1041, 4.4 task/s, elapsed: 181s, ETA:    58s[>>>>>>>>>>>>>>>>>>>>>       ] 789/1041, 4.4 task/s, elapsed: 181s, ETA:    58s[>>>>>>>>>>>>>>>>>>>>>       ] 790/1041, 4.4 task/s, elapsed: 181s, ETA:    58s[>>>>>>>>>>>>>>>>>>>>>       ] 791/1041, 4.4 task/s, elapsed: 181s, ETA:    57s[>>>>>>>>>>>>>>>>>>>>>       ] 792/1041, 4.4 task/s, elapsed: 181s, ETA:    57s[>>>>>>>>>>>>>>>>>>>>>       ] 793/1041, 4.4 task/s, elapsed: 182s, ETA:    57s[>>>>>>>>>>>>>>>>>>>>>       ] 794/1041, 4.4 task/s, elapsed: 182s, ETA:    57s[>>>>>>>>>>>>>>>>>>>>>       ] 795/1041, 4.4 task/s, elapsed: 182s, ETA:    56s[>>>>>>>>>>>>>>>>>>>>>       ] 796/1041, 4.4 task/s, elapsed: 182s, ETA:    56s[>>>>>>>>>>>>>>>>>>>>>       ] 797/1041, 4.4 task/s, elapsed: 183s, ETA:    56s[>>>>>>>>>>>>>>>>>>>>>       ] 798/1041, 4.4 task/s, elapsed: 183s, ETA:    56s[>>>>>>>>>>>>>>>>>>>>>       ] 799/1041, 4.4 task/s, elapsed: 183s, ETA:    55s[>>>>>>>>>>>>>>>>>>>>>       ] 800/1041, 4.4 task/s, elapsed: 183s, ETA:    55s[>>>>>>>>>>>>>>>>>>>>>       ] 801/1041, 4.4 task/s, elapsed: 184s, ETA:    55s[>>>>>>>>>>>>>>>>>>>>>       ] 802/1041, 4.4 task/s, elapsed: 184s, ETA:    55s[>>>>>>>>>>>>>>>>>>>>>       ] 803/1041, 4.4 task/s, elapsed: 184s, ETA:    55s[>>>>>>>>>>>>>>>>>>>>>       ] 804/1041, 4.4 task/s, elapsed: 184s, ETA:    54s[>>>>>>>>>>>>>>>>>>>>>       ] 805/1041, 4.4 task/s, elapsed: 184s, ETA:    54s[>>>>>>>>>>>>>>>>>>>>>       ] 806/1041, 4.4 task/s, elapsed: 185s, ETA:    54s[>>>>>>>>>>>>>>>>>>>>>       ] 807/1041, 4.4 task/s, elapsed: 185s, ETA:    54s[>>>>>>>>>>>>>>>>>>>>>       ] 808/1041, 4.4 task/s, elapsed: 185s, ETA:    53s[>>>>>>>>>>>>>>>>>>>>>       ] 809/1041, 4.4 task/s, elapsed: 185s, ETA:    53s[>>>>>>>>>>>>>>>>>>>>>       ] 810/1041, 4.4 task/s, elapsed: 186s, ETA:    53s[>>>>>>>>>>>>>>>>>>>>>       ] 811/1041, 4.4 task/s, elapsed: 186s, ETA:    53s[>>>>>>>>>>>>>>>>>>>>>       ] 812/1041, 4.4 task/s, elapsed: 186s, ETA:    52s[>>>>>>>>>>>>>>>>>>>>>       ] 813/1041, 4.4 task/s, elapsed: 186s, ETA:    52s[>>>>>>>>>>>>>>>>>>>>>       ] 814/1041, 4.4 task/s, elapsed: 186s, ETA:    52s[>>>>>>>>>>>>>>>>>>>>>       ] 815/1041, 4.4 task/s, elapsed: 187s, ETA:    52s[>>>>>>>>>>>>>>>>>>>>>       ] 816/1041, 4.4 task/s, elapsed: 187s, ETA:    52s[>>>>>>>>>>>>>>>>>>>>>       ] 817/1041, 4.4 task/s, elapsed: 187s, ETA:    51s[>>>>>>>>>>>>>>>>>>>>>>      ] 818/1041, 4.4 task/s, elapsed: 187s, ETA:    51s[>>>>>>>>>>>>>>>>>>>>>>      ] 819/1041, 4.4 task/s, elapsed: 188s, ETA:    51s[>>>>>>>>>>>>>>>>>>>>>>      ] 820/1041, 4.4 task/s, elapsed: 188s, ETA:    51s[>>>>>>>>>>>>>>>>>>>>>>      ] 821/1041, 4.4 task/s, elapsed: 188s, ETA:    50s[>>>>>>>>>>>>>>>>>>>>>>      ] 822/1041, 4.4 task/s, elapsed: 188s, ETA:    50s[>>>>>>>>>>>>>>>>>>>>>>      ] 823/1041, 4.4 task/s, elapsed: 188s, ETA:    50s[>>>>>>>>>>>>>>>>>>>>>>      ] 824/1041, 4.4 task/s, elapsed: 189s, ETA:    50s[>>>>>>>>>>>>>>>>>>>>>>      ] 825/1041, 4.4 task/s, elapsed: 189s, ETA:    49s[>>>>>>>>>>>>>>>>>>>>>>      ] 826/1041, 4.4 task/s, elapsed: 189s, ETA:    49s[>>>>>>>>>>>>>>>>>>>>>>      ] 827/1041, 4.4 task/s, elapsed: 189s, ETA:    49s[>>>>>>>>>>>>>>>>>>>>>>      ] 828/1041, 4.4 task/s, elapsed: 190s, ETA:    49s[>>>>>>>>>>>>>>>>>>>>>>      ] 829/1041, 4.4 task/s, elapsed: 190s, ETA:    49s[>>>>>>>>>>>>>>>>>>>>>>      ] 830/1041, 4.4 task/s, elapsed: 190s, ETA:    48s[>>>>>>>>>>>>>>>>>>>>>>      ] 831/1041, 4.4 task/s, elapsed: 190s, ETA:    48s[>>>>>>>>>>>>>>>>>>>>>>      ] 832/1041, 4.4 task/s, elapsed: 190s, ETA:    48s[>>>>>>>>>>>>>>>>>>>>>>      ] 833/1041, 4.4 task/s, elapsed: 191s, ETA:    48s[>>>>>>>>>>>>>>>>>>>>>>      ] 834/1041, 4.4 task/s, elapsed: 191s, ETA:    47s[>>>>>>>>>>>>>>>>>>>>>>      ] 835/1041, 4.4 task/s, elapsed: 191s, ETA:    47s[>>>>>>>>>>>>>>>>>>>>>>      ] 836/1041, 4.4 task/s, elapsed: 191s, ETA:    47s[>>>>>>>>>>>>>>>>>>>>>>      ] 837/1041, 4.4 task/s, elapsed: 192s, ETA:    47s[>>>>>>>>>>>>>>>>>>>>>>      ] 838/1041, 4.4 task/s, elapsed: 192s, ETA:    46s[>>>>>>>>>>>>>>>>>>>>>>      ] 839/1041, 4.4 task/s, elapsed: 192s, ETA:    46s[>>>>>>>>>>>>>>>>>>>>>>      ] 840/1041, 4.4 task/s, elapsed: 192s, ETA:    46s[>>>>>>>>>>>>>>>>>>>>>>      ] 841/1041, 4.4 task/s, elapsed: 193s, ETA:    46s[>>>>>>>>>>>>>>>>>>>>>>      ] 842/1041, 4.4 task/s, elapsed: 193s, ETA:    46s[>>>>>>>>>>>>>>>>>>>>>>      ] 843/1041, 4.4 task/s, elapsed: 193s, ETA:    45s[>>>>>>>>>>>>>>>>>>>>>>      ] 844/1041, 4.4 task/s, elapsed: 193s, ETA:    45s[>>>>>>>>>>>>>>>>>>>>>>      ] 845/1041, 4.4 task/s, elapsed: 193s, ETA:    45s[>>>>>>>>>>>>>>>>>>>>>>      ] 846/1041, 4.4 task/s, elapsed: 194s, ETA:    45s[>>>>>>>>>>>>>>>>>>>>>>      ] 847/1041, 4.4 task/s, elapsed: 194s, ETA:    44s[>>>>>>>>>>>>>>>>>>>>>>      ] 848/1041, 4.4 task/s, elapsed: 194s, ETA:    44s[>>>>>>>>>>>>>>>>>>>>>>      ] 849/1041, 4.4 task/s, elapsed: 194s, ETA:    44s[>>>>>>>>>>>>>>>>>>>>>>      ] 850/1041, 4.4 task/s, elapsed: 195s, ETA:    44s[>>>>>>>>>>>>>>>>>>>>>>      ] 851/1041, 4.4 task/s, elapsed: 195s, ETA:    43s[>>>>>>>>>>>>>>>>>>>>>>      ] 852/1041, 4.4 task/s, elapsed: 195s, ETA:    43s[>>>>>>>>>>>>>>>>>>>>>>      ] 853/1041, 4.4 task/s, elapsed: 195s, ETA:    43s[>>>>>>>>>>>>>>>>>>>>>>      ] 854/1041, 4.4 task/s, elapsed: 196s, ETA:    43s[>>>>>>>>>>>>>>>>>>>>>>      ] 855/1041, 4.4 task/s, elapsed: 196s, ETA:    43s[>>>>>>>>>>>>>>>>>>>>>>>     ] 856/1041, 4.4 task/s, elapsed: 196s, ETA:    42s[>>>>>>>>>>>>>>>>>>>>>>>     ] 857/1041, 4.4 task/s, elapsed: 196s, ETA:    42s[>>>>>>>>>>>>>>>>>>>>>>>     ] 858/1041, 4.4 task/s, elapsed: 196s, ETA:    42s[>>>>>>>>>>>>>>>>>>>>>>>     ] 859/1041, 4.4 task/s, elapsed: 197s, ETA:    42s[>>>>>>>>>>>>>>>>>>>>>>>     ] 860/1041, 4.4 task/s, elapsed: 197s, ETA:    41s[>>>>>>>>>>>>>>>>>>>>>>>     ] 861/1041, 4.4 task/s, elapsed: 197s, ETA:    41s[>>>>>>>>>>>>>>>>>>>>>>>     ] 862/1041, 4.4 task/s, elapsed: 197s, ETA:    41s[>>>>>>>>>>>>>>>>>>>>>>>     ] 863/1041, 4.4 task/s, elapsed: 198s, ETA:    41s[>>>>>>>>>>>>>>>>>>>>>>>     ] 864/1041, 4.4 task/s, elapsed: 198s, ETA:    41s[>>>>>>>>>>>>>>>>>>>>>>>     ] 865/1041, 4.4 task/s, elapsed: 198s, ETA:    40s[>>>>>>>>>>>>>>>>>>>>>>>     ] 866/1041, 4.4 task/s, elapsed: 198s, ETA:    40s[>>>>>>>>>>>>>>>>>>>>>>>     ] 867/1041, 4.4 task/s, elapsed: 198s, ETA:    40s[>>>>>>>>>>>>>>>>>>>>>>>     ] 868/1041, 4.4 task/s, elapsed: 199s, ETA:    40s[>>>>>>>>>>>>>>>>>>>>>>>     ] 869/1041, 4.4 task/s, elapsed: 199s, ETA:    39s[>>>>>>>>>>>>>>>>>>>>>>>     ] 870/1041, 4.4 task/s, elapsed: 199s, ETA:    39s[>>>>>>>>>>>>>>>>>>>>>>>     ] 871/1041, 4.4 task/s, elapsed: 199s, ETA:    39s[>>>>>>>>>>>>>>>>>>>>>>>     ] 872/1041, 4.4 task/s, elapsed: 200s, ETA:    39s[>>>>>>>>>>>>>>>>>>>>>>>     ] 873/1041, 4.4 task/s, elapsed: 200s, ETA:    38s[>>>>>>>>>>>>>>>>>>>>>>>     ] 874/1041, 4.4 task/s, elapsed: 200s, ETA:    38s[>>>>>>>>>>>>>>>>>>>>>>>     ] 875/1041, 4.4 task/s, elapsed: 200s, ETA:    38s[>>>>>>>>>>>>>>>>>>>>>>>     ] 876/1041, 4.4 task/s, elapsed: 201s, ETA:    38s[>>>>>>>>>>>>>>>>>>>>>>>     ] 877/1041, 4.4 task/s, elapsed: 201s, ETA:    38s[>>>>>>>>>>>>>>>>>>>>>>>     ] 878/1041, 4.4 task/s, elapsed: 201s, ETA:    37s[>>>>>>>>>>>>>>>>>>>>>>>     ] 879/1041, 4.4 task/s, elapsed: 201s, ETA:    37s[>>>>>>>>>>>>>>>>>>>>>>>     ] 880/1041, 4.4 task/s, elapsed: 202s, ETA:    37s[>>>>>>>>>>>>>>>>>>>>>>>     ] 881/1041, 4.4 task/s, elapsed: 202s, ETA:    37s[>>>>>>>>>>>>>>>>>>>>>>>     ] 882/1041, 4.4 task/s, elapsed: 202s, ETA:    36s[>>>>>>>>>>>>>>>>>>>>>>>     ] 883/1041, 4.4 task/s, elapsed: 202s, ETA:    36s[>>>>>>>>>>>>>>>>>>>>>>>     ] 884/1041, 4.4 task/s, elapsed: 202s, ETA:    36s[>>>>>>>>>>>>>>>>>>>>>>>     ] 885/1041, 4.4 task/s, elapsed: 203s, ETA:    36s[>>>>>>>>>>>>>>>>>>>>>>>     ] 886/1041, 4.4 task/s, elapsed: 203s, ETA:    35s[>>>>>>>>>>>>>>>>>>>>>>>     ] 887/1041, 4.4 task/s, elapsed: 203s, ETA:    35s[>>>>>>>>>>>>>>>>>>>>>>>     ] 888/1041, 4.4 task/s, elapsed: 203s, ETA:    35s[>>>>>>>>>>>>>>>>>>>>>>>     ] 889/1041, 4.4 task/s, elapsed: 204s, ETA:    35s[>>>>>>>>>>>>>>>>>>>>>>>     ] 890/1041, 4.4 task/s, elapsed: 204s, ETA:    35s[>>>>>>>>>>>>>>>>>>>>>>>     ] 891/1041, 4.4 task/s, elapsed: 204s, ETA:    34s[>>>>>>>>>>>>>>>>>>>>>>>     ] 892/1041, 4.4 task/s, elapsed: 204s, ETA:    34s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 893/1041, 4.4 task/s, elapsed: 205s, ETA:    34s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 894/1041, 4.4 task/s, elapsed: 205s, ETA:    34s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 895/1041, 4.4 task/s, elapsed: 205s, ETA:    33s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 896/1041, 4.4 task/s, elapsed: 205s, ETA:    33s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 897/1041, 4.4 task/s, elapsed: 205s, ETA:    33s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 898/1041, 4.4 task/s, elapsed: 206s, ETA:    33s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 899/1041, 4.4 task/s, elapsed: 206s, ETA:    33s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 900/1041, 4.4 task/s, elapsed: 206s, ETA:    32s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 901/1041, 4.4 task/s, elapsed: 206s, ETA:    32s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 902/1041, 4.4 task/s, elapsed: 207s, ETA:    32s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 903/1041, 4.4 task/s, elapsed: 207s, ETA:    32s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 904/1041, 4.4 task/s, elapsed: 207s, ETA:    31s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 905/1041, 4.4 task/s, elapsed: 207s, ETA:    31s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 906/1041, 4.4 task/s, elapsed: 208s, ETA:    31s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 907/1041, 4.4 task/s, elapsed: 208s, ETA:    31s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 908/1041, 4.4 task/s, elapsed: 208s, ETA:    30s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 909/1041, 4.4 task/s, elapsed: 208s, ETA:    30s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 910/1041, 4.4 task/s, elapsed: 208s, ETA:    30s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 911/1041, 4.4 task/s, elapsed: 209s, ETA:    30s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 912/1041, 4.4 task/s, elapsed: 209s, ETA:    30s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 913/1041, 4.4 task/s, elapsed: 209s, ETA:    29s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 914/1041, 4.4 task/s, elapsed: 209s, ETA:    29s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 915/1041, 4.4 task/s, elapsed: 210s, ETA:    29s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 916/1041, 4.4 task/s, elapsed: 210s, ETA:    29s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 917/1041, 4.4 task/s, elapsed: 210s, ETA:    28s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 918/1041, 4.4 task/s, elapsed: 210s, ETA:    28s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 919/1041, 4.4 task/s, elapsed: 211s, ETA:    28s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 920/1041, 4.4 task/s, elapsed: 211s, ETA:    28s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 921/1041, 4.4 task/s, elapsed: 211s, ETA:    27s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 922/1041, 4.4 task/s, elapsed: 211s, ETA:    27s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 923/1041, 4.4 task/s, elapsed: 211s, ETA:    27s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 924/1041, 4.4 task/s, elapsed: 212s, ETA:    27s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 925/1041, 4.4 task/s, elapsed: 212s, ETA:    27s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 926/1041, 4.4 task/s, elapsed: 212s, ETA:    26s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 927/1041, 4.4 task/s, elapsed: 212s, ETA:    26s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 928/1041, 4.4 task/s, elapsed: 213s, ETA:    26s[>>>>>>>>>>>>>>>>>>>>>>>>    ] 929/1041, 4.4 task/s, elapsed: 213s, ETA:    26s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 930/1041, 4.4 task/s, elapsed: 213s, ETA:    25s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 931/1041, 4.4 task/s, elapsed: 213s, ETA:    25s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 932/1041, 4.4 task/s, elapsed: 214s, ETA:    25s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 933/1041, 4.4 task/s, elapsed: 214s, ETA:    25s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 934/1041, 4.4 task/s, elapsed: 214s, ETA:    25s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 935/1041, 4.4 task/s, elapsed: 214s, ETA:    24s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 936/1041, 4.4 task/s, elapsed: 214s, ETA:    24s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 937/1041, 4.4 task/s, elapsed: 215s, ETA:    24s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 938/1041, 4.4 task/s, elapsed: 215s, ETA:    24s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 939/1041, 4.4 task/s, elapsed: 215s, ETA:    23s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 940/1041, 4.4 task/s, elapsed: 215s, ETA:    23s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 941/1041, 4.4 task/s, elapsed: 216s, ETA:    23s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 942/1041, 4.4 task/s, elapsed: 216s, ETA:    23s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 943/1041, 4.4 task/s, elapsed: 216s, ETA:    22s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 944/1041, 4.4 task/s, elapsed: 216s, ETA:    22s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 945/1041, 4.4 task/s, elapsed: 216s, ETA:    22s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 946/1041, 4.4 task/s, elapsed: 217s, ETA:    22s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 947/1041, 4.4 task/s, elapsed: 217s, ETA:    22s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 948/1041, 4.4 task/s, elapsed: 217s, ETA:    21s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 949/1041, 4.4 task/s, elapsed: 217s, ETA:    21s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 950/1041, 4.4 task/s, elapsed: 218s, ETA:    21s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 951/1041, 4.4 task/s, elapsed: 218s, ETA:    21s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 952/1041, 4.4 task/s, elapsed: 218s, ETA:    20s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 953/1041, 4.4 task/s, elapsed: 218s, ETA:    20s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 954/1041, 4.4 task/s, elapsed: 219s, ETA:    20s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 955/1041, 4.4 task/s, elapsed: 219s, ETA:    20s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 956/1041, 4.4 task/s, elapsed: 219s, ETA:    19s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 957/1041, 4.4 task/s, elapsed: 219s, ETA:    19s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 958/1041, 4.4 task/s, elapsed: 219s, ETA:    19s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 959/1041, 4.4 task/s, elapsed: 220s, ETA:    19s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 960/1041, 4.4 task/s, elapsed: 220s, ETA:    19s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 961/1041, 4.4 task/s, elapsed: 220s, ETA:    18s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 962/1041, 4.4 task/s, elapsed: 220s, ETA:    18s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 963/1041, 4.4 task/s, elapsed: 221s, ETA:    18s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 964/1041, 4.4 task/s, elapsed: 221s, ETA:    18s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 965/1041, 4.4 task/s, elapsed: 221s, ETA:    17s[>>>>>>>>>>>>>>>>>>>>>>>>>   ] 966/1041, 4.4 task/s, elapsed: 221s, ETA:    17s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 967/1041, 4.4 task/s, elapsed: 222s, ETA:    17s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 968/1041, 4.4 task/s, elapsed: 222s, ETA:    17s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 969/1041, 4.4 task/s, elapsed: 222s, ETA:    16s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 970/1041, 4.4 task/s, elapsed: 222s, ETA:    16s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 971/1041, 4.4 task/s, elapsed: 222s, ETA:    16s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 972/1041, 4.4 task/s, elapsed: 223s, ETA:    16s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 973/1041, 4.4 task/s, elapsed: 223s, ETA:    16s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 974/1041, 4.4 task/s, elapsed: 223s, ETA:    15s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 975/1041, 4.4 task/s, elapsed: 223s, ETA:    15s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 976/1041, 4.4 task/s, elapsed: 224s, ETA:    15s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 977/1041, 4.4 task/s, elapsed: 224s, ETA:    15s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 978/1041, 4.4 task/s, elapsed: 224s, ETA:    14s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 979/1041, 4.4 task/s, elapsed: 224s, ETA:    14s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 980/1041, 4.4 task/s, elapsed: 224s, ETA:    14s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 981/1041, 4.4 task/s, elapsed: 225s, ETA:    14s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 982/1041, 4.4 task/s, elapsed: 225s, ETA:    14s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 983/1041, 4.4 task/s, elapsed: 225s, ETA:    13s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 984/1041, 4.4 task/s, elapsed: 225s, ETA:    13s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 985/1041, 4.4 task/s, elapsed: 226s, ETA:    13s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 986/1041, 4.4 task/s, elapsed: 226s, ETA:    13s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 987/1041, 4.4 task/s, elapsed: 226s, ETA:    12s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 988/1041, 4.4 task/s, elapsed: 226s, ETA:    12s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 989/1041, 4.4 task/s, elapsed: 227s, ETA:    12s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 990/1041, 4.4 task/s, elapsed: 227s, ETA:    12s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 991/1041, 4.4 task/s, elapsed: 227s, ETA:    11s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 992/1041, 4.4 task/s, elapsed: 227s, ETA:    11s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 993/1041, 4.4 task/s, elapsed: 227s, ETA:    11s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 994/1041, 4.4 task/s, elapsed: 228s, ETA:    11s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 995/1041, 4.4 task/s, elapsed: 228s, ETA:    11s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 996/1041, 4.4 task/s, elapsed: 228s, ETA:    10s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 997/1041, 4.4 task/s, elapsed: 228s, ETA:    10s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 998/1041, 4.4 task/s, elapsed: 229s, ETA:    10s[>>>>>>>>>>>>>>>>>>>>>>>>>>  ] 999/1041, 4.4 task/s, elapsed: 229s, ETA:    10s[>>>>>>>>>>>>>>>>>>>>>>>>>  ] 1000/1041, 4.4 task/s, elapsed: 229s, ETA:     9s[>>>>>>>>>>>>>>>>>>>>>>>>>  ] 1001/1041, 4.4 task/s, elapsed: 229s, ETA:     9s[>>>>>>>>>>>>>>>>>>>>>>>>>  ] 1002/1041, 4.4 task/s, elapsed: 229s, ETA:     9s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1003/1041, 4.4 task/s, elapsed: 230s, ETA:     9s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1004/1041, 4.4 task/s, elapsed: 230s, ETA:     8s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1005/1041, 4.4 task/s, elapsed: 230s, ETA:     8s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1006/1041, 4.4 task/s, elapsed: 230s, ETA:     8s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1007/1041, 4.4 task/s, elapsed: 231s, ETA:     8s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1008/1041, 4.4 task/s, elapsed: 231s, ETA:     8s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1009/1041, 4.4 task/s, elapsed: 231s, ETA:     7s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1010/1041, 4.4 task/s, elapsed: 231s, ETA:     7s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1011/1041, 4.4 task/s, elapsed: 232s, ETA:     7s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1012/1041, 4.4 task/s, elapsed: 232s, ETA:     7s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1013/1041, 4.4 task/s, elapsed: 232s, ETA:     6s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1014/1041, 4.4 task/s, elapsed: 232s, ETA:     6s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1015/1041, 4.4 task/s, elapsed: 232s, ETA:     6s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1016/1041, 4.4 task/s, elapsed: 233s, ETA:     6s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1017/1041, 4.4 task/s, elapsed: 233s, ETA:     5s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1018/1041, 4.4 task/s, elapsed: 233s, ETA:     5s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1019/1041, 4.4 task/s, elapsed: 233s, ETA:     5s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1020/1041, 4.4 task/s, elapsed: 234s, ETA:     5s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1021/1041, 4.4 task/s, elapsed: 234s, ETA:     5s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1022/1041, 4.4 task/s, elapsed: 234s, ETA:     4s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1023/1041, 4.4 task/s, elapsed: 234s, ETA:     4s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1024/1041, 4.4 task/s, elapsed: 234s, ETA:     4s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1025/1041, 4.4 task/s, elapsed: 235s, ETA:     4s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1026/1041, 4.4 task/s, elapsed: 235s, ETA:     3s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1027/1041, 4.4 task/s, elapsed: 235s, ETA:     3s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1028/1041, 4.4 task/s, elapsed: 235s, ETA:     3s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1029/1041, 4.4 task/s, elapsed: 236s, ETA:     3s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1030/1041, 4.4 task/s, elapsed: 236s, ETA:     3s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1031/1041, 4.4 task/s, elapsed: 236s, ETA:     2s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1032/1041, 4.4 task/s, elapsed: 236s, ETA:     2s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1033/1041, 4.4 task/s, elapsed: 237s, ETA:     2s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1034/1041, 4.4 task/s, elapsed: 237s, ETA:     2s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1035/1041, 4.4 task/s, elapsed: 237s, ETA:     1s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1036/1041, 4.4 task/s, elapsed: 237s, ETA:     1s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1037/1041, 4.4 task/s, elapsed: 237s, ETA:     1s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1038/1041, 4.4 task/s, elapsed: 238s, ETA:     1s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1039/1041, 4.4 task/s, elapsed: 238s, ETA:     0s[>>>>>>>>>>>>>>>>>>>>>>>>>> ] 1040/1041, 4.4 task/s, elapsed: 238s, ETA:     0s[>>>>>>>>>>>>>>>>>>>>>>>>>>>] 1041/1041, 4.4 task/s, elapsed: 238s, ETA:     0s[                                                  ] 0/1041, elapsed: 0s, ETA:[                                ] 1/1041, 1.5 task/s, elapsed: 1s, ETA:   705s[                                ] 2/1041, 2.2 task/s, elapsed: 1s, ETA:   471s[                                ] 3/1041, 2.5 task/s, elapsed: 1s, ETA:   407s[                                ] 4/1041, 2.9 task/s, elapsed: 1s, ETA:   362s[                                ] 5/1041, 3.1 task/s, elapsed: 2s, ETA:   335s[                                ] 6/1041, 3.2 task/s, elapsed: 2s, ETA:   319s[                                ] 7/1041, 3.4 task/s, elapsed: 2s, ETA:   308s[                                ] 8/1041, 3.4 task/s, elapsed: 2s, ETA:   301s[                                ] 9/1041, 3.5 task/s, elapsed: 3s, ETA:   292s[                               ] 10/1041, 3.6 task/s, elapsed: 3s, ETA:   285s[                               ] 11/1041, 3.7 task/s, elapsed: 3s, ETA:   281s[                               ] 12/1041, 3.7 task/s, elapsed: 3s, ETA:   276s[                               ] 13/1041, 3.7 task/s, elapsed: 3s, ETA:   274s[                               ] 14/1041, 3.8 task/s, elapsed: 4s, ETA:   270s[                               ] 15/1041, 3.8 task/s, elapsed: 4s, ETA:   267s[                               ] 16/1041, 3.9 task/s, elapsed: 4s, ETA:   265s[                               ] 17/1041, 3.9 task/s, elapsed: 4s, ETA:   262s[                               ] 18/1041, 3.9 task/s, elapsed: 5s, ETA:   264s[                               ] 19/1041, 3.9 task/s, elapsed: 5s, ETA:   261s[                               ] 20/1041, 3.9 task/s, elapsed: 5s, ETA:   259s[                               ] 21/1041, 3.9 task/s, elapsed: 5s, ETA:   258s[                               ] 22/1041, 4.0 task/s, elapsed: 6s, ETA:   256s[                               ] 23/1041, 4.0 task/s, elapsed: 6s, ETA:   256s[                               ] 24/1041, 4.0 task/s, elapsed: 6s, ETA:   255s[                               ] 25/1041, 4.0 task/s, elapsed: 6s, ETA:   253s[                               ] 26/1041, 4.0 task/s, elapsed: 6s, ETA:   252s[                               ] 27/1041, 4.0 task/s, elapsed: 7s, ETA:   251s[                               ] 28/1041, 4.0 task/s, elapsed: 7s, ETA:   252s[                               ] 29/1041, 4.0 task/s, elapsed: 7s, ETA:   251s[                               ] 30/1041, 4.0 task/s, elapsed: 7s, ETA:   250s[                               ] 31/1041, 4.1 task/s, elapsed: 8s, ETA:   249s[                               ] 32/1041, 4.1 task/s, elapsed: 8s, ETA:   248s[                               ] 33/1041, 4.1 task/s, elapsed: 8s, ETA:   248s[>                              ] 34/1041, 4.1 task/s, elapsed: 8s, ETA:   247s[>                              ] 35/1041, 4.1 task/s, elapsed: 9s, ETA:   245s[>                              ] 36/1041, 4.1 task/s, elapsed: 9s, ETA:   245s[>                              ] 37/1041, 4.1 task/s, elapsed: 9s, ETA:   245s[>                              ] 38/1041, 4.1 task/s, elapsed: 9s, ETA:   245s[>                              ] 39/1041, 4.1 task/s, elapsed: 9s, ETA:   244s[>                             ] 40/1041, 4.1 task/s, elapsed: 10s, ETA:   243s[>                             ] 41/1041, 4.1 task/s, elapsed: 10s, ETA:   242s[>                             ] 42/1041, 4.1 task/s, elapsed: 10s, ETA:   241s[>                             ] 43/1041, 4.1 task/s, elapsed: 10s, ETA:   242s[>                             ] 44/1041, 4.1 task/s, elapsed: 11s, ETA:   241s[>                             ] 45/1041, 4.1 task/s, elapsed: 11s, ETA:   240s[>                             ] 46/1041, 4.1 task/s, elapsed: 11s, ETA:   240s[>                             ] 47/1041, 4.1 task/s, elapsed: 11s, ETA:   240s[>                             ] 48/1041, 4.1 task/s, elapsed: 12s, ETA:   240s[>                             ] 49/1041, 4.1 task/s, elapsed: 12s, ETA:   239s[>                             ] 50/1041, 4.2 task/s, elapsed: 12s, ETA:   238s[>                             ] 51/1041, 4.2 task/s, elapsed: 12s, ETA:   238s[>                             ] 52/1041, 4.2 task/s, elapsed: 12s, ETA:   238s[>                             ] 53/1041, 4.2 task/s, elapsed: 13s, ETA:   238s[>                             ] 54/1041, 4.2 task/s, elapsed: 13s, ETA:   237s[>                             ] 55/1041, 4.2 task/s, elapsed: 13s, ETA:   236s[>                             ] 56/1041, 4.2 task/s, elapsed: 13s, ETA:   236s[>                             ] 57/1041, 4.2 task/s, elapsed: 14s, ETA:   236s[>                             ] 58/1041, 4.2 task/s, elapsed: 14s, ETA:   236s[>                             ] 59/1041, 4.2 task/s, elapsed: 14s, ETA:   235s[>                             ] 60/1041, 4.2 task/s, elapsed: 14s, ETA:   235s[>                             ] 61/1041, 4.2 task/s, elapsed: 15s, ETA:   234s[>                             ] 62/1041, 4.2 task/s, elapsed: 15s, ETA:   234s[>                             ] 63/1041, 4.2 task/s, elapsed: 15s, ETA:   234s[>                             ] 64/1041, 4.2 task/s, elapsed: 15s, ETA:   233s[>                             ] 65/1041, 4.2 task/s, elapsed: 16s, ETA:   233s[>                             ] 66/1041, 4.2 task/s, elapsed: 16s, ETA:   232s[>                             ] 67/1041, 4.2 task/s, elapsed: 16s, ETA:   232s[>                             ] 68/1041, 4.2 task/s, elapsed: 16s, ETA:   232s[>                             ] 69/1041, 4.2 task/s, elapsed: 16s, ETA:   232s[>>                            ] 70/1041, 4.2 task/s, elapsed: 17s, ETA:   231s[>>                            ] 71/1041, 4.2 task/s, elapsed: 17s, ETA:   231s[>>                            ] 72/1041, 4.2 task/s, elapsed: 17s, ETA:   230s[>>                            ] 73/1041, 4.2 task/s, elapsed: 17s, ETA:   231s[>>                            ] 74/1041, 4.2 task/s, elapsed: 18s, ETA:   230s[>>                            ] 75/1041, 4.2 task/s, elapsed: 18s, ETA:   230s[>>                            ] 76/1041, 4.2 task/s, elapsed: 18s, ETA:   229s[>>                            ] 77/1041, 4.2 task/s, elapsed: 18s, ETA:   229s[>>                            ] 78/1041, 4.2 task/s, elapsed: 19s, ETA:   229s[>>                            ] 79/1041, 4.2 task/s, elapsed: 19s, ETA:   228s[>>                            ] 80/1041, 4.2 task/s, elapsed: 19s, ETA:   228s[>>                            ] 81/1041, 4.2 task/s, elapsed: 19s, ETA:   227s[>>                            ] 82/1041, 4.2 task/s, elapsed: 19s, ETA:   227s[>>                            ] 83/1041, 4.2 task/s, elapsed: 20s, ETA:   227s[>>                            ] 84/1041, 4.2 task/s, elapsed: 20s, ETA:   227s[>>                            ] 85/1041, 4.2 task/s, elapsed: 20s, ETA:   226s[>>                            ] 86/1041, 4.2 task/s, elapsed: 20s, ETA:   226sslurmstepd: error: *** JOB 53502 ON gnode01 CANCELLED AT 2022-10-11T09:08:22 ***

@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "tools/train.py", line 208, in <module>
+    main()
+  File "tools/train.py", line 93, in main
+    cfg = Config.fromfile(args.config)
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/utils/config.py", line 340, in fromfile
+    cfg_dict, cfg_text = Config._file2dict(filename,
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/utils/config.py", line 252, in _file2dict
+    _cfg_dict, _cfg_text = Config._file2dict(osp.join(cfg_dir, f))
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/utils/config.py", line 183, in _file2dict
+    check_file_exist(filename)
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/utils/path.py", line 23, in check_file_exist
+    raise FileNotFoundError(msg_tmpl.format(filename))
+FileNotFoundError: file "/home/s.starace/FlowNets/mmflow/configs/schedules/pwcnet_plus_750k_schedule.py" does not exist

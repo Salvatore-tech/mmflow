@@ -1,0 +1,933 @@
+2022-10-11 10:04:26,946 - mmflow - INFO - Multi-processing start method is `fork`
+2022-10-11 10:04:26,948 - mmflow - INFO - OpenCV num_threads is `32
+2022-10-11 10:04:26,998 - mmflow - INFO - Environment info:
+------------------------------------------------------------
+sys.platform: linux
+Python: 3.8.13 (default, Mar 28 2022, 11:38:47) [GCC 7.5.0]
+CUDA available: True
+CUDA_HOME: /opt/share/cuda/cuda-10.1
+NVCC: Cuda compilation tools, release 10.1, V10.1.243
+GPU 0,1,2,3: Tesla V100-SXM2-32GB
+GCC: gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-36)
+PyTorch: 1.12.1
+PyTorch compiling details: PyTorch built with:
+  - GCC 9.3
+  - C++ Version: 201402
+  - Intel(R) oneAPI Math Kernel Library Version 2021.4-Product Build 20210904 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.6.0 (Git Hash 52b5f107dd9cf10910aaa19cb47f3abf9b349815)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.3
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 8.3.2  (built against CUDA 11.5)
+  - Magma 2.5.2
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.3, CUDNN_VERSION=8.3.2, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -fabi-version=11 -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -DEDGE_PROFILER_USE_KINETO -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-unused-local-typedefs -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.12.1, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=OFF, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
+
+TorchVision: 0.13.1
+OpenCV: 4.6.0
+MMCV: 1.6.1
+MMFlow: 0.5.1+47d7ece
+MMCV Compiler: GCC 9.3
+MMCV CUDA Compiler: 11.3
+------------------------------------------------------------
+
+2022-10-11 10:04:26,999 - mmflow - INFO - Distributed training: False
+2022-10-11 10:04:27,467 - mmflow - INFO - Config:
+model = dict(
+    type='RAFT',
+    num_levels=4,
+    radius=4,
+    cxt_channels=128,
+    h_channels=128,
+    encoder=dict(
+        type='RAFTEncoder',
+        in_channels=3,
+        out_channels=256,
+        net_type='Basic',
+        norm_cfg=dict(type='IN'),
+        init_cfg=[
+            dict(
+                type='Kaiming',
+                layer=['Conv2d'],
+                mode='fan_out',
+                nonlinearity='relu'),
+            dict(type='Constant', layer=['InstanceNorm2d'], val=1, bias=0)
+        ]),
+    cxt_encoder=dict(
+        type='RAFTEncoder',
+        in_channels=3,
+        out_channels=256,
+        net_type='Basic',
+        norm_cfg=dict(type='SyncBN'),
+        init_cfg=[
+            dict(
+                type='Kaiming',
+                layer=['Conv2d'],
+                mode='fan_out',
+                nonlinearity='relu'),
+            dict(type='Constant', layer=['SyncBatchNorm2d'], val=1, bias=0)
+        ]),
+    decoder=dict(
+        type='RAFTDecoder',
+        net_type='Basic',
+        num_levels=4,
+        radius=4,
+        iters=12,
+        corr_op_cfg=dict(type='CorrLookup', align_corners=True),
+        gru_type='SeqConv',
+        flow_loss=dict(type='SequenceLoss', gamma=0.85),
+        act_cfg=dict(type='ReLU')),
+    freeze_bn=True,
+    train_cfg=dict(),
+    test_cfg=dict(iters=32))
+caddy_data_root = '/home/s.starace/Dataset/dCADDY'
+caddy_dataset_type = 'CADDY'
+caddy_img_norm_cfg = dict(
+    mean=[0.0, 0.0, 0.0], std=[255.0, 255.0, 255.0], to_rgb=False)
+crop_size_caddy = (320, 240)
+kitti_data_root = '/home/s.starace/Dataset/Depthstillation_mix/dKITTI'
+kitti_dataset_type = 'KITTI2015AUG'
+kitti_img_norm_cfg = dict(
+    mean=[127.5, 127.5, 127.5], std=[127.5, 127.5, 127.5], to_rgb=False)
+crop_size_kitti = (288, 960)
+global_transform = dict(
+    translates=(0.02, 0.02),
+    zoom=(0.98, 1.02),
+    shear=(1.0, 1.0),
+    rotate=(-0.5, 0.5))
+relative_transform = dict(
+    translates=(0.0025, 0.0025),
+    zoom=(0.99, 1.01),
+    shear=(1.0, 1.0),
+    rotate=(-0.5, 0.5))
+kitti_train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', sparse=True),
+    dict(
+        type='ColorJitter',
+        asymmetric_prob=0.0,
+        brightness=0.4,
+        contrast=0.4,
+        saturation=0.4,
+        hue=0.1592356687898089),
+    dict(type='Erase', prob=0.5, bounds=[50, 100], max_num=3),
+    dict(
+        type='SpacialTransform',
+        spacial_prob=0.8,
+        stretch_prob=0.8,
+        crop_size=(288, 960),
+        min_scale=-0.2,
+        max_scale=0.4,
+        max_stretch=0.2),
+    dict(type='RandomCrop', crop_size=(288, 960)),
+    dict(
+        type='Normalize',
+        mean=[0.0, 0.0, 0.0],
+        std=[255.0, 255.0, 255.0],
+        to_rgb=False),
+    dict(type='DefaultFormatBundle'),
+    dict(
+        type='Collect',
+        keys=['imgs', 'flow_gt', 'valid'],
+        meta_keys=[
+            'filename1', 'filename2', 'ori_filename1', 'ori_filename2',
+            'filename_flow', 'ori_filename_flow', 'ori_shape', 'img_shape',
+            'erase_bounds', 'erase_num', 'scale_factor'
+        ])
+]
+caddy_train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', sparse=True),
+    dict(
+        type='ColorJitter',
+        brightness=0.05,
+        contrast=0.2,
+        saturation=0.25,
+        hue=0.1),
+    dict(type='RandomGamma', gamma_range=(0.7, 1.5)),
+    dict(
+        type='Normalize',
+        mean=[0.0, 0.0, 0.0],
+        std=[255.0, 255.0, 255.0],
+        to_rgb=False),
+    dict(type='GaussianNoise', sigma_range=(0, 0.04), clamp_range=(0.0, 1.0)),
+    dict(type='RandomFlip', prob=0.5, direction='horizontal'),
+    dict(type='RandomFlip', prob=0.5, direction='vertical'),
+    dict(
+        type='RandomAffine',
+        global_transform=dict(
+            translates=(0.02, 0.02),
+            zoom=(0.98, 1.02),
+            shear=(1.0, 1.0),
+            rotate=(-0.5, 0.5)),
+        relative_transform=dict(
+            translates=(0.0025, 0.0025),
+            zoom=(0.99, 1.01),
+            shear=(1.0, 1.0),
+            rotate=(-0.5, 0.5))),
+    dict(type='RandomCrop', crop_size=(320, 240)),
+    dict(type='DefaultFormatBundle'),
+    dict(
+        type='Collect',
+        keys=['imgs', 'flow_gt', 'valid'],
+        meta_keys=[
+            'img_fields', 'ann_fields', 'filename1', 'filename2',
+            'ori_filename1', 'ori_filename2', 'filename_flow',
+            'ori_filename_flow', 'ori_shape', 'img_shape', 'img_norm_cfg'
+        ])
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', sparse=True),
+    dict(type='InputResize', exponent=6),
+    dict(
+        type='Normalize',
+        mean=[0.0, 0.0, 0.0],
+        std=[255.0, 255.0, 255.0],
+        to_rgb=False),
+    dict(type='TestFormatBundle'),
+    dict(
+        type='Collect',
+        keys=['imgs'],
+        meta_keys=[
+            'flow_gt', 'valid', 'filename1', 'filename2', 'ori_filename1',
+            'ori_filename2', 'ori_shape', 'img_shape', 'img_norm_cfg',
+            'scale_factor', 'pad_shape'
+        ])
+]
+sintel_test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations'),
+    dict(type='InputPad', exponent=3),
+    dict(
+        type='Normalize',
+        mean=[0.0, 0.0, 0.0],
+        std=[255.0, 255.0, 255.0],
+        to_rgb=False),
+    dict(type='TestFormatBundle'),
+    dict(
+        type='Collect',
+        keys=['imgs'],
+        meta_keys=[
+            'flow_gt', 'filename1', 'filename2', 'ori_filename1',
+            'ori_filename2', 'ori_shape', 'img_shape', 'img_norm_cfg',
+            'scale_factor', 'pad_shape', 'pad'
+        ])
+]
+d_caddy_train = dict(
+    type='CADDY',
+    data_root='/home/s.starace/Dataset/dCADDY',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations', sparse=True),
+        dict(
+            type='ColorJitter',
+            brightness=0.05,
+            contrast=0.2,
+            saturation=0.25,
+            hue=0.1),
+        dict(type='RandomGamma', gamma_range=(0.7, 1.5)),
+        dict(
+            type='Normalize',
+            mean=[0.0, 0.0, 0.0],
+            std=[255.0, 255.0, 255.0],
+            to_rgb=False),
+        dict(
+            type='GaussianNoise',
+            sigma_range=(0, 0.04),
+            clamp_range=(0.0, 1.0)),
+        dict(type='RandomFlip', prob=0.5, direction='horizontal'),
+        dict(type='RandomFlip', prob=0.5, direction='vertical'),
+        dict(
+            type='RandomAffine',
+            global_transform=dict(
+                translates=(0.02, 0.02),
+                zoom=(0.98, 1.02),
+                shear=(1.0, 1.0),
+                rotate=(-0.5, 0.5)),
+            relative_transform=dict(
+                translates=(0.0025, 0.0025),
+                zoom=(0.99, 1.01),
+                shear=(1.0, 1.0),
+                rotate=(-0.5, 0.5))),
+        dict(type='RandomCrop', crop_size=(320, 240)),
+        dict(type='DefaultFormatBundle'),
+        dict(
+            type='Collect',
+            keys=['imgs', 'flow_gt', 'valid'],
+            meta_keys=[
+                'img_fields', 'ann_fields', 'filename1', 'filename2',
+                'ori_filename1', 'ori_filename2', 'filename_flow',
+                'ori_filename_flow', 'ori_shape', 'img_shape', 'img_norm_cfg'
+            ])
+    ],
+    test_mode=False)
+d_kitti_train = dict(
+    type='KITTI2015AUG',
+    data_root='/home/s.starace/Dataset/Depthstillation_mix/dKITTI',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations', sparse=True),
+        dict(
+            type='ColorJitter',
+            asymmetric_prob=0.0,
+            brightness=0.4,
+            contrast=0.4,
+            saturation=0.4,
+            hue=0.1592356687898089),
+        dict(type='Erase', prob=0.5, bounds=[50, 100], max_num=3),
+        dict(
+            type='SpacialTransform',
+            spacial_prob=0.8,
+            stretch_prob=0.8,
+            crop_size=(288, 960),
+            min_scale=-0.2,
+            max_scale=0.4,
+            max_stretch=0.2),
+        dict(type='RandomCrop', crop_size=(288, 960)),
+        dict(
+            type='Normalize',
+            mean=[0.0, 0.0, 0.0],
+            std=[255.0, 255.0, 255.0],
+            to_rgb=False),
+        dict(type='DefaultFormatBundle'),
+        dict(
+            type='Collect',
+            keys=['imgs', 'flow_gt', 'valid'],
+            meta_keys=[
+                'filename1', 'filename2', 'ori_filename1', 'ori_filename2',
+                'filename_flow', 'ori_filename_flow', 'ori_shape', 'img_shape',
+                'erase_bounds', 'erase_num', 'scale_factor'
+            ])
+    ],
+    test_mode=False)
+kitti2015_val_test = dict(
+    type='KITTI2015',
+    data_root='data/KITTI_2015',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations', sparse=True),
+        dict(type='InputResize', exponent=6),
+        dict(
+            type='Normalize',
+            mean=[0.0, 0.0, 0.0],
+            std=[255.0, 255.0, 255.0],
+            to_rgb=False),
+        dict(type='TestFormatBundle'),
+        dict(
+            type='Collect',
+            keys=['imgs'],
+            meta_keys=[
+                'flow_gt', 'valid', 'filename1', 'filename2', 'ori_filename1',
+                'ori_filename2', 'ori_shape', 'img_shape', 'img_norm_cfg',
+                'scale_factor', 'pad_shape'
+            ])
+    ],
+    test_mode=True)
+sintel_clean_test = dict(
+    type='Sintel',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations'),
+        dict(type='InputPad', exponent=3),
+        dict(
+            type='Normalize',
+            mean=[0.0, 0.0, 0.0],
+            std=[255.0, 255.0, 255.0],
+            to_rgb=False),
+        dict(type='TestFormatBundle'),
+        dict(
+            type='Collect',
+            keys=['imgs'],
+            meta_keys=[
+                'flow_gt', 'filename1', 'filename2', 'ori_filename1',
+                'ori_filename2', 'ori_shape', 'img_shape', 'img_norm_cfg',
+                'scale_factor', 'pad_shape', 'pad'
+            ])
+    ],
+    data_root='data/Sintel',
+    test_mode=True,
+    pass_style='clean')
+sintel_final_test = dict(
+    type='Sintel',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations'),
+        dict(type='InputPad', exponent=3),
+        dict(
+            type='Normalize',
+            mean=[0.0, 0.0, 0.0],
+            std=[255.0, 255.0, 255.0],
+            to_rgb=False),
+        dict(type='TestFormatBundle'),
+        dict(
+            type='Collect',
+            keys=['imgs'],
+            meta_keys=[
+                'flow_gt', 'filename1', 'filename2', 'ori_filename1',
+                'ori_filename2', 'ori_shape', 'img_shape', 'img_norm_cfg',
+                'scale_factor', 'pad_shape', 'pad'
+            ])
+    ],
+    data_root='data/Sintel',
+    test_mode=True,
+    pass_style='final')
+data = dict(
+    train_dataloader=dict(
+        samples_per_gpu=2,
+        workers_per_gpu=5,
+        drop_last=True,
+        shuffle=False,
+        persistent_workers=True),
+    val_dataloader=dict(
+        samples_per_gpu=1,
+        workers_per_gpu=5,
+        shuffle=False,
+        persistent_workers=True),
+    test_dataloader=dict(samples_per_gpu=1, workers_per_gpu=5, shuffle=False),
+    train=[
+        dict(
+            type='CADDY',
+            data_root='/home/s.starace/Dataset/dCADDY',
+            pipeline=[
+                dict(type='LoadImageFromFile'),
+                dict(type='LoadAnnotations', sparse=True),
+                dict(
+                    type='ColorJitter',
+                    brightness=0.05,
+                    contrast=0.2,
+                    saturation=0.25,
+                    hue=0.1),
+                dict(type='RandomGamma', gamma_range=(0.7, 1.5)),
+                dict(
+                    type='Normalize',
+                    mean=[0.0, 0.0, 0.0],
+                    std=[255.0, 255.0, 255.0],
+                    to_rgb=False),
+                dict(
+                    type='GaussianNoise',
+                    sigma_range=(0, 0.04),
+                    clamp_range=(0.0, 1.0)),
+                dict(type='RandomFlip', prob=0.5, direction='horizontal'),
+                dict(type='RandomFlip', prob=0.5, direction='vertical'),
+                dict(
+                    type='RandomAffine',
+                    global_transform=dict(
+                        translates=(0.02, 0.02),
+                        zoom=(0.98, 1.02),
+                        shear=(1.0, 1.0),
+                        rotate=(-0.5, 0.5)),
+                    relative_transform=dict(
+                        translates=(0.0025, 0.0025),
+                        zoom=(0.99, 1.01),
+                        shear=(1.0, 1.0),
+                        rotate=(-0.5, 0.5))),
+                dict(type='RandomCrop', crop_size=(320, 240)),
+                dict(type='DefaultFormatBundle'),
+                dict(
+                    type='Collect',
+                    keys=['imgs', 'flow_gt', 'valid'],
+                    meta_keys=[
+                        'img_fields', 'ann_fields', 'filename1', 'filename2',
+                        'ori_filename1', 'ori_filename2', 'filename_flow',
+                        'ori_filename_flow', 'ori_shape', 'img_shape',
+                        'img_norm_cfg'
+                    ])
+            ],
+            test_mode=False),
+        dict(
+            type='KITTI2015AUG',
+            data_root='/home/s.starace/Dataset/Depthstillation_mix/dKITTI',
+            pipeline=[
+                dict(type='LoadImageFromFile'),
+                dict(type='LoadAnnotations', sparse=True),
+                dict(
+                    type='ColorJitter',
+                    asymmetric_prob=0.0,
+                    brightness=0.4,
+                    contrast=0.4,
+                    saturation=0.4,
+                    hue=0.1592356687898089),
+                dict(type='Erase', prob=0.5, bounds=[50, 100], max_num=3),
+                dict(
+                    type='SpacialTransform',
+                    spacial_prob=0.8,
+                    stretch_prob=0.8,
+                    crop_size=(288, 960),
+                    min_scale=-0.2,
+                    max_scale=0.4,
+                    max_stretch=0.2),
+                dict(type='RandomCrop', crop_size=(288, 960)),
+                dict(
+                    type='Normalize',
+                    mean=[0.0, 0.0, 0.0],
+                    std=[255.0, 255.0, 255.0],
+                    to_rgb=False),
+                dict(type='DefaultFormatBundle'),
+                dict(
+                    type='Collect',
+                    keys=['imgs', 'flow_gt', 'valid'],
+                    meta_keys=[
+                        'filename1', 'filename2', 'ori_filename1',
+                        'ori_filename2', 'filename_flow', 'ori_filename_flow',
+                        'ori_shape', 'img_shape', 'erase_bounds', 'erase_num',
+                        'scale_factor'
+                    ])
+            ],
+            test_mode=False)
+    ],
+    val=dict(datasets=[], separate_eval=True),
+    test=dict(datasets=[], separate_eval=True))
+log_config = dict(
+    interval=50,
+    hooks=[dict(type='TextLoggerHook'),
+           dict(type='TensorboardLoggerHook')])
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = 'checkpoints/raft/raft_8x2_100k_flyingthings3d_400x720.pth'
+resume_from = None
+workflow = [('train', 1)]
+optimizer = dict(
+    type='Adam', lr=1e-05, weight_decay=0.0004, betas=(0.9, 0.999))
+optimizer_config = dict(grad_clip=None)
+lr_config = dict(
+    policy='step',
+    by_epoch=False,
+    gamma=0.5,
+    step=[10000, 15000, 20000, 25000, 30000, 40000])
+runner = dict(type='IterBasedRunner', max_iters=50000)
+checkpoint_config = dict(by_epoch=False, interval=2000)
+evaluation = dict(interval=2000, metric='EPE')
+work_dir = '/home/s.starace/FlowNets/mmflow//work_dir/raft_dCADDY_mix_freezed_10'
+auto_resume = False
+gpu_ids = [0]
+
+2022-10-11 10:04:27,469 - mmflow - INFO - Set random seed to 848899554, deterministic: False
+2022-10-11 10:04:27,577 - mmflow - INFO - initialize RAFTEncoder with init_cfg [{'type': 'Kaiming', 'layer': ['Conv2d'], 'mode': 'fan_out', 'nonlinearity': 'relu'}, {'type': 'Constant', 'layer': ['InstanceNorm2d'], 'val': 1, 'bias': 0}]
+2022-10-11 10:04:27,957 - mmflow - INFO - initialize RAFTEncoder with init_cfg [{'type': 'Kaiming', 'layer': ['Conv2d'], 'mode': 'fan_out', 'nonlinearity': 'relu'}, {'type': 'Constant', 'layer': ['SyncBatchNorm2d'], 'val': 1, 'bias': 0}]
+2022-10-11 10:04:27,976 - mmflow - INFO - RAFT(
+  (encoder): RAFTEncoder(
+    (conv1): Conv2d(3, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3))
+    (in1): InstanceNorm2d(64, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+    (relu): ReLU(inplace=True)
+    (res_layer1): ResLayer(
+      (0): BasicBlock(
+        (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (in1): InstanceNorm2d(64, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (in2): InstanceNorm2d(64, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (relu): ReLU()
+      )
+      (1): BasicBlock(
+        (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (in1): InstanceNorm2d(64, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (in2): InstanceNorm2d(64, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (relu): ReLU()
+      )
+    )
+    (conv2): Conv2d(128, 256, kernel_size=(1, 1), stride=(1, 1))
+    (res_layer2): ResLayer(
+      (0): BasicBlock(
+        (conv1): Conv2d(64, 96, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+        (in1): InstanceNorm2d(96, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (conv2): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (in2): InstanceNorm2d(96, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (relu): ReLU()
+        (downsample): Sequential(
+          (0): Conv2d(64, 96, kernel_size=(1, 1), stride=(2, 2))
+          (1): InstanceNorm2d(96, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        )
+      )
+      (1): BasicBlock(
+        (conv1): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (in1): InstanceNorm2d(96, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (conv2): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (in2): InstanceNorm2d(96, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (relu): ReLU()
+      )
+    )
+    (res_layer3): ResLayer(
+      (0): BasicBlock(
+        (conv1): Conv2d(96, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+        (in1): InstanceNorm2d(128, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (in2): InstanceNorm2d(128, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (relu): ReLU()
+        (downsample): Sequential(
+          (0): Conv2d(96, 128, kernel_size=(1, 1), stride=(2, 2))
+          (1): InstanceNorm2d(128, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        )
+      )
+      (1): BasicBlock(
+        (conv1): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (in1): InstanceNorm2d(128, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (in2): InstanceNorm2d(128, eps=1e-05, momentum=0.1, affine=False, track_running_stats=False)
+        (relu): ReLU()
+      )
+    )
+  )
+  init_cfg=[{'type': 'Kaiming', 'layer': ['Conv2d'], 'mode': 'fan_out', 'nonlinearity': 'relu'}, {'type': 'Constant', 'layer': ['InstanceNorm2d'], 'val': 1, 'bias': 0}]
+  (decoder): RAFTDecoder(
+    (corr_block): CorrelationPyramid(
+      (pool): AvgPool2d(kernel_size=2, stride=2, padding=0)
+    )
+    (corr_lookup): CorrLookup()
+    (encoder): MotionEncoder(
+      (corr_net): Sequential(
+        (0): ConvModule(
+          (conv): Conv2d(324, 256, kernel_size=(1, 1), stride=(1, 1))
+          (activate): ReLU(inplace=True)
+        )
+        (1): ConvModule(
+          (conv): Conv2d(256, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (activate): ReLU(inplace=True)
+        )
+      )
+      (flow_net): Sequential(
+        (0): ConvModule(
+          (conv): Conv2d(2, 128, kernel_size=(7, 7), stride=(1, 1), padding=(3, 3))
+          (activate): ReLU(inplace=True)
+        )
+        (1): ConvModule(
+          (conv): Conv2d(128, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (activate): ReLU(inplace=True)
+        )
+      )
+      (out_net): Sequential(
+        (0): ConvModule(
+          (conv): Conv2d(256, 126, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (activate): ReLU(inplace=True)
+        )
+      )
+    )
+    (gru): ConvGRU(
+      (conv_z): ModuleList(
+        (0): ConvModule(
+          (conv): Conv2d(384, 128, kernel_size=(1, 5), stride=(1, 1), padding=(0, 2))
+          (activate): Sigmoid()
+        )
+        (1): ConvModule(
+          (conv): Conv2d(384, 128, kernel_size=(5, 1), stride=(1, 1), padding=(2, 0))
+          (activate): Sigmoid()
+        )
+      )
+      (conv_r): ModuleList(
+        (0): ConvModule(
+          (conv): Conv2d(384, 128, kernel_size=(1, 5), stride=(1, 1), padding=(0, 2))
+          (activate): Sigmoid()
+        )
+        (1): ConvModule(
+          (conv): Conv2d(384, 128, kernel_size=(5, 1), stride=(1, 1), padding=(2, 0))
+          (activate): Sigmoid()
+        )
+      )
+      (conv_q): ModuleList(
+        (0): ConvModule(
+          (conv): Conv2d(384, 128, kernel_size=(1, 5), stride=(1, 1), padding=(0, 2))
+          (activate): Tanh()
+        )
+        (1): ConvModule(
+          (conv): Conv2d(384, 128, kernel_size=(5, 1), stride=(1, 1), padding=(2, 0))
+          (activate): Tanh()
+        )
+      )
+    )
+    (flow_pred): XHead(
+      (layers): Sequential(
+        (0): ConvModule(
+          (conv): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (activate): ReLU(inplace=True)
+        )
+      )
+      (predict_layer): Conv2d(256, 2, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+    )
+    (mask_pred): XHead(
+      (layers): Sequential(
+        (0): ConvModule(
+          (conv): Conv2d(128, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (activate): ReLU(inplace=True)
+        )
+      )
+      (predict_layer): Conv2d(256, 576, kernel_size=(1, 1), stride=(1, 1))
+    )
+    (flow_loss): SequenceLoss()
+  )
+  (context): RAFTEncoder(
+    (conv1): Conv2d(3, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3))
+    (bn1): SyncBatchNorm(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (relu): ReLU(inplace=True)
+    (res_layer1): ResLayer(
+      (0): BasicBlock(
+        (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (bn1): SyncBatchNorm(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (bn2): SyncBatchNorm(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (relu): ReLU()
+      )
+      (1): BasicBlock(
+        (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (bn1): SyncBatchNorm(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (bn2): SyncBatchNorm(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (relu): ReLU()
+      )
+    )
+    (conv2): Conv2d(128, 256, kernel_size=(1, 1), stride=(1, 1))
+    (res_layer2): ResLayer(
+      (0): BasicBlock(
+        (conv1): Conv2d(64, 96, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+        (bn1): SyncBatchNorm(96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (conv2): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (bn2): SyncBatchNorm(96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (relu): ReLU()
+        (downsample): Sequential(
+          (0): Conv2d(64, 96, kernel_size=(1, 1), stride=(2, 2))
+          (1): SyncBatchNorm(96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        )
+      )
+      (1): BasicBlock(
+        (conv1): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (bn1): SyncBatchNorm(96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (conv2): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (bn2): SyncBatchNorm(96, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (relu): ReLU()
+      )
+    )
+    (res_layer3): ResLayer(
+      (0): BasicBlock(
+        (conv1): Conv2d(96, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+        (bn1): SyncBatchNorm(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (bn2): SyncBatchNorm(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (relu): ReLU()
+        (downsample): Sequential(
+          (0): Conv2d(96, 128, kernel_size=(1, 1), stride=(2, 2))
+          (1): SyncBatchNorm(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        )
+      )
+      (1): BasicBlock(
+        (conv1): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (bn1): SyncBatchNorm(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (bn2): SyncBatchNorm(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (relu): ReLU()
+      )
+    )
+  )
+  init_cfg=[{'type': 'Kaiming', 'layer': ['Conv2d'], 'mode': 'fan_out', 'nonlinearity': 'relu'}, {'type': 'Constant', 'layer': ['SyncBatchNorm2d'], 'val': 1, 'bias': 0}]
+)
+2022-10-11 10:04:29,060 - mmflow - INFO - dataset size 10406
+/home/s.starace/FlowNets/mmflow/mmflow/apis/train.py:151: UserWarning: SyncBN is only supported with DDP. To be compatible with DP, we convert SyncBN to BN. Please use dist_train.sh which can avoid this error.
+  warnings.warn(
+2022-10-11 10:04:30,251 - mmflow - INFO - load checkpoint from local path: checkpoints/raft/raft_8x2_100k_flyingthings3d_400x720.pth
+2022-10-11 10:04:30,372 - mmflow - INFO - Start running, host: s.starace@gnode01, work_dir: /home/s.starace/FlowNets/mmflow/work_dir/raft_dCADDY_mix_freezed_10
+2022-10-11 10:04:30,373 - mmflow - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(NORMAL      ) CheckpointHook                     
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_train_iter:
+(ABOVE_NORMAL) OptimizerHook                      
+(NORMAL      ) CheckpointHook                     
+(LOW         ) IterTimerHook                      
+(LOW         ) EvalHook                           
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) CheckpointHook                     
+(LOW         ) EvalHook                           
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_val_epoch:
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_epoch:
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+after_run:
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+2022-10-11 10:04:30,375 - mmflow - INFO - workflow: [('train', 1)], max: 50000 iters
+2022-10-11 10:04:30,375 - mmflow - INFO - Checkpoints will be saved to /home/s.starace/FlowNets/mmflow/work_dir/raft_dCADDY_mix_freezed_10 by HardDiskBackend.
+********** NOT DISTRIBUTED --- DEBUG SS ******************
+/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/torch/functional.py:478: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at  /opt/conda/conda-bld/pytorch_1659484810403/work/aten/src/ATen/native/TensorShape.cpp:2894.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+2022-10-11 10:04:38,724 - mmflow - INFO - Iter [50/50000]	lr: 1.000e-05, eta: 2:15:29, time: 0.163, data_time: 0.015, memory: 547, loss_flow: 70.0241, loss: 70.0241
+2022-10-11 10:04:44,612 - mmflow - INFO - Iter [100/50000]	lr: 1.000e-05, eta: 1:56:39, time: 0.118, data_time: 0.005, memory: 547, loss_flow: 86.2765, loss: 86.2765
+2022-10-11 10:04:50,786 - mmflow - INFO - Iter [150/50000]	lr: 1.000e-05, eta: 1:51:52, time: 0.123, data_time: 0.010, memory: 547, loss_flow: 62.7047, loss: 62.7047
+2022-10-11 10:04:56,611 - mmflow - INFO - Iter [200/50000]	lr: 1.000e-05, eta: 1:48:00, time: 0.117, data_time: 0.006, memory: 547, loss_flow: 88.6153, loss: 88.6153
+2022-10-11 10:05:02,343 - mmflow - INFO - Iter [250/50000]	lr: 1.000e-05, eta: 1:45:19, time: 0.115, data_time: 0.005, memory: 547, loss_flow: 64.6663, loss: 64.6663
+2022-10-11 10:05:07,699 - mmflow - INFO - Iter [300/50000]	lr: 1.000e-05, eta: 1:42:27, time: 0.107, data_time: 0.005, memory: 547, loss_flow: 73.2399, loss: 73.2399
+2022-10-11 10:05:13,014 - mmflow - INFO - Iter [350/50000]	lr: 1.000e-05, eta: 1:40:18, time: 0.106, data_time: 0.005, memory: 547, loss_flow: 126.6168, loss: 126.6168
+2022-10-11 10:05:18,483 - mmflow - INFO - Iter [400/50000]	lr: 1.000e-05, eta: 1:38:58, time: 0.109, data_time: 0.005, memory: 547, loss_flow: 136.3148, loss: 136.3148
+2022-10-11 10:05:23,959 - mmflow - INFO - Iter [450/50000]	lr: 1.000e-05, eta: 1:37:56, time: 0.110, data_time: 0.008, memory: 547, loss_flow: 127.7933, loss: 127.7933
+2022-10-11 10:05:29,361 - mmflow - INFO - Iter [500/50000]	lr: 1.000e-05, eta: 1:36:58, time: 0.108, data_time: 0.005, memory: 547, loss_flow: 134.7846, loss: 134.7846
+2022-10-11 10:05:34,812 - mmflow - INFO - Iter [550/50000]	lr: 1.000e-05, eta: 1:36:14, time: 0.109, data_time: 0.005, memory: 547, loss_flow: 117.6426, loss: 117.6426
+2022-10-11 10:05:40,100 - mmflow - INFO - Iter [600/50000]	lr: 1.000e-05, eta: 1:35:22, time: 0.106, data_time: 0.006, memory: 547, loss_flow: 118.3057, loss: 118.3057
+2022-10-11 10:05:45,525 - mmflow - INFO - Iter [650/50000]	lr: 1.000e-05, eta: 1:34:49, time: 0.108, data_time: 0.010, memory: 547, loss_flow: 135.8784, loss: 135.8784
+2022-10-11 10:05:51,008 - mmflow - INFO - Iter [700/50000]	lr: 1.000e-05, eta: 1:34:23, time: 0.110, data_time: 0.009, memory: 547, loss_flow: 89.2119, loss: 89.2119
+2022-10-11 10:05:56,313 - mmflow - INFO - Iter [750/50000]	lr: 1.000e-05, eta: 1:33:48, time: 0.106, data_time: 0.005, memory: 547, loss_flow: 116.9201, loss: 116.9201
+2022-10-11 10:06:01,863 - mmflow - INFO - Iter [800/50000]	lr: 1.000e-05, eta: 1:33:33, time: 0.111, data_time: 0.007, memory: 547, loss_flow: 132.7828, loss: 132.7828
+2022-10-11 10:06:07,590 - mmflow - INFO - Iter [850/50000]	lr: 1.000e-05, eta: 1:33:28, time: 0.115, data_time: 0.014, memory: 547, loss_flow: 135.2716, loss: 135.2716
+2022-10-11 10:06:13,020 - mmflow - INFO - Iter [900/50000]	lr: 1.000e-05, eta: 1:33:07, time: 0.109, data_time: 0.008, memory: 547, loss_flow: 121.7954, loss: 121.7954
+2022-10-11 10:06:18,712 - mmflow - INFO - Iter [950/50000]	lr: 1.000e-05, eta: 1:33:02, time: 0.114, data_time: 0.010, memory: 547, loss_flow: 108.9403, loss: 108.9403
+2022-10-11 10:06:24,319 - mmflow - INFO - Exp name: raft_caddy_mix.py
+2022-10-11 10:06:24,320 - mmflow - INFO - Iter [1000/50000]	lr: 1.000e-05, eta: 1:32:52, time: 0.112, data_time: 0.008, memory: 547, loss_flow: 88.0523, loss: 88.0523
+2022-10-11 10:06:29,983 - mmflow - INFO - Iter [1050/50000]	lr: 1.000e-05, eta: 1:32:45, time: 0.113, data_time: 0.005, memory: 547, loss_flow: 97.7703, loss: 97.7703
+2022-10-11 10:06:35,627 - mmflow - INFO - Iter [1100/50000]	lr: 1.000e-05, eta: 1:32:38, time: 0.113, data_time: 0.008, memory: 547, loss_flow: 125.9279, loss: 125.9279
+2022-10-11 10:06:41,026 - mmflow - INFO - Iter [1150/50000]	lr: 1.000e-05, eta: 1:32:20, time: 0.108, data_time: 0.005, memory: 547, loss_flow: 163.7007, loss: 163.7007
+2022-10-11 10:06:46,540 - mmflow - INFO - Iter [1200/50000]	lr: 1.000e-05, eta: 1:32:08, time: 0.110, data_time: 0.008, memory: 547, loss_flow: 147.2702, loss: 147.2702
+2022-10-11 10:06:52,228 - mmflow - INFO - Iter [1250/50000]	lr: 1.000e-05, eta: 1:32:03, time: 0.114, data_time: 0.009, memory: 547, loss_flow: 122.2353, loss: 122.2353
+2022-10-11 10:06:57,927 - mmflow - INFO - Iter [1300/50000]	lr: 1.000e-05, eta: 1:31:59, time: 0.114, data_time: 0.008, memory: 547, loss_flow: 133.6118, loss: 133.6118
+2022-10-11 10:07:03,243 - mmflow - INFO - Iter [1350/50000]	lr: 1.000e-05, eta: 1:31:40, time: 0.106, data_time: 0.007, memory: 547, loss_flow: 147.7375, loss: 147.7375
+2022-10-11 10:07:08,572 - mmflow - INFO - Iter [1400/50000]	lr: 1.000e-05, eta: 1:31:23, time: 0.107, data_time: 0.005, memory: 547, loss_flow: 157.3801, loss: 157.3801
+2022-10-11 10:07:13,991 - mmflow - INFO - Iter [1450/50000]	lr: 1.000e-05, eta: 1:31:10, time: 0.108, data_time: 0.008, memory: 547, loss_flow: 127.2329, loss: 127.2329
+2022-10-11 10:07:19,415 - mmflow - INFO - Iter [1500/50000]	lr: 1.000e-05, eta: 1:30:58, time: 0.108, data_time: 0.005, memory: 547, loss_flow: 113.8849, loss: 113.8849
+2022-10-11 10:07:24,780 - mmflow - INFO - Iter [1550/50000]	lr: 1.000e-05, eta: 1:30:44, time: 0.107, data_time: 0.004, memory: 547, loss_flow: 116.1781, loss: 116.1781
+2022-10-11 10:07:30,016 - mmflow - INFO - Iter [1600/50000]	lr: 1.000e-05, eta: 1:30:27, time: 0.105, data_time: 0.005, memory: 547, loss_flow: 115.9967, loss: 115.9967
+2022-10-11 10:07:35,707 - mmflow - INFO - Iter [1650/50000]	lr: 1.000e-05, eta: 1:30:24, time: 0.114, data_time: 0.005, memory: 547, loss_flow: 120.7023, loss: 120.7023
+2022-10-11 10:07:41,447 - mmflow - INFO - Iter [1700/50000]	lr: 1.000e-05, eta: 1:30:22, time: 0.115, data_time: 0.005, memory: 547, loss_flow: 115.2865, loss: 115.2865
+2022-10-11 10:07:46,618 - mmflow - INFO - Iter [1750/50000]	lr: 1.000e-05, eta: 1:30:04, time: 0.103, data_time: 0.008, memory: 547, loss_flow: 88.4863, loss: 88.4863
+2022-10-11 10:07:51,988 - mmflow - INFO - Iter [1800/50000]	lr: 1.000e-05, eta: 1:29:52, time: 0.107, data_time: 0.006, memory: 547, loss_flow: 75.5731, loss: 75.5731
+2022-10-11 10:07:57,439 - mmflow - INFO - Iter [1850/50000]	lr: 1.000e-05, eta: 1:29:43, time: 0.109, data_time: 0.011, memory: 547, loss_flow: 64.7203, loss: 64.7203
+2022-10-11 10:08:03,365 - mmflow - INFO - Iter [1900/50000]	lr: 1.000e-05, eta: 1:29:46, time: 0.119, data_time: 0.007, memory: 547, loss_flow: 59.5064, loss: 59.5064
+2022-10-11 10:08:08,860 - mmflow - INFO - Iter [1950/50000]	lr: 1.000e-05, eta: 1:29:38, time: 0.110, data_time: 0.007, memory: 547, loss_flow: 89.9316, loss: 89.9316
+2022-10-11 10:08:14,165 - mmflow - INFO - Saving checkpoint at 2000 iterations
+2022-10-11 10:08:14,328 - mmflow - INFO - Exp name: raft_caddy_mix.py
+2022-10-11 10:08:14,329 - mmflow - INFO - Iter(val) [2000]	
+2022-10-11 10:08:19,978 - mmflow - INFO - Iter [2050/50000]	lr: 1.000e-05, eta: 1:27:17, time: 0.113, data_time: 0.005, memory: 547, loss_flow: 68.9279, loss: 68.9279
+2022-10-11 10:08:25,401 - mmflow - INFO - Iter [2100/50000]	lr: 1.000e-05, eta: 1:27:10, time: 0.108, data_time: 0.005, memory: 547, loss_flow: 69.1690, loss: 69.1690
+2022-10-11 10:08:31,076 - mmflow - INFO - Iter [2150/50000]	lr: 1.000e-05, eta: 1:27:10, time: 0.113, data_time: 0.014, memory: 547, loss_flow: 87.9703, loss: 87.9703
+2022-10-11 10:08:36,600 - mmflow - INFO - Iter [2200/50000]	lr: 1.000e-05, eta: 1:27:05, time: 0.110, data_time: 0.007, memory: 547, loss_flow: 82.2661, loss: 82.2661
+2022-10-11 10:08:42,184 - mmflow - INFO - Iter [2250/50000]	lr: 1.000e-05, eta: 1:27:03, time: 0.112, data_time: 0.005, memory: 547, loss_flow: 90.9123, loss: 90.9123
+2022-10-11 10:08:47,517 - mmflow - INFO - Iter [2300/50000]	lr: 1.000e-05, eta: 1:26:54, time: 0.107, data_time: 0.005, memory: 547, loss_flow: 74.1013, loss: 74.1013
+2022-10-11 10:08:52,939 - mmflow - INFO - Iter [2350/50000]	lr: 1.000e-05, eta: 1:26:48, time: 0.108, data_time: 0.005, memory: 547, loss_flow: 121.8856, loss: 121.8856
+2022-10-11 10:08:58,391 - mmflow - INFO - Iter [2400/50000]	lr: 1.000e-05, eta: 1:26:42, time: 0.109, data_time: 0.005, memory: 547, loss_flow: 155.6153, loss: 155.6153
+2022-10-11 10:09:03,919 - mmflow - INFO - Iter [2450/50000]	lr: 1.000e-05, eta: 1:26:38, time: 0.111, data_time: 0.012, memory: 547, loss_flow: 106.4696, loss: 106.4696
+2022-10-11 10:09:09,710 - mmflow - INFO - Iter [2500/50000]	lr: 1.000e-05, eta: 1:26:38, time: 0.116, data_time: 0.013, memory: 547, loss_flow: 143.6838, loss: 143.6838
+2022-10-11 10:09:15,156 - mmflow - INFO - Iter [2550/50000]	lr: 1.000e-05, eta: 1:26:33, time: 0.109, data_time: 0.008, memory: 547, loss_flow: 103.5756, loss: 103.5756
+2022-10-11 10:09:20,742 - mmflow - INFO - Iter [2600/50000]	lr: 1.000e-05, eta: 1:26:29, time: 0.112, data_time: 0.012, memory: 547, loss_flow: 110.7060, loss: 110.7060
+2022-10-11 10:09:26,126 - mmflow - INFO - Iter [2650/50000]	lr: 1.000e-05, eta: 1:26:22, time: 0.108, data_time: 0.009, memory: 547, loss_flow: 125.5922, loss: 125.5922
+2022-10-11 10:09:31,811 - mmflow - INFO - Iter [2700/50000]	lr: 1.000e-05, eta: 1:26:20, time: 0.114, data_time: 0.008, memory: 547, loss_flow: 137.0228, loss: 137.0228
+2022-10-11 10:09:37,513 - mmflow - INFO - Iter [2750/50000]	lr: 1.000e-05, eta: 1:26:19, time: 0.114, data_time: 0.011, memory: 547, loss_flow: 122.2036, loss: 122.2036
+2022-10-11 10:09:43,317 - mmflow - INFO - Iter [2800/50000]	lr: 1.000e-05, eta: 1:26:19, time: 0.116, data_time: 0.006, memory: 547, loss_flow: 126.9128, loss: 126.9128
+2022-10-11 10:09:49,000 - mmflow - INFO - Iter [2850/50000]	lr: 1.000e-05, eta: 1:26:16, time: 0.114, data_time: 0.008, memory: 547, loss_flow: 127.2549, loss: 127.2549
+2022-10-11 10:09:54,630 - mmflow - INFO - Iter [2900/50000]	lr: 1.000e-05, eta: 1:26:13, time: 0.113, data_time: 0.008, memory: 547, loss_flow: 148.0238, loss: 148.0238
+2022-10-11 10:10:00,316 - mmflow - INFO - Iter [2950/50000]	lr: 1.000e-05, eta: 1:26:11, time: 0.114, data_time: 0.012, memory: 547, loss_flow: 105.7277, loss: 105.7277
+2022-10-11 10:10:05,402 - mmflow - INFO - Exp name: raft_caddy_mix.py
+2022-10-11 10:10:05,403 - mmflow - INFO - Iter [3000/50000]	lr: 1.000e-05, eta: 1:25:59, time: 0.102, data_time: 0.007, memory: 547, loss_flow: 85.3557, loss: 85.3557
+2022-10-11 10:10:11,121 - mmflow - INFO - Iter [3050/50000]	lr: 1.000e-05, eta: 1:25:57, time: 0.114, data_time: 0.005, memory: 547, loss_flow: 85.5623, loss: 85.5623
+2022-10-11 10:10:16,943 - mmflow - INFO - Iter [3100/50000]	lr: 1.000e-05, eta: 1:25:56, time: 0.116, data_time: 0.005, memory: 547, loss_flow: 95.5369, loss: 95.5369
+2022-10-11 10:10:22,568 - mmflow - INFO - Iter [3150/50000]	lr: 1.000e-05, eta: 1:25:53, time: 0.112, data_time: 0.005, memory: 547, loss_flow: 150.5425, loss: 150.5425
+2022-10-11 10:10:28,055 - mmflow - INFO - Iter [3200/50000]	lr: 1.000e-05, eta: 1:25:47, time: 0.110, data_time: 0.005, memory: 547, loss_flow: 163.2920, loss: 163.2920
+2022-10-11 10:10:33,725 - mmflow - INFO - Iter [3250/50000]	lr: 1.000e-05, eta: 1:25:44, time: 0.113, data_time: 0.005, memory: 547, loss_flow: 129.7245, loss: 129.7245
+2022-10-11 10:10:39,210 - mmflow - INFO - Iter [3300/50000]	lr: 1.000e-05, eta: 1:25:38, time: 0.110, data_time: 0.005, memory: 547, loss_flow: 112.3574, loss: 112.3574
+2022-10-11 10:10:44,532 - mmflow - INFO - Iter [3350/50000]	lr: 1.000e-05, eta: 1:25:30, time: 0.106, data_time: 0.005, memory: 547, loss_flow: 118.9533, loss: 118.9533
+2022-10-11 10:10:49,821 - mmflow - INFO - Iter [3400/50000]	lr: 1.000e-05, eta: 1:25:22, time: 0.106, data_time: 0.005, memory: 547, loss_flow: 145.1518, loss: 145.1518
+2022-10-11 10:10:55,202 - mmflow - INFO - Iter [3450/50000]	lr: 1.000e-05, eta: 1:25:15, time: 0.108, data_time: 0.005, memory: 547, loss_flow: 147.2700, loss: 147.2700
+2022-10-11 10:11:00,702 - mmflow - INFO - Iter [3500/50000]	lr: 1.000e-05, eta: 1:25:09, time: 0.110, data_time: 0.007, memory: 547, loss_flow: 97.1499, loss: 97.1499
+2022-10-11 10:11:06,021 - mmflow - INFO - Iter [3550/50000]	lr: 1.000e-05, eta: 1:25:02, time: 0.106, data_time: 0.009, memory: 547, loss_flow: 149.9876, loss: 149.9876
+2022-10-11 10:11:11,636 - mmflow - INFO - Iter [3600/50000]	lr: 1.000e-05, eta: 1:24:58, time: 0.112, data_time: 0.009, memory: 547, loss_flow: 110.7754, loss: 110.7754
+2022-10-11 10:11:17,381 - mmflow - INFO - Iter [3650/50000]	lr: 1.000e-05, eta: 1:24:55, time: 0.115, data_time: 0.010, memory: 547, loss_flow: 107.7708, loss: 107.7708
+2022-10-11 10:11:22,940 - mmflow - INFO - Iter [3700/50000]	lr: 1.000e-05, eta: 1:24:51, time: 0.111, data_time: 0.008, memory: 547, loss_flow: 111.7536, loss: 111.7536
+2022-10-11 10:11:28,400 - mmflow - INFO - Iter [3750/50000]	lr: 1.000e-05, eta: 1:24:45, time: 0.109, data_time: 0.007, memory: 547, loss_flow: 156.0530, loss: 156.0530
+2022-10-11 10:11:34,180 - mmflow - INFO - Iter [3800/50000]	lr: 1.000e-05, eta: 1:24:43, time: 0.116, data_time: 0.005, memory: 547, loss_flow: 165.8002, loss: 165.8002
+2022-10-11 10:11:39,528 - mmflow - INFO - Iter [3850/50000]	lr: 1.000e-05, eta: 1:24:35, time: 0.107, data_time: 0.005, memory: 547, loss_flow: 106.1343, loss: 106.1343
+2022-10-11 10:11:44,725 - mmflow - INFO - Iter [3900/50000]	lr: 1.000e-05, eta: 1:24:26, time: 0.104, data_time: 0.005, memory: 547, loss_flow: 113.5933, loss: 113.5933
+2022-10-11 10:11:50,189 - mmflow - INFO - Iter [3950/50000]	lr: 1.000e-05, eta: 1:24:20, time: 0.109, data_time: 0.005, memory: 547, loss_flow: 106.1788, loss: 106.1788
+2022-10-11 10:11:55,612 - mmflow - INFO - Saving checkpoint at 4000 iterations
+2022-10-11 10:11:55,758 - mmflow - INFO - Exp name: raft_caddy_mix.py
+2022-10-11 10:11:55,759 - mmflow - INFO - Iter(val) [4000]	
+2022-10-11 10:12:01,483 - mmflow - INFO - Iter [4050/50000]	lr: 1.000e-05, eta: 1:23:10, time: 0.114, data_time: 0.010, memory: 547, loss_flow: 88.1638, loss: 88.1638
+2022-10-11 10:12:07,340 - mmflow - INFO - Iter [4100/50000]	lr: 1.000e-05, eta: 1:23:09, time: 0.117, data_time: 0.006, memory: 547, loss_flow: 136.8571, loss: 136.8571
+2022-10-11 10:12:12,461 - mmflow - INFO - Iter [4150/50000]	lr: 1.000e-05, eta: 1:23:00, time: 0.102, data_time: 0.004, memory: 547, loss_flow: 137.2034, loss: 137.2034
+2022-10-11 10:12:17,884 - mmflow - INFO - Iter [4200/50000]	lr: 1.000e-05, eta: 1:22:54, time: 0.108, data_time: 0.009, memory: 547, loss_flow: 124.1519, loss: 124.1519
+2022-10-11 10:12:23,450 - mmflow - INFO - Iter [4250/50000]	lr: 1.000e-05, eta: 1:22:50, time: 0.111, data_time: 0.005, memory: 547, loss_flow: 128.8676, loss: 128.8676
+2022-10-11 10:12:28,754 - mmflow - INFO - Iter [4300/50000]	lr: 1.000e-05, eta: 1:22:44, time: 0.106, data_time: 0.005, memory: 547, loss_flow: 145.8832, loss: 145.8832
+2022-10-11 10:12:34,295 - mmflow - INFO - Iter [4350/50000]	lr: 1.000e-05, eta: 1:22:39, time: 0.111, data_time: 0.010, memory: 547, loss_flow: 96.3862, loss: 96.3862
+2022-10-11 10:12:39,999 - mmflow - INFO - Iter [4400/50000]	lr: 1.000e-05, eta: 1:22:37, time: 0.114, data_time: 0.010, memory: 547, loss_flow: 119.6452, loss: 119.6452
+2022-10-11 10:12:45,601 - mmflow - INFO - Iter [4450/50000]	lr: 1.000e-05, eta: 1:22:33, time: 0.112, data_time: 0.008, memory: 547, loss_flow: 109.5066, loss: 109.5066
+2022-10-11 10:12:51,092 - mmflow - INFO - Iter [4500/50000]	lr: 1.000e-05, eta: 1:22:28, time: 0.110, data_time: 0.010, memory: 547, loss_flow: 147.2884, loss: 147.2884
+2022-10-11 10:12:57,101 - mmflow - INFO - Iter [4550/50000]	lr: 1.000e-05, eta: 1:22:28, time: 0.120, data_time: 0.011, memory: 547, loss_flow: 137.4950, loss: 137.4950
+2022-10-11 10:13:02,608 - mmflow - INFO - Iter [4600/50000]	lr: 1.000e-05, eta: 1:22:24, time: 0.110, data_time: 0.005, memory: 547, loss_flow: 138.0383, loss: 138.0383
+2022-10-11 10:13:07,940 - mmflow - INFO - Iter [4650/50000]	lr: 1.000e-05, eta: 1:22:17, time: 0.107, data_time: 0.006, memory: 547, loss_flow: 98.1699, loss: 98.1699
+2022-10-11 10:13:13,746 - mmflow - INFO - Iter [4700/50000]	lr: 1.000e-05, eta: 1:22:15, time: 0.116, data_time: 0.005, memory: 547, loss_flow: 124.2595, loss: 124.2595
+2022-10-11 10:13:19,393 - mmflow - INFO - Iter [4750/50000]	lr: 1.000e-05, eta: 1:22:12, time: 0.113, data_time: 0.005, memory: 547, loss_flow: 109.1579, loss: 109.1579
+2022-10-11 10:13:25,482 - mmflow - INFO - Iter [4800/50000]	lr: 1.000e-05, eta: 1:22:12, time: 0.122, data_time: 0.005, memory: 547, loss_flow: 86.3068, loss: 86.3068
+2022-10-11 10:13:31,217 - mmflow - INFO - Iter [4850/50000]	lr: 1.000e-05, eta: 1:22:09, time: 0.115, data_time: 0.005, memory: 547, loss_flow: 110.2879, loss: 110.2879
+2022-10-11 10:13:36,673 - mmflow - INFO - Iter [4900/50000]	lr: 1.000e-05, eta: 1:22:04, time: 0.109, data_time: 0.005, memory: 547, loss_flow: 127.3690, loss: 127.3690
+2022-10-11 10:13:42,157 - mmflow - INFO - Iter [4950/50000]	lr: 1.000e-05, eta: 1:21:58, time: 0.110, data_time: 0.008, memory: 547, loss_flow: 100.5272, loss: 100.5272
+2022-10-11 10:13:47,943 - mmflow - INFO - Exp name: raft_caddy_mix.py
+2022-10-11 10:13:47,945 - mmflow - INFO - Iter [5000/50000]	lr: 1.000e-05, eta: 1:21:56, time: 0.116, data_time: 0.005, memory: 547, loss_flow: 120.1246, loss: 120.1246
+Traceback (most recent call last):
+  File "/home/s.starace/FlowNets/mmflow//tools/train.py", line 208, in <module>
+    main()
+  File "/home/s.starace/FlowNets/mmflow//tools/train.py", line 197, in main
+    train_model(
+  File "/home/s.starace/FlowNets/mmflow/mmflow/apis/train.py", line 267, in train_model
+    runner.run(data_loaders, cfg.workflow)
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/runner/iter_based_runner.py", line 144, in run
+    iter_runner(iter_loaders[i], **kwargs)
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/runner/iter_based_runner.py", line 61, in train
+    data_batch = next(data_loader)
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/runner/iter_based_runner.py", line 34, in __next__
+    data = next(self.iter_loader)
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 681, in __next__
+    data = self._next_data()
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 1356, in _next_data
+    return self._process_data(data)
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 1402, in _process_data
+    data.reraise()
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/torch/_utils.py", line 461, in reraise
+    raise exception
+cv2.error: Caught error in DataLoader worker process 1.
+Original Traceback (most recent call last):
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/torch/utils/data/_utils/worker.py", line 302, in _worker_loop
+    data = fetcher.fetch(index)
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/torch/utils/data/_utils/fetch.py", line 49, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/torch/utils/data/_utils/fetch.py", line 49, in <listcomp>
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/torch/utils/data/dataset.py", line 235, in __getitem__
+    return self.datasets[dataset_idx][sample_idx]
+  File "/home/s.starace/FlowNets/mmflow/mmflow/datasets/base_dataset.py", line 87, in __getitem__
+    return self.prepare_data(idx)
+  File "/home/s.starace/FlowNets/mmflow/mmflow/datasets/base_dataset.py", line 71, in prepare_data
+    return self.pipeline(results)
+  File "/home/s.starace/FlowNets/mmflow/mmflow/datasets/pipelines/compose.py", line 42, in __call__
+    data = t(data)
+  File "/home/s.starace/FlowNets/mmflow/mmflow/datasets/pipelines/loading.py", line 70, in __call__
+    img2 = mmcv.imfrombytes(
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/image/io.py", line 259, in imfrombytes
+    img = cv2.imdecode(img_np, flag)
+cv2.error: OpenCV(4.6.0) /io/opencv/modules/imgcodecs/src/loadsave.cpp:816: error: (-215:Assertion failed) !buf.empty() in function 'imdecode_'
+
+

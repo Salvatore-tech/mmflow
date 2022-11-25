@@ -1,0 +1,14 @@
++ PARTITION=xgpu
++ JOB_NAME=finetuneSchedule
++ CONFIG=configs/pwcnet/pwcnet_finetune_dkitti.py
++ WORK_DIR=work_dir/pwc_chairs
++ GPUS=8
++ GPUS_PER_NODE=2
++ CPUS_PER_TASK=2
++ SRUN_ARGS=
++ PY_ARGS=
+++ dirname tools/slurm_train.sh
++ PYTHONPATH=tools/..:
++ srun -p xgpu --job-name=finetuneSchedule --gres=gpu:2 --ntasks=8 --ntasks-per-node=2 --cpus-per-task=2 --kill-on-bad-exit=1 python -u tools/train.py configs/pwcnet/pwcnet_finetune_dkitti.py --work-dir=work_dir/pwc_chairs --launcher=slurm
+srun: Warning: can't honor --ntasks-per-node set to 2 which doesn't match the requested tasks 8 with the number of requested nodes 1. Ignoring --ntasks-per-node.
+srun: error: Unable to create step for job 53319: More processors requested than permitted

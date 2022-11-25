@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "tools/train.py", line 213, in <module>
+    main()
+  File "tools/train.py", line 93, in main
+    cfg = Config.fromfile(args.config)
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/utils/config.py", line 340, in fromfile
+    cfg_dict, cfg_text = Config._file2dict(filename,
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/utils/config.py", line 268, in _file2dict
+    base_cfg_dict = Config._merge_a_into_b(cfg_dict, base_cfg_dict)
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/utils/config.py", line 327, in _merge_a_into_b
+    b[k] = Config._merge_a_into_b(v, b[k], allow_list_keys)
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/utils/config.py", line 321, in _merge_a_into_b
+    raise TypeError(
+TypeError: grad_clip={'max_norm': 1.0} in child config cannot inherit from base because grad_clip is a dict in the child config but is of type <class 'NoneType'> in base config. You may set `_delete_=True` to ignore the base config.

@@ -1,0 +1,9 @@
+usage: train.py [-h] [--work-dir WORK_DIR] [--load-from LOAD_FROM]
+                [--resume-from RESUME_FROM] [--auto-resume] [--no-validate]
+                [--gpus GPUS | --gpu-ids GPU_IDS [GPU_IDS ...] | --gpu-id
+                GPU_ID] [--seed SEED] [--diff_seed] [--deterministic]
+                [--cfg-options CFG_OPTIONS [CFG_OPTIONS ...]]
+                [--launcher {none,pytorch,slurm,mpi}]
+                [--local_rank LOCAL_RANK]
+                config
+train.py: error: unrecognized arguments: work_dir/pwcnet_caddy_freezed_08

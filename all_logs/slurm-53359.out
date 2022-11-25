@@ -1,0 +1,669 @@
+2022-09-28 09:22:18,095 - mmflow - INFO - Multi-processing start method is `fork`
+2022-09-28 09:22:18,099 - mmflow - INFO - OpenCV num_threads is `32
+2022-09-28 09:22:18,359 - mmflow - INFO - Environment info:
+------------------------------------------------------------
+sys.platform: linux
+Python: 3.8.13 (default, Mar 28 2022, 11:38:47) [GCC 7.5.0]
+CUDA available: True
+CUDA_HOME: /opt/share/cuda/cuda-10.1
+NVCC: Cuda compilation tools, release 10.1, V10.1.243
+GPU 0,1,2,3: Tesla V100-SXM2-32GB
+GCC: gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-36)
+PyTorch: 1.12.1
+PyTorch compiling details: PyTorch built with:
+  - GCC 9.3
+  - C++ Version: 201402
+  - Intel(R) oneAPI Math Kernel Library Version 2021.4-Product Build 20210904 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.6.0 (Git Hash 52b5f107dd9cf10910aaa19cb47f3abf9b349815)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.3
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 8.3.2  (built against CUDA 11.5)
+  - Magma 2.5.2
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.3, CUDNN_VERSION=8.3.2, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -fabi-version=11 -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -DEDGE_PROFILER_USE_KINETO -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-unused-local-typedefs -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.12.1, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=OFF, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
+
+TorchVision: 0.13.1
+OpenCV: 4.6.0
+MMCV: 1.6.1
+MMFlow: 0.5.1+47d7ece
+MMCV Compiler: GCC 9.3
+MMCV CUDA Compiler: 11.3
+------------------------------------------------------------
+
+2022-09-28 09:22:18,366 - mmflow - INFO - Distributed training: False
+2022-09-28 09:22:19,114 - mmflow - INFO - Config:
+img_norm_cfg = dict(
+    mean=[0.0, 0.0, 0.0], std=[255.0, 255.0, 255.0], to_rgb=False)
+crop_size = (320, 896)
+global_transform = dict(
+    translates=(0.02, 0.02),
+    zoom=(0.98, 1.02),
+    shear=(1.0, 1.0),
+    rotate=(-0.5, 0.5))
+relative_transform = dict(
+    translates=(0.0025, 0.0025),
+    zoom=(0.99, 1.01),
+    shear=(1.0, 1.0),
+    rotate=(-0.5, 0.5))
+sparse_train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', sparse=True),
+    dict(
+        type='ColorJitter',
+        brightness=0.05,
+        contrast=0.2,
+        saturation=0.25,
+        hue=0.1),
+    dict(type='RandomGamma', gamma_range=(0.7, 1.5)),
+    dict(
+        type='Normalize',
+        mean=[0.0, 0.0, 0.0],
+        std=[255.0, 255.0, 255.0],
+        to_rgb=False),
+    dict(type='GaussianNoise', sigma_range=(0, 0.04), clamp_range=(0.0, 1.0)),
+    dict(type='RandomFlip', prob=0.5, direction='horizontal'),
+    dict(type='RandomFlip', prob=0.5, direction='vertical'),
+    dict(
+        type='RandomAffine',
+        global_transform=dict(
+            translates=(0.02, 0.02),
+            zoom=(0.98, 1.02),
+            shear=(1.0, 1.0),
+            rotate=(-0.5, 0.5)),
+        relative_transform=dict(
+            translates=(0.0025, 0.0025),
+            zoom=(0.99, 1.01),
+            shear=(1.0, 1.0),
+            rotate=(-0.5, 0.5))),
+    dict(type='RandomCrop', crop_size=(320, 896)),
+    dict(type='DefaultFormatBundle'),
+    dict(
+        type='Collect',
+        keys=['imgs', 'flow_gt', 'valid'],
+        meta_keys=[
+            'img_fields', 'ann_fields', 'filename1', 'filename2',
+            'ori_filename1', 'ori_filename2', 'filename_flow',
+            'ori_filename_flow', 'ori_shape', 'img_shape', 'img_norm_cfg'
+        ])
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', sparse=True),
+    dict(type='InputResize', exponent=6),
+    dict(
+        type='Normalize',
+        mean=[0.0, 0.0, 0.0],
+        std=[255.0, 255.0, 255.0],
+        to_rgb=False),
+    dict(type='TestFormatBundle'),
+    dict(
+        type='Collect',
+        keys=['imgs'],
+        meta_keys=[
+            'flow_gt', 'valid', 'filename1', 'filename2', 'ori_filename1',
+            'ori_filename2', 'ori_shape', 'img_shape', 'img_norm_cfg',
+            'scale_factor', 'pad_shape'
+        ])
+]
+caddy_train = dict(
+    type='CADDY',
+    data_root=
+    'data/CADDY_gestures_complete_v2_release/brodarski-D/true_positives',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations', sparse=True),
+        dict(
+            type='ColorJitter',
+            brightness=0.05,
+            contrast=0.2,
+            saturation=0.25,
+            hue=0.1),
+        dict(type='RandomGamma', gamma_range=(0.7, 1.5)),
+        dict(
+            type='Normalize',
+            mean=[0.0, 0.0, 0.0],
+            std=[255.0, 255.0, 255.0],
+            to_rgb=False),
+        dict(
+            type='GaussianNoise',
+            sigma_range=(0, 0.04),
+            clamp_range=(0.0, 1.0)),
+        dict(type='RandomFlip', prob=0.5, direction='horizontal'),
+        dict(type='RandomFlip', prob=0.5, direction='vertical'),
+        dict(
+            type='RandomAffine',
+            global_transform=dict(
+                translates=(0.02, 0.02),
+                zoom=(0.98, 1.02),
+                shear=(1.0, 1.0),
+                rotate=(-0.5, 0.5)),
+            relative_transform=dict(
+                translates=(0.0025, 0.0025),
+                zoom=(0.99, 1.01),
+                shear=(1.0, 1.0),
+                rotate=(-0.5, 0.5))),
+        dict(type='RandomCrop', crop_size=(320, 896)),
+        dict(type='DefaultFormatBundle'),
+        dict(
+            type='Collect',
+            keys=['imgs', 'flow_gt', 'valid'],
+            meta_keys=[
+                'img_fields', 'ann_fields', 'filename1', 'filename2',
+                'ori_filename1', 'ori_filename2', 'filename_flow',
+                'ori_filename_flow', 'ori_shape', 'img_shape', 'img_norm_cfg'
+            ])
+    ],
+    test_mode=False)
+data = dict(
+    train_dataloader=dict(
+        samples_per_gpu=1,
+        workers_per_gpu=2,
+        drop_last=True,
+        shuffle=False,
+        persistent_workers=True),
+    val_dataloader=dict(
+        samples_per_gpu=1,
+        workers_per_gpu=5,
+        shuffle=False,
+        persistent_workers=True),
+    test_dataloader=dict(samples_per_gpu=1, workers_per_gpu=5, shuffle=False),
+    train=[
+        dict(
+            type='CADDY',
+            data_root=
+            'data/CADDY_gestures_complete_v2_release/brodarski-D/true_positives',
+            pipeline=[
+                dict(type='LoadImageFromFile'),
+                dict(type='LoadAnnotations', sparse=True),
+                dict(
+                    type='ColorJitter',
+                    brightness=0.05,
+                    contrast=0.2,
+                    saturation=0.25,
+                    hue=0.1),
+                dict(type='RandomGamma', gamma_range=(0.7, 1.5)),
+                dict(
+                    type='Normalize',
+                    mean=[0.0, 0.0, 0.0],
+                    std=[255.0, 255.0, 255.0],
+                    to_rgb=False),
+                dict(
+                    type='GaussianNoise',
+                    sigma_range=(0, 0.04),
+                    clamp_range=(0.0, 1.0)),
+                dict(type='RandomFlip', prob=0.5, direction='horizontal'),
+                dict(type='RandomFlip', prob=0.5, direction='vertical'),
+                dict(
+                    type='RandomAffine',
+                    global_transform=dict(
+                        translates=(0.02, 0.02),
+                        zoom=(0.98, 1.02),
+                        shear=(1.0, 1.0),
+                        rotate=(-0.5, 0.5)),
+                    relative_transform=dict(
+                        translates=(0.0025, 0.0025),
+                        zoom=(0.99, 1.01),
+                        shear=(1.0, 1.0),
+                        rotate=(-0.5, 0.5))),
+                dict(type='RandomCrop', crop_size=(320, 896)),
+                dict(type='DefaultFormatBundle'),
+                dict(
+                    type='Collect',
+                    keys=['imgs', 'flow_gt', 'valid'],
+                    meta_keys=[
+                        'img_fields', 'ann_fields', 'filename1', 'filename2',
+                        'ori_filename1', 'ori_filename2', 'filename_flow',
+                        'ori_filename_flow', 'ori_shape', 'img_shape',
+                        'img_norm_cfg'
+                    ])
+            ],
+            test_mode=False)
+    ],
+    val=dict(datasets=[], separate_eval=True),
+    test=dict(datasets=[], separate_eval=True))
+optimizer = dict(
+    type='Adam', lr=3e-05, weight_decay=0.0004, betas=(0.9, 0.999))
+optimizer_config = dict(grad_clip=None)
+lr_config = dict(
+    policy='MultiStage',
+    by_epoch=False,
+    gammas=[0.5, 0.5],
+    milestone_lrs=[3e-05, 2e-05],
+    milestone_iters=[0, 150000],
+    steps=[[
+        45000, 65000, 85000, 95000, 97500, 100000, 110000, 120000, 130000,
+        140000
+    ],
+           [
+               195000, 215000, 235000, 245000, 247500, 250000, 260000, 270000,
+               280000, 290000
+           ]])
+runner = dict(type='IterBasedRunner', max_iters=300000)
+checkpoint_config = dict(by_epoch=False, interval=5000)
+log_config = dict(
+    interval=50,
+    hooks=[dict(type='TextLoggerHook'),
+           dict(type='TensorboardLoggerHook')])
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = None
+resume_from = None
+workflow = [('train', 1)]
+model = dict(
+    type='PWCNet',
+    encoder=dict(
+        type='PWCNetEncoder',
+        in_channels=3,
+        net_type='Basic',
+        pyramid_levels=[
+            'level1', 'level2', 'level3', 'level4', 'level5', 'level6'
+        ],
+        out_channels=(16, 32, 64, 96, 128, 196),
+        strides=(2, 2, 2, 2, 2, 2),
+        dilations=(1, 1, 1, 1, 1, 1),
+        act_cfg=dict(type='LeakyReLU', negative_slope=0.1)),
+    decoder=dict(
+        type='PWCNetDecoder',
+        in_channels=dict(
+            level6=81, level5=213, level4=181, level3=149, level2=117),
+        flow_div=20.0,
+        corr_cfg=dict(type='Correlation', max_displacement=4, padding=0),
+        warp_cfg=dict(type='Warp', align_corners=True, use_mask=True),
+        act_cfg=dict(type='LeakyReLU', negative_slope=0.1),
+        scaled=False,
+        post_processor=dict(type='ContextNet', in_channels=565),
+        flow_loss=dict(
+            type='MultiLevelEPE',
+            p=1,
+            q=0.4,
+            eps=0.01,
+            resize_flow='upsample',
+            reduction='sum',
+            weights=dict(
+                level2=0.005,
+                level3=0.01,
+                level4=0.02,
+                level5=0.08,
+                level6=0.32))),
+    train_cfg=dict(),
+    test_cfg=dict(),
+    init_cfg=dict(
+        type='Kaiming',
+        nonlinearity='leaky_relu',
+        layer=['Conv2d', 'ConvTranspose2d'],
+        mode='fan_in',
+        bias=0))
+work_dir = 'work_dir/pwcnet_caddy_new'
+auto_resume = False
+gpu_ids = [0]
+
+2022-09-28 09:22:19,126 - mmflow - INFO - Set random seed to 413724338, deterministic: False
+2022-09-28 09:22:19,363 - mmflow - INFO - initialize PWCNet with init_cfg {'type': 'Kaiming', 'nonlinearity': 'leaky_relu', 'layer': ['Conv2d', 'ConvTranspose2d'], 'mode': 'fan_in', 'bias': 0}
+2022-09-28 09:22:19,470 - mmflow - INFO - PWCNet(
+  (encoder): PWCNetEncoder(
+    (layers): Sequential(
+      (0): BasicConvBlock(
+        (layers): Sequential(
+          (0): ConvModule(
+            (conv): Conv2d(3, 16, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+          (1): ConvModule(
+            (conv): Conv2d(16, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+          (2): ConvModule(
+            (conv): Conv2d(16, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+        )
+      )
+      (1): BasicConvBlock(
+        (layers): Sequential(
+          (0): ConvModule(
+            (conv): Conv2d(16, 32, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+          (1): ConvModule(
+            (conv): Conv2d(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+          (2): ConvModule(
+            (conv): Conv2d(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+        )
+      )
+      (2): BasicConvBlock(
+        (layers): Sequential(
+          (0): ConvModule(
+            (conv): Conv2d(32, 64, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+          (1): ConvModule(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+          (2): ConvModule(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+        )
+      )
+      (3): BasicConvBlock(
+        (layers): Sequential(
+          (0): ConvModule(
+            (conv): Conv2d(64, 96, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+          (1): ConvModule(
+            (conv): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+          (2): ConvModule(
+            (conv): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+        )
+      )
+      (4): BasicConvBlock(
+        (layers): Sequential(
+          (0): ConvModule(
+            (conv): Conv2d(96, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+          (1): ConvModule(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+          (2): ConvModule(
+            (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+        )
+      )
+      (5): BasicConvBlock(
+        (layers): Sequential(
+          (0): ConvModule(
+            (conv): Conv2d(128, 196, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+          (1): ConvModule(
+            (conv): Conv2d(196, 196, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+          (2): ConvModule(
+            (conv): Conv2d(196, 196, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+        )
+      )
+    )
+  )
+  (decoder): PWCNetDecoder(
+    (flow_loss): MultiLevelEPE(resize_flow=upsample, scale_as_level=False, flow_div=20.0, weights={'level2': 0.005, 'level3': 0.01, 'level4': 0.02, 'level5': 0.08, 'level6': 0.32}, p=1, q=0.4, eps=0.01, reduction='sum')
+    (corr_block): CorrBlock()
+    scaled=False
+    scale_mode=dimension
+    (warp): Warp(mode=bilinear, padding_mode=zeros, align_corners=True,use_mask=True)
+    (post_processor): ContextNet(
+      (layers): Sequential(
+        (0): ConvModule(
+          (conv): Conv2d(565, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+        )
+        (1): ConvModule(
+          (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(2, 2), dilation=(2, 2))
+          (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+        )
+        (2): ConvModule(
+          (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(4, 4), dilation=(4, 4))
+          (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+        )
+        (3): ConvModule(
+          (conv): Conv2d(128, 96, kernel_size=(3, 3), stride=(1, 1), padding=(8, 8), dilation=(8, 8))
+          (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+        )
+        (4): ConvModule(
+          (conv): Conv2d(96, 64, kernel_size=(3, 3), stride=(1, 1), padding=(16, 16), dilation=(16, 16))
+          (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+        )
+        (5): ConvModule(
+          (conv): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+        )
+        (6): Conv2d(32, 2, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      )
+    )
+    (decoders): ModuleDict(
+      (level2): PWCModule(
+        (dense_net): BasicDenseBlock(
+          (layers): Sequential(
+            (0): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(117, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+            (1): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(245, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+            (2): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(373, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+            (3): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(469, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+            (4): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(533, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+          )
+        )
+        (predict_layer): Conv2d(565, 2, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+      )
+      (level3): PWCModule(
+        (dense_net): BasicDenseBlock(
+          (layers): Sequential(
+            (0): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(149, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+            (1): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(277, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+            (2): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(405, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+            (3): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(501, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+            (4): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(565, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+          )
+        )
+        (predict_layer): Conv2d(597, 2, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (upflow_layer): ConvTranspose2d(2, 2, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
+        (upfeat_layer): ConvTranspose2d(597, 2, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
+      )
+      (level4): PWCModule(
+        (dense_net): BasicDenseBlock(
+          (layers): Sequential(
+            (0): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(181, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+            (1): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(309, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+            (2): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(437, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+            (3): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(533, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+            (4): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(597, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+          )
+        )
+        (predict_layer): Conv2d(629, 2, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (upflow_layer): ConvTranspose2d(2, 2, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
+        (upfeat_layer): ConvTranspose2d(629, 2, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
+      )
+      (level5): PWCModule(
+        (dense_net): BasicDenseBlock(
+          (layers): Sequential(
+            (0): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(213, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+            (1): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(341, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+            (2): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(469, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+            (3): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(565, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+            (4): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(629, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+          )
+        )
+        (predict_layer): Conv2d(661, 2, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (upflow_layer): ConvTranspose2d(2, 2, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
+        (upfeat_layer): ConvTranspose2d(661, 2, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
+      )
+      (level6): PWCModule(
+        (dense_net): BasicDenseBlock(
+          (layers): Sequential(
+            (0): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(81, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+            (1): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(209, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+            (2): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(337, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+            (3): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(433, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+            (4): DenseLayer(
+              (layers): ConvModule(
+                (conv): Conv2d(497, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+                (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+              )
+            )
+          )
+        )
+        (predict_layer): Conv2d(529, 2, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        (upflow_layer): ConvTranspose2d(2, 2, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
+        (upfeat_layer): ConvTranspose2d(529, 2, kernel_size=(4, 4), stride=(2, 2), padding=(1, 1))
+      )
+    )
+  )
+)
+init_cfg={'type': 'Kaiming', 'nonlinearity': 'leaky_relu', 'layer': ['Conv2d', 'ConvTranspose2d'], 'mode': 'fan_in', 'bias': 0}
+Traceback (most recent call last):
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/utils/registry.py", line 69, in build_from_cfg
+    return obj_cls(**args)
+  File "/home/s.starace/FlowNets/mmflow/mmflow/datasets/caddy.py", line 13, in __init__
+    super().__init__(*args, **kwargs)
+  File "/home/s.starace/FlowNets/mmflow/mmflow/datasets/base_dataset.py", line 44, in __init__
+    self.load_data_info()
+  File "/home/s.starace/FlowNets/mmflow/mmflow/datasets/caddy.py", line 32, in load_data_info
+    img1_filenames = self.get_data_filename(self.img1_dir)
+  File "/home/s.starace/FlowNets/mmflow/mmflow/datasets/base_dataset.py", line 153, in get_data_filename
+    for f in mmcv.scandir(data_dir, suffix=suffix):
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/utils/path.py", line 69, in _scandir
+    for entry in os.scandir(dir_path):
+FileNotFoundError: [Errno 2] No such file or directory: 'data/CADDY_gestures_complete_v2_release/brodarski-D/true_positives/im0'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "tools/train.py", line 208, in <module>
+    main()
+  File "tools/train.py", line 178, in main
+    datasets = [build_dataset(cfg.data.train)]
+  File "/home/s.starace/FlowNets/mmflow/mmflow/datasets/builder.py", line 48, in build_dataset
+    dataset = ConcatDataset([build_dataset(c, default_args) for c in cfg])
+  File "/home/s.starace/FlowNets/mmflow/mmflow/datasets/builder.py", line 48, in <listcomp>
+    dataset = ConcatDataset([build_dataset(c, default_args) for c in cfg])
+  File "/home/s.starace/FlowNets/mmflow/mmflow/datasets/builder.py", line 56, in build_dataset
+    dataset = build_from_cfg(cfg, DATASETS, default_args)
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/utils/registry.py", line 72, in build_from_cfg
+    raise type(e)(f'{obj_cls.__name__}: {e}')
+FileNotFoundError: CADDY: [Errno 2] No such file or directory: 'data/CADDY_gestures_complete_v2_release/brodarski-D/true_positives/im0'

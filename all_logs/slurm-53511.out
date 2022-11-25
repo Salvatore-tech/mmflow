@@ -1,0 +1,33 @@
+Traceback (most recent call last):
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/utils/config.py", line 103, in _validate_py_syntax
+    ast.parse(content)
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/ast.py", line 47, in parse
+    return compile(source, filename, mode, flags,
+  File "<unknown>", line 170
+    type='ConcatDataset,
+                       ^
+SyntaxError: EOL while scanning string literal
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/s.starace/FlowNets/mmflow//tools/train.py", line 208, in <module>
+    main()
+  File "/home/s.starace/FlowNets/mmflow//tools/train.py", line 93, in main
+    cfg = Config.fromfile(args.config)
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/utils/config.py", line 340, in fromfile
+    cfg_dict, cfg_text = Config._file2dict(filename,
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/utils/config.py", line 252, in _file2dict
+    _cfg_dict, _cfg_text = Config._file2dict(osp.join(cfg_dir, f))
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/utils/config.py", line 207, in _file2dict
+    Config._validate_py_syntax(filename)
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/utils/config.py", line 105, in _validate_py_syntax
+    raise SyntaxError('There are syntax errors in config '
+SyntaxError: There are syntax errors in config file /home/s.starace/FlowNets/mmflow/configs/_base_/datasets/caddy_mix_raft.py: EOL while scanning string literal (<unknown>, line 170)
+Exception ignored in: <function _TemporaryFileCloser.__del__ at 0x7f3f1b843940>
+Traceback (most recent call last):
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/tempfile.py", line 440, in __del__
+    self.close()
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/tempfile.py", line 436, in close
+    unlink(self.name)
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/tmpuq01q2ky/tmpgnz7qlmg.py'

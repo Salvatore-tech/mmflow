@@ -1,0 +1,1099 @@
+2022-09-20 21:50:02,703 - mmflow - INFO - Multi-processing start method is `fork`
+2022-09-20 21:50:02,705 - mmflow - INFO - OpenCV num_threads is `32
+2022-09-20 21:50:02,762 - mmflow - INFO - Environment info:
+------------------------------------------------------------
+sys.platform: linux
+Python: 3.8.13 (default, Mar 28 2022, 11:38:47) [GCC 7.5.0]
+CUDA available: True
+CUDA_HOME: /opt/share/cuda/cuda-10.1
+NVCC: Cuda compilation tools, release 10.1, V10.1.243
+GPU 0,1: Tesla V100-SXM2-32GB
+GCC: gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-36)
+PyTorch: 1.12.1
+PyTorch compiling details: PyTorch built with:
+  - GCC 9.3
+  - C++ Version: 201402
+  - Intel(R) oneAPI Math Kernel Library Version 2021.4-Product Build 20210904 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.6.0 (Git Hash 52b5f107dd9cf10910aaa19cb47f3abf9b349815)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.3
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 8.3.2  (built against CUDA 11.5)
+  - Magma 2.5.2
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.3, CUDNN_VERSION=8.3.2, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -fabi-version=11 -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -DEDGE_PROFILER_USE_KINETO -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-unused-local-typedefs -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.12.1, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=OFF, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
+
+TorchVision: 0.13.1
+OpenCV: 4.6.0
+MMCV: 1.6.1
+MMFlow: 0.5.1+47d7ece
+MMCV Compiler: GCC 9.3
+MMCV CUDA Compiler: 11.3
+------------------------------------------------------------
+
+2022-09-20 21:50:02,763 - mmflow - INFO - Distributed training: False
+2022-09-20 21:50:03,151 - mmflow - INFO - Config:
+img_norm_cfg = dict(
+    mean=[127.5, 127.5, 127.5], std=[127.5, 127.5, 127.5], to_rgb=False)
+crop_size = (288, 960)
+kitti_train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', sparse=True),
+    dict(
+        type='ColorJitter',
+        asymmetric_prob=0.0,
+        brightness=0.4,
+        contrast=0.4,
+        saturation=0.4,
+        hue=0.1592356687898089),
+    dict(type='Erase', prob=0.5, bounds=[50, 100], max_num=3),
+    dict(
+        type='SpacialTransform',
+        spacial_prob=0.8,
+        stretch_prob=0.8,
+        crop_size=(288, 960),
+        min_scale=-0.2,
+        max_scale=0.4,
+        max_stretch=0.2),
+    dict(type='RandomCrop', crop_size=(288, 960)),
+    dict(
+        type='Normalize',
+        mean=[127.5, 127.5, 127.5],
+        std=[127.5, 127.5, 127.5],
+        to_rgb=False),
+    dict(type='DefaultFormatBundle'),
+    dict(
+        type='Collect',
+        keys=['imgs', 'flow_gt', 'valid'],
+        meta_keys=[
+            'filename1', 'filename2', 'ori_filename1', 'ori_filename2',
+            'filename_flow', 'ori_filename_flow', 'ori_shape', 'img_shape',
+            'erase_bounds', 'erase_num', 'scale_factor'
+        ])
+]
+kitti_train = dict(
+    type='KITTI2015AUG',
+    data_root='./data/KITTI_AUG',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations', sparse=True),
+        dict(
+            type='ColorJitter',
+            asymmetric_prob=0.0,
+            brightness=0.4,
+            contrast=0.4,
+            saturation=0.4,
+            hue=0.1592356687898089),
+        dict(type='Erase', prob=0.5, bounds=[50, 100], max_num=3),
+        dict(
+            type='SpacialTransform',
+            spacial_prob=0.8,
+            stretch_prob=0.8,
+            crop_size=(288, 960),
+            min_scale=-0.2,
+            max_scale=0.4,
+            max_stretch=0.2),
+        dict(type='RandomCrop', crop_size=(288, 960)),
+        dict(
+            type='Normalize',
+            mean=[127.5, 127.5, 127.5],
+            std=[127.5, 127.5, 127.5],
+            to_rgb=False),
+        dict(type='DefaultFormatBundle'),
+        dict(
+            type='Collect',
+            keys=['imgs', 'flow_gt', 'valid'],
+            meta_keys=[
+                'filename1', 'filename2', 'ori_filename1', 'ori_filename2',
+                'filename_flow', 'ori_filename_flow', 'ori_shape', 'img_shape',
+                'erase_bounds', 'erase_num', 'scale_factor'
+            ])
+    ],
+    test_mode=False)
+kitti_test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', sparse=True),
+    dict(type='InputPad', exponent=3),
+    dict(
+        type='Normalize',
+        mean=[127.5, 127.5, 127.5],
+        std=[127.5, 127.5, 127.5],
+        to_rgb=False),
+    dict(type='TestFormatBundle'),
+    dict(
+        type='Collect',
+        keys=['imgs'],
+        meta_keys=[
+            'flow_gt', 'valid', 'filename1', 'filename2', 'ori_filename1',
+            'ori_filename2', 'ori_shape', 'img_shape', 'img_norm_cfg',
+            'scale_factor', 'pad_shape', 'pad'
+        ])
+]
+kitti2015_val_test = dict(
+    type='KITTI2015AUG',
+    data_root='data/KITTI_AUG',
+    pipeline=[
+        dict(type='LoadImageFromFile'),
+        dict(type='LoadAnnotations', sparse=True),
+        dict(type='InputPad', exponent=3),
+        dict(
+            type='Normalize',
+            mean=[127.5, 127.5, 127.5],
+            std=[127.5, 127.5, 127.5],
+            to_rgb=False),
+        dict(type='TestFormatBundle'),
+        dict(
+            type='Collect',
+            keys=['imgs'],
+            meta_keys=[
+                'flow_gt', 'valid', 'filename1', 'filename2', 'ori_filename1',
+                'ori_filename2', 'ori_shape', 'img_shape', 'img_norm_cfg',
+                'scale_factor', 'pad_shape', 'pad'
+            ])
+    ],
+    test_mode=True)
+data = dict(
+    train_dataloader=dict(
+        samples_per_gpu=2,
+        workers_per_gpu=5,
+        drop_last=True,
+        shuffle=True,
+        persistent_workers=True),
+    val_dataloader=dict(
+        samples_per_gpu=1,
+        workers_per_gpu=5,
+        shuffle=False,
+        persistent_workers=True),
+    test_dataloader=dict(samples_per_gpu=1, workers_per_gpu=2, shuffle=False),
+    train=dict(
+        type='KITTI2015AUG',
+        data_root='./data/KITTI_AUG',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(type='LoadAnnotations', sparse=True),
+            dict(
+                type='ColorJitter',
+                asymmetric_prob=0.0,
+                brightness=0.4,
+                contrast=0.4,
+                saturation=0.4,
+                hue=0.1592356687898089),
+            dict(type='Erase', prob=0.5, bounds=[50, 100], max_num=3),
+            dict(
+                type='SpacialTransform',
+                spacial_prob=0.8,
+                stretch_prob=0.8,
+                crop_size=(288, 960),
+                min_scale=-0.2,
+                max_scale=0.4,
+                max_stretch=0.2),
+            dict(type='RandomCrop', crop_size=(288, 960)),
+            dict(
+                type='Normalize',
+                mean=[127.5, 127.5, 127.5],
+                std=[127.5, 127.5, 127.5],
+                to_rgb=False),
+            dict(type='DefaultFormatBundle'),
+            dict(
+                type='Collect',
+                keys=['imgs', 'flow_gt', 'valid'],
+                meta_keys=[
+                    'filename1', 'filename2', 'ori_filename1', 'ori_filename2',
+                    'filename_flow', 'ori_filename_flow', 'ori_shape',
+                    'img_shape', 'erase_bounds', 'erase_num', 'scale_factor'
+                ])
+        ],
+        test_mode=False),
+    val=dict(
+        type='KITTI2015AUG',
+        data_root='data/KITTI_AUG',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(type='LoadAnnotations', sparse=True),
+            dict(type='InputPad', exponent=3),
+            dict(
+                type='Normalize',
+                mean=[127.5, 127.5, 127.5],
+                std=[127.5, 127.5, 127.5],
+                to_rgb=False),
+            dict(type='TestFormatBundle'),
+            dict(
+                type='Collect',
+                keys=['imgs'],
+                meta_keys=[
+                    'flow_gt', 'valid', 'filename1', 'filename2',
+                    'ori_filename1', 'ori_filename2', 'ori_shape', 'img_shape',
+                    'img_norm_cfg', 'scale_factor', 'pad_shape', 'pad'
+                ])
+        ],
+        test_mode=True),
+    test=dict(
+        type='KITTI2015AUG',
+        data_root='data/KITTI_AUG',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(type='LoadAnnotations', sparse=True),
+            dict(type='InputPad', exponent=3),
+            dict(
+                type='Normalize',
+                mean=[127.5, 127.5, 127.5],
+                std=[127.5, 127.5, 127.5],
+                to_rgb=False),
+            dict(type='TestFormatBundle'),
+            dict(
+                type='Collect',
+                keys=['imgs'],
+                meta_keys=[
+                    'flow_gt', 'valid', 'filename1', 'filename2',
+                    'ori_filename1', 'ori_filename2', 'ori_shape', 'img_shape',
+                    'img_norm_cfg', 'scale_factor', 'pad_shape', 'pad'
+                ])
+        ],
+        test_mode=True))
+log_config = dict(
+    interval=50,
+    hooks=[dict(type='TextLoggerHook'),
+           dict(type='TensorboardLoggerHook')])
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = 'checkpoints/liteflownet2/liteflownet2_ft_4x1_600k_sintel_kitti_320x768.pth'
+resume_from = None
+workflow = [('train', 1)]
+model = dict(
+    type='LiteFlowNet',
+    encoder=dict(
+        type='NetC',
+        in_channels=3,
+        pyramid_levels=[
+            'level1', 'level2', 'level3', 'level4', 'level5', 'level6'
+        ],
+        out_channels=(32, 32, 64, 96, 128, 192),
+        strides=(1, 2, 2, 2, 2, 2),
+        num_convs=(1, 3, 2, 2, 1, 1),
+        conv_cfg=None,
+        norm_cfg=None,
+        act_cfg=dict(type='LeakyReLU', negative_slope=0.1),
+        init_cfg=None),
+    decoder=dict(
+        type='NetE',
+        in_channels=dict(level3=64, level4=96, level5=128, level6=192),
+        corr_channels=dict(level3=49, level4=49, level5=49, level6=49),
+        sin_channels=dict(level3=130, level4=194, level5=258, level6=386),
+        rin_channels=dict(level3=131, level4=131, level5=131, level6=195),
+        feat_channels=64,
+        mfeat_channels=(128, 128, 96, 64, 32),
+        sfeat_channels=(128, 128, 96, 64, 32),
+        rfeat_channels=(128, 128, 64, 64, 32, 32),
+        patch_size=dict(level3=5, level4=5, level5=3, level6=3),
+        corr_cfg=dict(
+            level3=dict(
+                type='Correlation',
+                max_displacement=3,
+                stride=2,
+                dilation_patch=2),
+            level4=dict(type='Correlation', max_displacement=3),
+            level5=dict(type='Correlation', max_displacement=3),
+            level6=dict(type='Correlation', max_displacement=3)),
+        warp_cfg=dict(type='Warp', align_corners=True, use_mask=True),
+        flow_div=20.0,
+        conv_cfg=None,
+        norm_cfg=None,
+        act_cfg=dict(type='LeakyReLU', negative_slope=0.1),
+        scaled_corr=False,
+        regularized_flow=True,
+        extra_training_loss=True,
+        flow_loss=dict(
+            type='MultiLevelCharbonnierLoss',
+            resize_flow='upsample',
+            weights=dict(
+                level6=0.32,
+                level5=0.08,
+                level4=0.02,
+                level3=0.01,
+                level0=0.000625),
+            q=0.2,
+            eps=0.01,
+            reduction='sum'),
+        init_cfg=None),
+    train_cfg=dict(),
+    test_cfg=dict())
+optimizer = dict(
+    type='Adam', lr=5e-05, weight_decay=0.0004, betas=(0.9, 0.999))
+optimizer_config = dict(grad_clip=None)
+lr_config = dict(
+    policy='step',
+    by_epoch=False,
+    gamma=0.5,
+    step=[
+        45000, 65000, 85000, 95000, 97500, 100000, 110000, 120000, 130000,
+        140000
+    ])
+runner = dict(type='IterBasedRunner', max_iters=150000)
+checkpoint_config = dict(by_epoch=False, interval=10000)
+evaluation = dict(interval=10000, metric='EPE')
+work_dir = 'work_dir/liteflownet2_aug'
+auto_resume = False
+gpu_ids = [0]
+
+2022-09-20 21:50:03,153 - mmflow - INFO - Set random seed to 1763676591, deterministic: False
+2022-09-20 21:50:03,343 - mmflow - INFO - LiteFlowNet(
+  (encoder): NetC(
+    (layers): Sequential(
+      (0): BasicConvBlock(
+        (layers): Sequential(
+          (0): ConvModule(
+            (conv): Conv2d(3, 32, kernel_size=(7, 7), stride=(1, 1), padding=(3, 3))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+        )
+      )
+      (1): BasicConvBlock(
+        (layers): Sequential(
+          (0): ConvModule(
+            (conv): Conv2d(32, 32, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+          (1): ConvModule(
+            (conv): Conv2d(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+          (2): ConvModule(
+            (conv): Conv2d(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+        )
+      )
+      (2): BasicConvBlock(
+        (layers): Sequential(
+          (0): ConvModule(
+            (conv): Conv2d(32, 64, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+          (1): ConvModule(
+            (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+        )
+      )
+      (3): BasicConvBlock(
+        (layers): Sequential(
+          (0): ConvModule(
+            (conv): Conv2d(64, 96, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+          (1): ConvModule(
+            (conv): Conv2d(96, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+        )
+      )
+      (4): BasicConvBlock(
+        (layers): Sequential(
+          (0): ConvModule(
+            (conv): Conv2d(96, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+        )
+      )
+      (5): BasicConvBlock(
+        (layers): Sequential(
+          (0): ConvModule(
+            (conv): Conv2d(128, 192, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1))
+            (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+          )
+        )
+      )
+    )
+  )
+  (decoder): NetE(
+    (flow_loss): MultiLevelCharbonnierLoss(resize_flow=upsample, scale_as_level=False, flow_div=20.0, weights={'level6': 0.32, 'level5': 0.08, 'level4': 0.02, 'level3': 0.01, 'level0': 0.000625}, q=0.2, eps=0.01, reduction='sum')
+    (decoders): ModuleDict(
+      (level3): ModuleDict(
+        (feat_layer): Sequential()
+        (rfeat_layer): ConvModule(
+          (conv): Conv2d(64, 128, kernel_size=(1, 1), stride=(1, 1))
+          (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+        )
+        (NetM): MatchingBlock(
+          (layers): Sequential(
+            (0): ConvModule(
+              (conv): Conv2d(49, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (1): ConvModule(
+              (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (2): ConvModule(
+              (conv): Conv2d(128, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (3): ConvModule(
+              (conv): Conv2d(96, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (4): ConvModule(
+              (conv): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+          )
+          (warp_op): Warp(mode=bilinear, padding_mode=zeros, align_corners=True,use_mask=True)
+          (pred_flow): Conv2d(32, 2, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+          (corr): CorrBlock()
+          scaled=False
+          scale_mode=dimension
+          (corr_up): Upsample()
+        )
+        (NetS): SubpixelBlock(
+          (layers): Sequential(
+            (0): ConvModule(
+              (conv): Conv2d(130, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (1): ConvModule(
+              (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (2): ConvModule(
+              (conv): Conv2d(128, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (3): ConvModule(
+              (conv): Conv2d(96, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (4): ConvModule(
+              (conv): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+          )
+          (warp_op): Warp(mode=bilinear, padding_mode=zeros, align_corners=True,use_mask=True)
+          (pred_flow): Conv2d(32, 2, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+        )
+        (NetR): RegularizationBlock(
+          (layers): Sequential(
+            (0): ConvModule(
+              (conv): Conv2d(131, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (1): ConvModule(
+              (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (2): ConvModule(
+              (conv): Conv2d(128, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (3): ConvModule(
+              (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (4): ConvModule(
+              (conv): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (5): ConvModule(
+              (conv): Conv2d(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+          )
+          (warp_op): Warp(mode=bilinear, padding_mode=zeros, align_corners=True,use_mask=True)
+          (dist_layer): Sequential(
+            (0): Conv2d(32, 25, kernel_size=(5, 1), stride=(1, 1), padding=(2, 0))
+            (1): Conv2d(25, 25, kernel_size=(1, 5), stride=(1, 1), padding=(0, 2))
+          )
+        )
+        (upflow_layer): Sequential()
+      )
+      (level4): ModuleDict(
+        (feat_layer): Sequential()
+        (rfeat_layer): ConvModule(
+          (conv): Conv2d(96, 128, kernel_size=(1, 1), stride=(1, 1))
+          (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+        )
+        (NetM): MatchingBlock(
+          (layers): Sequential(
+            (0): ConvModule(
+              (conv): Conv2d(49, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (1): ConvModule(
+              (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (2): ConvModule(
+              (conv): Conv2d(128, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (3): ConvModule(
+              (conv): Conv2d(96, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (4): ConvModule(
+              (conv): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+          )
+          (warp_op): Warp(mode=bilinear, padding_mode=zeros, align_corners=True,use_mask=True)
+          (pred_flow): Conv2d(32, 2, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+          (corr): CorrBlock()
+          scaled=False
+          scale_mode=dimension
+          (corr_up): Sequential()
+        )
+        (NetS): SubpixelBlock(
+          (layers): Sequential(
+            (0): ConvModule(
+              (conv): Conv2d(194, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (1): ConvModule(
+              (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (2): ConvModule(
+              (conv): Conv2d(128, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (3): ConvModule(
+              (conv): Conv2d(96, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (4): ConvModule(
+              (conv): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+          )
+          (warp_op): Warp(mode=bilinear, padding_mode=zeros, align_corners=True,use_mask=True)
+          (pred_flow): Conv2d(32, 2, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+        )
+        (NetR): RegularizationBlock(
+          (layers): Sequential(
+            (0): ConvModule(
+              (conv): Conv2d(131, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (1): ConvModule(
+              (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (2): ConvModule(
+              (conv): Conv2d(128, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (3): ConvModule(
+              (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (4): ConvModule(
+              (conv): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (5): ConvModule(
+              (conv): Conv2d(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+          )
+          (warp_op): Warp(mode=bilinear, padding_mode=zeros, align_corners=True,use_mask=True)
+          (dist_layer): Sequential(
+            (0): Conv2d(32, 25, kernel_size=(5, 1), stride=(1, 1), padding=(2, 0))
+            (1): Conv2d(25, 25, kernel_size=(1, 5), stride=(1, 1), padding=(0, 2))
+          )
+        )
+        (upflow_layer): Upsample()
+      )
+      (level5): ModuleDict(
+        (feat_layer): Sequential()
+        (rfeat_layer): Sequential()
+        (NetM): MatchingBlock(
+          (layers): Sequential(
+            (0): ConvModule(
+              (conv): Conv2d(49, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (1): ConvModule(
+              (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (2): ConvModule(
+              (conv): Conv2d(128, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (3): ConvModule(
+              (conv): Conv2d(96, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (4): ConvModule(
+              (conv): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+          )
+          (warp_op): Warp(mode=bilinear, padding_mode=zeros, align_corners=True,use_mask=True)
+          (pred_flow): Conv2d(32, 2, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (corr): CorrBlock()
+          scaled=False
+          scale_mode=dimension
+          (corr_up): Sequential()
+        )
+        (NetS): SubpixelBlock(
+          (layers): Sequential(
+            (0): ConvModule(
+              (conv): Conv2d(258, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (1): ConvModule(
+              (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (2): ConvModule(
+              (conv): Conv2d(128, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (3): ConvModule(
+              (conv): Conv2d(96, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (4): ConvModule(
+              (conv): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+          )
+          (warp_op): Warp(mode=bilinear, padding_mode=zeros, align_corners=True,use_mask=True)
+          (pred_flow): Conv2d(32, 2, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        )
+        (NetR): RegularizationBlock(
+          (layers): Sequential(
+            (0): ConvModule(
+              (conv): Conv2d(131, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (1): ConvModule(
+              (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (2): ConvModule(
+              (conv): Conv2d(128, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (3): ConvModule(
+              (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (4): ConvModule(
+              (conv): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (5): ConvModule(
+              (conv): Conv2d(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+          )
+          (warp_op): Warp(mode=bilinear, padding_mode=zeros, align_corners=True,use_mask=True)
+          (dist_layer): Conv2d(32, 9, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        )
+        (upflow_layer): Upsample()
+      )
+      (level6): ModuleDict(
+        (feat_layer): Sequential()
+        (rfeat_layer): Sequential()
+        (NetM): MatchingBlock(
+          (layers): Sequential(
+            (0): ConvModule(
+              (conv): Conv2d(49, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (1): ConvModule(
+              (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (2): ConvModule(
+              (conv): Conv2d(128, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (3): ConvModule(
+              (conv): Conv2d(96, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (4): ConvModule(
+              (conv): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+          )
+          (warp_op): Warp(mode=bilinear, padding_mode=zeros, align_corners=True,use_mask=True)
+          (pred_flow): Conv2d(32, 2, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+          (corr): CorrBlock()
+          scaled=False
+          scale_mode=dimension
+          (corr_up): Sequential()
+        )
+        (NetS): SubpixelBlock(
+          (layers): Sequential(
+            (0): ConvModule(
+              (conv): Conv2d(386, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (1): ConvModule(
+              (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (2): ConvModule(
+              (conv): Conv2d(128, 96, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (3): ConvModule(
+              (conv): Conv2d(96, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (4): ConvModule(
+              (conv): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+          )
+          (warp_op): Warp(mode=bilinear, padding_mode=zeros, align_corners=True,use_mask=True)
+          (pred_flow): Conv2d(32, 2, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        )
+        (NetR): RegularizationBlock(
+          (layers): Sequential(
+            (0): ConvModule(
+              (conv): Conv2d(195, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (1): ConvModule(
+              (conv): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (2): ConvModule(
+              (conv): Conv2d(128, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (3): ConvModule(
+              (conv): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (4): ConvModule(
+              (conv): Conv2d(64, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+            (5): ConvModule(
+              (conv): Conv2d(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+              (activate): LeakyReLU(negative_slope=0.1, inplace=True)
+            )
+          )
+          (warp_op): Warp(mode=bilinear, padding_mode=zeros, align_corners=True,use_mask=True)
+          (dist_layer): Conv2d(32, 9, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        )
+        (upflow_layer): Upsample()
+      )
+    )
+  )
+)
+2022-09-20 21:50:04,049 - mmflow - INFO - dataset size 400
+/home/s.starace/FlowNets/mmflow/mmflow/apis/train.py:132: UserWarning: SyncBN is only supported with DDP. To be compatible with DP, we convert SyncBN to BN. Please use dist_train.sh which can avoid this error.
+  warnings.warn(
+2022-09-20 21:50:05,368 - mmflow - INFO - load checkpoint from local path: checkpoints/liteflownet2/liteflownet2_ft_4x1_600k_sintel_kitti_320x768.pth
+2022-09-20 21:50:05,524 - mmflow - INFO - Start running, host: s.starace@gnode01, work_dir: /home/s.starace/FlowNets/mmflow/work_dir/liteflownet2_aug
+2022-09-20 21:50:05,525 - mmflow - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(NORMAL      ) CheckpointHook                     
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_train_iter:
+(ABOVE_NORMAL) OptimizerHook                      
+(NORMAL      ) CheckpointHook                     
+(LOW         ) IterTimerHook                      
+(LOW         ) EvalHook                           
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) CheckpointHook                     
+(LOW         ) EvalHook                           
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_val_epoch:
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+before_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_epoch:
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+after_run:
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) TensorboardLoggerHook              
+ -------------------- 
+2022-09-20 21:50:05,526 - mmflow - INFO - workflow: [('train', 1)], max: 150000 iters
+2022-09-20 21:50:05,527 - mmflow - INFO - Checkpoints will be saved to /home/s.starace/FlowNets/mmflow/work_dir/liteflownet2_aug by HardDiskBackend.
+/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/torch/functional.py:478: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at  /opt/conda/conda-bld/pytorch_1659484810403/work/aten/src/ATen/native/TensorShape.cpp:2894.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+2022-09-20 21:50:15,449 - mmflow - INFO - Iter [50/150000]	lr: 5.000e-05, eta: 8:05:57, time: 0.194, data_time: 0.016, memory: 852, loss_flow: 316794.5075, loss: 316794.5075
+2022-09-20 21:50:22,381 - mmflow - INFO - Iter [100/150000]	lr: 5.000e-05, eta: 6:56:04, time: 0.139, data_time: 0.009, memory: 852, loss_flow: 193063.6052, loss: 193063.6052
+2022-09-20 21:50:29,757 - mmflow - INFO - Iter [150/150000]	lr: 5.000e-05, eta: 6:40:04, time: 0.147, data_time: 0.010, memory: 852, loss_flow: 178288.1997, loss: 178288.1997
+2022-09-20 21:50:37,322 - mmflow - INFO - Iter [200/150000]	lr: 5.000e-05, eta: 6:34:23, time: 0.151, data_time: 0.010, memory: 852, loss_flow: 177409.1861, loss: 177409.1861
+2022-09-20 21:50:46,968 - mmflow - INFO - Iter [250/150000]	lr: 5.000e-05, eta: 6:51:41, time: 0.193, data_time: 0.061, memory: 852, loss_flow: 166794.5486, loss: 166794.5486
+2022-09-20 21:50:54,006 - mmflow - INFO - Iter [300/150000]	lr: 5.000e-05, eta: 6:41:30, time: 0.141, data_time: 0.009, memory: 852, loss_flow: 174442.8403, loss: 174442.8403
+2022-09-20 21:51:01,796 - mmflow - INFO - Iter [350/150000]	lr: 5.000e-05, eta: 6:39:31, time: 0.156, data_time: 0.011, memory: 852, loss_flow: 171654.9348, loss: 171654.9348
+2022-09-20 21:51:08,858 - mmflow - INFO - Iter [400/150000]	lr: 5.000e-05, eta: 6:33:28, time: 0.141, data_time: 0.010, memory: 852, loss_flow: 168923.3436, loss: 168923.3436
+2022-09-20 21:51:18,793 - mmflow - INFO - Iter [450/150000]	lr: 5.000e-05, eta: 6:44:39, time: 0.199, data_time: 0.062, memory: 852, loss_flow: 171271.0783, loss: 171271.0783
+2022-09-20 21:51:26,266 - mmflow - INFO - Iter [500/150000]	lr: 5.000e-05, eta: 6:41:18, time: 0.149, data_time: 0.009, memory: 852, loss_flow: 176767.3723, loss: 176767.3723
+2022-09-20 21:51:33,610 - mmflow - INFO - Iter [550/150000]	lr: 5.000e-05, eta: 6:37:57, time: 0.147, data_time: 0.009, memory: 852, loss_flow: 167249.1655, loss: 167249.1655
+2022-09-20 21:51:40,144 - mmflow - INFO - Iter [600/150000]	lr: 5.000e-05, eta: 6:31:47, time: 0.131, data_time: 0.009, memory: 852, loss_flow: 175608.1778, loss: 175608.1778
+2022-09-20 21:51:49,937 - mmflow - INFO - Iter [650/150000]	lr: 5.000e-05, eta: 6:39:02, time: 0.196, data_time: 0.061, memory: 852, loss_flow: 162441.7062, loss: 162441.7062
+2022-09-20 21:51:56,997 - mmflow - INFO - Iter [700/150000]	lr: 5.000e-05, eta: 6:35:30, time: 0.141, data_time: 0.009, memory: 852, loss_flow: 170019.5525, loss: 170019.5525
+2022-09-20 21:52:04,315 - mmflow - INFO - Iter [750/150000]	lr: 5.000e-05, eta: 6:33:16, time: 0.146, data_time: 0.010, memory: 852, loss_flow: 173839.5247, loss: 173839.5247
+2022-09-20 21:52:11,472 - mmflow - INFO - Iter [800/150000]	lr: 5.000e-05, eta: 6:30:49, time: 0.143, data_time: 0.009, memory: 852, loss_flow: 168665.9395, loss: 168665.9395
+2022-09-20 21:52:21,231 - mmflow - INFO - Iter [850/150000]	lr: 5.000e-05, eta: 6:36:14, time: 0.195, data_time: 0.061, memory: 852, loss_flow: 174418.2888, loss: 174418.2888
+2022-09-20 21:52:28,860 - mmflow - INFO - Iter [900/150000]	lr: 5.000e-05, eta: 6:35:10, time: 0.153, data_time: 0.010, memory: 852, loss_flow: 165441.8678, loss: 165441.8678
+2022-09-20 21:52:35,846 - mmflow - INFO - Iter [950/150000]	lr: 5.000e-05, eta: 6:32:30, time: 0.140, data_time: 0.010, memory: 852, loss_flow: 169231.7016, loss: 169231.7016
+2022-09-20 21:52:42,868 - mmflow - INFO - Exp name: liteflownet2_kitti_2015_augmented.py
+2022-09-20 21:52:42,870 - mmflow - INFO - Iter [1000/150000]	lr: 5.000e-05, eta: 6:30:12, time: 0.140, data_time: 0.009, memory: 852, loss_flow: 168410.1177, loss: 168410.1177
+2022-09-20 21:52:52,025 - mmflow - INFO - Iter [1050/150000]	lr: 5.000e-05, eta: 6:33:08, time: 0.183, data_time: 0.057, memory: 852, loss_flow: 165138.2883, loss: 165138.2883
+2022-09-20 21:52:59,561 - mmflow - INFO - Iter [1100/150000]	lr: 5.000e-05, eta: 6:32:09, time: 0.151, data_time: 0.010, memory: 852, loss_flow: 160401.2795, loss: 160401.2795
+2022-09-20 21:53:06,863 - mmflow - INFO - Iter [1150/150000]	lr: 5.000e-05, eta: 6:30:43, time: 0.146, data_time: 0.009, memory: 852, loss_flow: 157788.4541, loss: 157788.4541
+2022-09-20 21:53:13,906 - mmflow - INFO - Iter [1200/150000]	lr: 5.000e-05, eta: 6:28:52, time: 0.141, data_time: 0.009, memory: 852, loss_flow: 158906.6913, loss: 158906.6913
+2022-09-20 21:53:24,080 - mmflow - INFO - Iter [1250/150000]	lr: 5.000e-05, eta: 6:33:22, time: 0.203, data_time: 0.062, memory: 852, loss_flow: 170693.0603, loss: 170693.0603
+2022-09-20 21:53:31,502 - mmflow - INFO - Iter [1300/150000]	lr: 5.000e-05, eta: 6:32:15, time: 0.148, data_time: 0.010, memory: 852, loss_flow: 159440.2952, loss: 159440.2952
+2022-09-20 21:53:38,667 - mmflow - INFO - Iter [1350/150000]	lr: 5.000e-05, eta: 6:30:45, time: 0.143, data_time: 0.010, memory: 852, loss_flow: 162144.5956, loss: 162144.5956
+2022-09-20 21:53:45,714 - mmflow - INFO - Iter [1400/150000]	lr: 5.000e-05, eta: 6:29:08, time: 0.141, data_time: 0.009, memory: 852, loss_flow: 165386.6672, loss: 165386.6672
+2022-09-20 21:53:55,286 - mmflow - INFO - Iter [1450/150000]	lr: 5.000e-05, eta: 6:31:56, time: 0.191, data_time: 0.061, memory: 852, loss_flow: 177800.3427, loss: 177800.3427
+2022-09-20 21:54:02,432 - mmflow - INFO - Iter [1500/150000]	lr: 5.000e-05, eta: 6:30:31, time: 0.143, data_time: 0.009, memory: 852, loss_flow: 165846.5048, loss: 165846.5048
+2022-09-20 21:54:09,626 - mmflow - INFO - Iter [1550/150000]	lr: 5.000e-05, eta: 6:29:17, time: 0.144, data_time: 0.009, memory: 852, loss_flow: 174147.2184, loss: 174147.2184
+2022-09-20 21:54:16,209 - mmflow - INFO - Iter [1600/150000]	lr: 5.000e-05, eta: 6:27:10, time: 0.132, data_time: 0.009, memory: 852, loss_flow: 173694.4798, loss: 173694.4798
+2022-09-20 21:54:25,947 - mmflow - INFO - Iter [1650/150000]	lr: 5.000e-05, eta: 6:29:54, time: 0.195, data_time: 0.061, memory: 852, loss_flow: 165295.1495, loss: 165295.1495
+2022-09-20 21:54:33,229 - mmflow - INFO - Iter [1700/150000]	lr: 5.000e-05, eta: 6:28:53, time: 0.146, data_time: 0.009, memory: 852, loss_flow: 159923.3698, loss: 159923.3698
+2022-09-20 21:54:40,250 - mmflow - INFO - Iter [1750/150000]	lr: 5.000e-05, eta: 6:27:34, time: 0.140, data_time: 0.009, memory: 852, loss_flow: 169436.8612, loss: 169436.8612
+2022-09-20 21:54:47,159 - mmflow - INFO - Iter [1800/150000]	lr: 5.000e-05, eta: 6:26:09, time: 0.138, data_time: 0.009, memory: 852, loss_flow: 162964.7944, loss: 162964.7944
+2022-09-20 21:54:56,329 - mmflow - INFO - Iter [1850/150000]	lr: 5.000e-05, eta: 6:27:49, time: 0.183, data_time: 0.058, memory: 852, loss_flow: 159384.4766, loss: 159384.4766
+2022-09-20 21:55:03,652 - mmflow - INFO - Iter [1900/150000]	lr: 5.000e-05, eta: 6:27:00, time: 0.146, data_time: 0.009, memory: 852, loss_flow: 159222.6456, loss: 159222.6456
+2022-09-20 21:55:11,261 - mmflow - INFO - Iter [1950/150000]	lr: 5.000e-05, eta: 6:26:35, time: 0.152, data_time: 0.010, memory: 852, loss_flow: 166242.5153, loss: 166242.5153
+2022-09-20 21:55:18,332 - mmflow - INFO - Exp name: liteflownet2_kitti_2015_augmented.py
+2022-09-20 21:55:18,334 - mmflow - INFO - Iter [2000/150000]	lr: 5.000e-05, eta: 6:25:31, time: 0.141, data_time: 0.009, memory: 852, loss_flow: 162871.3181, loss: 162871.3181
+2022-09-20 21:55:27,929 - mmflow - INFO - Iter [2050/150000]	lr: 5.000e-05, eta: 6:27:31, time: 0.192, data_time: 0.063, memory: 852, loss_flow: 150387.1944, loss: 150387.1944
+2022-09-20 21:55:35,515 - mmflow - INFO - Iter [2100/150000]	lr: 5.000e-05, eta: 6:27:04, time: 0.152, data_time: 0.010, memory: 852, loss_flow: 162727.9923, loss: 162727.9923
+2022-09-20 21:55:42,580 - mmflow - INFO - Iter [2150/150000]	lr: 5.000e-05, eta: 6:26:02, time: 0.141, data_time: 0.009, memory: 852, loss_flow: 161802.1595, loss: 161802.1595
+2022-09-20 21:55:49,668 - mmflow - INFO - Iter [2200/150000]	lr: 5.000e-05, eta: 6:25:04, time: 0.142, data_time: 0.009, memory: 852, loss_flow: 160037.7502, loss: 160037.7502
+2022-09-20 21:55:59,286 - mmflow - INFO - Iter [2250/150000]	lr: 5.000e-05, eta: 6:26:55, time: 0.192, data_time: 0.062, memory: 852, loss_flow: 162337.8884, loss: 162337.8884
+2022-09-20 21:56:06,530 - mmflow - INFO - Iter [2300/150000]	lr: 5.000e-05, eta: 6:26:08, time: 0.145, data_time: 0.010, memory: 852, loss_flow: 156149.7855, loss: 156149.7855
+2022-09-20 21:56:14,268 - mmflow - INFO - Iter [2350/150000]	lr: 5.000e-05, eta: 6:25:53, time: 0.155, data_time: 0.010, memory: 852, loss_flow: 156720.9733, loss: 156720.9733
+2022-09-20 21:56:21,559 - mmflow - INFO - Iter [2400/150000]	lr: 5.000e-05, eta: 6:25:11, time: 0.146, data_time: 0.010, memory: 852, loss_flow: 157993.6602, loss: 157993.6602
+2022-09-20 21:56:31,344 - mmflow - INFO - Iter [2450/150000]	lr: 5.000e-05, eta: 6:27:01, time: 0.196, data_time: 0.063, memory: 852, loss_flow: 166867.2566, loss: 166867.2566
+2022-09-20 21:56:38,465 - mmflow - INFO - Iter [2500/150000]	lr: 5.000e-05, eta: 6:26:09, time: 0.142, data_time: 0.009, memory: 852, loss_flow: 155211.2775, loss: 155211.2775
+2022-09-20 21:56:45,469 - mmflow - INFO - Iter [2550/150000]	lr: 5.000e-05, eta: 6:25:12, time: 0.140, data_time: 0.009, memory: 852, loss_flow: 147271.4683, loss: 147271.4683
+2022-09-20 21:56:52,191 - mmflow - INFO - Iter [2600/150000]	lr: 5.000e-05, eta: 6:24:01, time: 0.134, data_time: 0.009, memory: 852, loss_flow: 148539.9344, loss: 148539.9344
+2022-09-20 21:57:01,971 - mmflow - INFO - Iter [2650/150000]	lr: 5.000e-05, eta: 6:25:43, time: 0.196, data_time: 0.059, memory: 852, loss_flow: 156521.2200, loss: 156521.2200
+2022-09-20 21:57:08,951 - mmflow - INFO - Iter [2700/150000]	lr: 5.000e-05, eta: 6:24:47, time: 0.140, data_time: 0.009, memory: 852, loss_flow: 150730.3888, loss: 150730.3888
+2022-09-20 21:57:15,857 - mmflow - INFO - Iter [2750/150000]	lr: 5.000e-05, eta: 6:23:49, time: 0.138, data_time: 0.010, memory: 852, loss_flow: 150348.4095, loss: 150348.4095
+2022-09-20 21:57:22,630 - mmflow - INFO - Iter [2800/150000]	lr: 5.000e-05, eta: 6:22:46, time: 0.135, data_time: 0.009, memory: 852, loss_flow: 158342.3775, loss: 158342.3775
+2022-09-20 21:57:32,721 - mmflow - INFO - Iter [2850/150000]	lr: 5.000e-05, eta: 6:24:37, time: 0.202, data_time: 0.063, memory: 852, loss_flow: 147568.7805, loss: 147568.7805
+2022-09-20 21:57:40,166 - mmflow - INFO - Iter [2900/150000]	lr: 5.000e-05, eta: 6:24:09, time: 0.149, data_time: 0.010, memory: 852, loss_flow: 154142.4138, loss: 154142.4138
+2022-09-20 21:57:47,180 - mmflow - INFO - Iter [2950/150000]	lr: 5.000e-05, eta: 6:23:20, time: 0.140, data_time: 0.009, memory: 852, loss_flow: 153618.9206, loss: 153618.9206
+2022-09-20 21:57:54,551 - mmflow - INFO - Exp name: liteflownet2_kitti_2015_augmented.py
+2022-09-20 21:57:54,553 - mmflow - INFO - Iter [3000/150000]	lr: 5.000e-05, eta: 6:22:50, time: 0.147, data_time: 0.010, memory: 852, loss_flow: 163285.5756, loss: 163285.5756
+2022-09-20 21:58:04,038 - mmflow - INFO - Iter [3050/150000]	lr: 5.000e-05, eta: 6:24:03, time: 0.190, data_time: 0.060, memory: 852, loss_flow: 142757.0083, loss: 142757.0083
+2022-09-20 21:58:11,311 - mmflow - INFO - Iter [3100/150000]	lr: 5.000e-05, eta: 6:23:28, time: 0.145, data_time: 0.009, memory: 852, loss_flow: 150221.9413, loss: 150221.9413
+2022-09-20 21:58:18,816 - mmflow - INFO - Iter [3150/150000]	lr: 5.000e-05, eta: 6:23:05, time: 0.150, data_time: 0.010, memory: 852, loss_flow: 151735.6066, loss: 151735.6066
+2022-09-20 21:58:25,696 - mmflow - INFO - Iter [3200/150000]	lr: 5.000e-05, eta: 6:22:14, time: 0.138, data_time: 0.009, memory: 852, loss_flow: 153338.8348, loss: 153338.8348
+2022-09-20 21:58:35,496 - mmflow - INFO - Iter [3250/150000]	lr: 5.000e-05, eta: 6:23:36, time: 0.196, data_time: 0.060, memory: 852, loss_flow: 153165.4253, loss: 153165.4253
+2022-09-20 21:58:42,894 - mmflow - INFO - Iter [3300/150000]	lr: 5.000e-05, eta: 6:23:08, time: 0.148, data_time: 0.010, memory: 852, loss_flow: 151526.9033, loss: 151526.9033
+2022-09-20 21:58:50,201 - mmflow - INFO - Iter [3350/150000]	lr: 5.000e-05, eta: 6:22:37, time: 0.146, data_time: 0.010, memory: 852, loss_flow: 147214.0464, loss: 147214.0464
+2022-09-20 21:58:56,850 - mmflow - INFO - Iter [3400/150000]	lr: 5.000e-05, eta: 6:21:39, time: 0.133, data_time: 0.009, memory: 852, loss_flow: 151347.8759, loss: 151347.8759
+2022-09-20 21:59:06,370 - mmflow - INFO - Iter [3450/150000]	lr: 5.000e-05, eta: 6:22:43, time: 0.190, data_time: 0.057, memory: 852, loss_flow: 150984.3580, loss: 150984.3580
+2022-09-20 21:59:13,480 - mmflow - INFO - Iter [3500/150000]	lr: 5.000e-05, eta: 6:22:05, time: 0.142, data_time: 0.010, memory: 852, loss_flow: 154959.9522, loss: 154959.9522
+2022-09-20 21:59:20,727 - mmflow - INFO - Iter [3550/150000]	lr: 5.000e-05, eta: 6:21:34, time: 0.145, data_time: 0.010, memory: 852, loss_flow: 153498.2145, loss: 153498.2145
+2022-09-20 21:59:27,476 - mmflow - INFO - Iter [3600/150000]	lr: 5.000e-05, eta: 6:20:42, time: 0.135, data_time: 0.009, memory: 852, loss_flow: 150142.6070, loss: 150142.6070
+2022-09-20 21:59:36,805 - mmflow - INFO - Iter [3650/150000]	lr: 5.000e-05, eta: 6:21:36, time: 0.187, data_time: 0.058, memory: 852, loss_flow: 150479.9253, loss: 150479.9253
+2022-09-20 21:59:44,064 - mmflow - INFO - Iter [3700/150000]	lr: 5.000e-05, eta: 6:21:06, time: 0.145, data_time: 0.010, memory: 852, loss_flow: 153106.4744, loss: 153106.4744
+2022-09-20 21:59:51,269 - mmflow - INFO - Iter [3750/150000]	lr: 5.000e-05, eta: 6:20:34, time: 0.144, data_time: 0.010, memory: 852, loss_flow: 151548.9531, loss: 151548.9531
+2022-09-20 21:59:57,864 - mmflow - INFO - Iter [3800/150000]	lr: 5.000e-05, eta: 6:19:40, time: 0.132, data_time: 0.009, memory: 852, loss_flow: 136478.1737, loss: 136478.1737
+2022-09-20 22:00:07,554 - mmflow - INFO - Iter [3850/150000]	lr: 5.000e-05, eta: 6:20:44, time: 0.194, data_time: 0.060, memory: 852, loss_flow: 145872.9077, loss: 145872.9077
+2022-09-20 22:00:14,898 - mmflow - INFO - Iter [3900/150000]	lr: 5.000e-05, eta: 6:20:18, time: 0.147, data_time: 0.010, memory: 852, loss_flow: 150738.6088, loss: 150738.6088
+2022-09-20 22:00:21,950 - mmflow - INFO - Iter [3950/150000]	lr: 5.000e-05, eta: 6:19:43, time: 0.141, data_time: 0.009, memory: 852, loss_flow: 144489.8287, loss: 144489.8287
+2022-09-20 22:00:28,737 - mmflow - INFO - Exp name: liteflownet2_kitti_2015_augmented.py
+2022-09-20 22:00:28,739 - mmflow - INFO - Iter [4000/150000]	lr: 5.000e-05, eta: 6:18:58, time: 0.136, data_time: 0.009, memory: 852, loss_flow: 146137.5998, loss: 146137.5998
+2022-09-20 22:00:38,415 - mmflow - INFO - Iter [4050/150000]	lr: 5.000e-05, eta: 6:19:58, time: 0.194, data_time: 0.062, memory: 852, loss_flow: 140659.3975, loss: 140659.3975
+2022-09-20 22:00:45,566 - mmflow - INFO - Iter [4100/150000]	lr: 5.000e-05, eta: 6:19:27, time: 0.143, data_time: 0.010, memory: 852, loss_flow: 147552.3744, loss: 147552.3744
+2022-09-20 22:00:53,227 - mmflow - INFO - Iter [4150/150000]	lr: 5.000e-05, eta: 6:19:14, time: 0.153, data_time: 0.010, memory: 852, loss_flow: 146767.4364, loss: 146767.4364
+2022-09-20 22:01:00,318 - mmflow - INFO - Iter [4200/150000]	lr: 5.000e-05, eta: 6:18:42, time: 0.142, data_time: 0.009, memory: 852, loss_flow: 149145.2475, loss: 149145.2475
+2022-09-20 22:01:10,103 - mmflow - INFO - Iter [4250/150000]	lr: 5.000e-05, eta: 6:19:42, time: 0.196, data_time: 0.061, memory: 852, loss_flow: 157285.5558, loss: 157285.5558
+2022-09-20 22:01:17,140 - mmflow - INFO - Iter [4300/150000]	lr: 5.000e-05, eta: 6:19:08, time: 0.141, data_time: 0.009, memory: 852, loss_flow: 147777.7927, loss: 147777.7927
+2022-09-20 22:01:24,297 - mmflow - INFO - Iter [4350/150000]	lr: 5.000e-05, eta: 6:18:38, time: 0.143, data_time: 0.009, memory: 852, loss_flow: 147539.7498, loss: 147539.7498
+2022-09-20 22:01:31,708 - mmflow - INFO - Iter [4400/150000]	lr: 5.000e-05, eta: 6:18:18, time: 0.148, data_time: 0.010, memory: 852, loss_flow: 148534.3902, loss: 148534.3902
+2022-09-20 22:01:41,123 - mmflow - INFO - Iter [4450/150000]	lr: 5.000e-05, eta: 6:19:03, time: 0.188, data_time: 0.060, memory: 852, loss_flow: 147530.8120, loss: 147530.8120
+2022-09-20 22:01:48,683 - mmflow - INFO - Iter [4500/150000]	lr: 5.000e-05, eta: 6:18:47, time: 0.151, data_time: 0.010, memory: 852, loss_flow: 141119.1431, loss: 141119.1431
+2022-09-20 22:01:56,181 - mmflow - INFO - Iter [4550/150000]	lr: 5.000e-05, eta: 6:18:29, time: 0.150, data_time: 0.010, memory: 852, loss_flow: 144982.2352, loss: 144982.2352
+2022-09-20 22:02:03,238 - mmflow - INFO - Iter [4600/150000]	lr: 5.000e-05, eta: 6:17:58, time: 0.141, data_time: 0.009, memory: 852, loss_flow: 157172.3045, loss: 157172.3045
+2022-09-20 22:02:12,961 - mmflow - INFO - Iter [4650/150000]	lr: 5.000e-05, eta: 6:18:50, time: 0.194, data_time: 0.062, memory: 852, loss_flow: 147328.7555, loss: 147328.7555
+2022-09-20 22:02:19,928 - mmflow - INFO - Iter [4700/150000]	lr: 5.000e-05, eta: 6:18:16, time: 0.139, data_time: 0.009, memory: 852, loss_flow: 148368.0108, loss: 148368.0108
+2022-09-20 22:02:26,950 - mmflow - INFO - Iter [4750/150000]	lr: 5.000e-05, eta: 6:17:44, time: 0.140, data_time: 0.009, memory: 852, loss_flow: 148315.9197, loss: 148315.9197
+2022-09-20 22:02:34,003 - mmflow - INFO - Iter [4800/150000]	lr: 5.000e-05, eta: 6:17:13, time: 0.141, data_time: 0.009, memory: 852, loss_flow: 145776.0770, loss: 145776.0770
+2022-09-20 22:02:43,803 - mmflow - INFO - Iter [4850/150000]	lr: 5.000e-05, eta: 6:18:06, time: 0.196, data_time: 0.062, memory: 852, loss_flow: 141985.9859, loss: 141985.9859
+2022-09-20 22:02:51,067 - mmflow - INFO - Iter [4900/150000]	lr: 5.000e-05, eta: 6:17:41, time: 0.145, data_time: 0.010, memory: 852, loss_flow: 146018.9113, loss: 146018.9113
+2022-09-20 22:02:58,192 - mmflow - INFO - Iter [4950/150000]	lr: 5.000e-05, eta: 6:17:13, time: 0.143, data_time: 0.010, memory: 852, loss_flow: 134580.4402, loss: 134580.4402
+2022-09-20 22:03:05,128 - mmflow - INFO - Exp name: liteflownet2_kitti_2015_augmented.py
+2022-09-20 22:03:05,129 - mmflow - INFO - Iter [5000/150000]	lr: 5.000e-05, eta: 6:16:41, time: 0.139, data_time: 0.009, memory: 852, loss_flow: 144958.2188, loss: 144958.2188
+2022-09-20 22:03:14,692 - mmflow - INFO - Iter [5050/150000]	lr: 5.000e-05, eta: 6:17:24, time: 0.191, data_time: 0.058, memory: 852, loss_flow: 145768.2681, loss: 145768.2681
+2022-09-20 22:03:21,641 - mmflow - INFO - Iter [5100/150000]	lr: 5.000e-05, eta: 6:16:51, time: 0.139, data_time: 0.009, memory: 852, loss_flow: 138530.0859, loss: 138530.0859
+2022-09-20 22:03:28,786 - mmflow - INFO - Iter [5150/150000]	lr: 5.000e-05, eta: 6:16:25, time: 0.143, data_time: 0.009, memory: 852, loss_flow: 150901.7594, loss: 150901.7594
+2022-09-20 22:03:35,921 - mmflow - INFO - Iter [5200/150000]	lr: 5.000e-05, eta: 6:15:59, time: 0.143, data_time: 0.009, memory: 852, loss_flow: 147709.3325, loss: 147709.3325
+2022-09-20 22:03:45,341 - mmflow - INFO - Iter [5250/150000]	lr: 5.000e-05, eta: 6:16:36, time: 0.188, data_time: 0.059, memory: 852, loss_flow: 143996.9759, loss: 143996.9759
+2022-09-20 22:03:52,811 - mmflow - INFO - Iter [5300/150000]	lr: 5.000e-05, eta: 6:16:19, time: 0.149, data_time: 0.009, memory: 852, loss_flow: 138701.0400, loss: 138701.0400
+2022-09-20 22:04:00,309 - mmflow - INFO - Iter [5350/150000]	lr: 5.000e-05, eta: 6:16:03, time: 0.150, data_time: 0.010, memory: 852, loss_flow: 149520.0516, loss: 149520.0516
+2022-09-20 22:04:06,793 - mmflow - INFO - Iter [5400/150000]	lr: 5.000e-05, eta: 6:15:20, time: 0.130, data_time: 0.009, memory: 852, loss_flow: 141570.5102, loss: 141570.5102
+2022-09-20 22:04:16,136 - mmflow - INFO - Iter [5450/150000]	lr: 5.000e-05, eta: 6:15:53, time: 0.187, data_time: 0.061, memory: 852, loss_flow: 138516.3933, loss: 138516.3933
+2022-09-20 22:04:23,642 - mmflow - INFO - Iter [5500/150000]	lr: 5.000e-05, eta: 6:15:38, time: 0.150, data_time: 0.010, memory: 852, loss_flow: 140262.3839, loss: 140262.3839
+2022-09-20 22:04:30,874 - mmflow - INFO - Iter [5550/150000]	lr: 5.000e-05, eta: 6:15:15, time: 0.145, data_time: 0.010, memory: 852, loss_flow: 137558.1523, loss: 137558.1523
+2022-09-20 22:04:38,125 - mmflow - INFO - Iter [5600/150000]	lr: 5.000e-05, eta: 6:14:53, time: 0.145, data_time: 0.010, memory: 852, loss_flow: 135770.6584, loss: 135770.6584
+2022-09-20 22:04:47,868 - mmflow - INFO - Iter [5650/150000]	lr: 5.000e-05, eta: 6:15:35, time: 0.195, data_time: 0.060, memory: 852, loss_flow: 144473.5102, loss: 144473.5102
+2022-09-20 22:04:55,400 - mmflow - INFO - Iter [5700/150000]	lr: 5.000e-05, eta: 6:15:21, time: 0.151, data_time: 0.010, memory: 852, loss_flow: 145331.3934, loss: 145331.3934
+2022-09-20 22:05:02,738 - mmflow - INFO - Iter [5750/150000]	lr: 5.000e-05, eta: 6:15:01, time: 0.147, data_time: 0.010, memory: 852, loss_flow: 146387.9777, loss: 146387.9777
+2022-09-20 22:05:09,542 - mmflow - INFO - Iter [5800/150000]	lr: 5.000e-05, eta: 6:14:29, time: 0.136, data_time: 0.009, memory: 852, loss_flow: 144155.6817, loss: 144155.6817
+2022-09-20 22:05:18,888 - mmflow - INFO - Iter [5850/150000]	lr: 5.000e-05, eta: 6:14:59, time: 0.187, data_time: 0.062, memory: 852, loss_flow: 139032.3461, loss: 139032.3461
+2022-09-20 22:05:26,134 - mmflow - INFO - Iter [5900/150000]	lr: 5.000e-05, eta: 6:14:38, time: 0.145, data_time: 0.010, memory: 852, loss_flow: 145359.5103, loss: 145359.5103
+2022-09-20 22:05:33,326 - mmflow - INFO - Iter [5950/150000]	lr: 5.000e-05, eta: 6:14:15, time: 0.144, data_time: 0.010, memory: 852, loss_flow: 135485.1088, loss: 135485.1088
+2022-09-20 22:05:40,250 - mmflow - INFO - Exp name: liteflownet2_kitti_2015_augmented.py
+2022-09-20 22:05:40,252 - mmflow - INFO - Iter [6000/150000]	lr: 5.000e-05, eta: 6:13:47, time: 0.138, data_time: 0.009, memory: 852, loss_flow: 136377.2416, loss: 136377.2416
+2022-09-20 22:05:50,084 - mmflow - INFO - Iter [6050/150000]	lr: 5.000e-05, eta: 6:14:27, time: 0.197, data_time: 0.061, memory: 852, loss_flow: 143634.9656, loss: 143634.9656
+2022-09-20 22:05:57,204 - mmflow - INFO - Iter [6100/150000]	lr: 5.000e-05, eta: 6:14:03, time: 0.142, data_time: 0.010, memory: 852, loss_flow: 142939.7683, loss: 142939.7683
+2022-09-20 22:06:04,406 - mmflow - INFO - Iter [6150/150000]	lr: 5.000e-05, eta: 6:13:42, time: 0.144, data_time: 0.010, memory: 852, loss_flow: 139065.6359, loss: 139065.6359
+2022-09-20 22:06:11,796 - mmflow - INFO - Iter [6200/150000]	lr: 5.000e-05, eta: 6:13:25, time: 0.148, data_time: 0.010, memory: 852, loss_flow: 143358.1913, loss: 143358.1913
+2022-09-20 22:06:21,331 - mmflow - INFO - Iter [6250/150000]	lr: 5.000e-05, eta: 6:13:57, time: 0.191, data_time: 0.060, memory: 852, loss_flow: 138672.1416, loss: 138672.1416
+2022-09-20 22:06:28,939 - mmflow - INFO - Iter [6300/150000]	lr: 5.000e-05, eta: 6:13:45, time: 0.152, data_time: 0.010, memory: 852, loss_flow: 144922.3333, loss: 144922.3333
+2022-09-20 22:06:35,984 - mmflow - INFO - Iter [6350/150000]	lr: 5.000e-05, eta: 6:13:20, time: 0.141, data_time: 0.009, memory: 852, loss_flow: 137846.7361, loss: 137846.7361
+2022-09-20 22:06:43,210 - mmflow - INFO - Iter [6400/150000]	lr: 5.000e-05, eta: 6:12:59, time: 0.145, data_time: 0.009, memory: 852, loss_flow: 138564.3778, loss: 138564.3778
+2022-09-20 22:06:53,134 - mmflow - INFO - Iter [6450/150000]	lr: 5.000e-05, eta: 6:13:39, time: 0.198, data_time: 0.062, memory: 852, loss_flow: 135952.7866, loss: 135952.7866
+2022-09-20 22:07:00,457 - mmflow - INFO - Iter [6500/150000]	lr: 5.000e-05, eta: 6:13:20, time: 0.146, data_time: 0.010, memory: 852, loss_flow: 143479.3800, loss: 143479.3800
+2022-09-20 22:07:08,162 - mmflow - INFO - Iter [6550/150000]	lr: 5.000e-05, eta: 6:13:10, time: 0.154, data_time: 0.010, memory: 852, loss_flow: 139079.6125, loss: 139079.6125
+2022-09-20 22:07:14,966 - mmflow - INFO - Iter [6600/150000]	lr: 5.000e-05, eta: 6:12:41, time: 0.136, data_time: 0.009, memory: 852, loss_flow: 138769.7181, loss: 138769.7181
+2022-09-20 22:07:24,911 - mmflow - INFO - Iter [6650/150000]	lr: 5.000e-05, eta: 6:13:19, time: 0.199, data_time: 0.061, memory: 852, loss_flow: 145106.8355, loss: 145106.8355
+2022-09-20 22:07:32,556 - mmflow - INFO - Iter [6700/150000]	lr: 5.000e-05, eta: 6:13:08, time: 0.153, data_time: 0.010, memory: 852, loss_flow: 146886.0645, loss: 146886.0645
+2022-09-20 22:07:40,011 - mmflow - INFO - Iter [6750/150000]	lr: 5.000e-05, eta: 6:12:52, time: 0.149, data_time: 0.010, memory: 852, loss_flow: 149686.2898, loss: 149686.2898
+2022-09-20 22:07:47,300 - mmflow - INFO - Iter [6800/150000]	lr: 5.000e-05, eta: 6:12:33, time: 0.146, data_time: 0.010, memory: 852, loss_flow: 144624.5833, loss: 144624.5833
+2022-09-20 22:07:57,415 - mmflow - INFO - Iter [6850/150000]	lr: 5.000e-05, eta: 6:13:14, time: 0.202, data_time: 0.061, memory: 852, loss_flow: 138378.8247, loss: 138378.8247
+2022-09-20 22:08:04,353 - mmflow - INFO - Iter [6900/150000]	lr: 5.000e-05, eta: 6:12:48, time: 0.139, data_time: 0.010, memory: 852, loss_flow: 133653.1336, loss: 133653.1336
+2022-09-20 22:08:11,366 - mmflow - INFO - Iter [6950/150000]	lr: 5.000e-05, eta: 6:12:23, time: 0.140, data_time: 0.009, memory: 852, loss_flow: 141115.1169, loss: 141115.1169
+2022-09-20 22:08:18,271 - mmflow - INFO - Exp name: liteflownet2_kitti_2015_augmented.py
+2022-09-20 22:08:18,272 - mmflow - INFO - Iter [7000/150000]	lr: 5.000e-05, eta: 6:11:57, time: 0.138, data_time: 0.009, memory: 852, loss_flow: 144099.7336, loss: 144099.7336
+2022-09-20 22:08:28,177 - mmflow - INFO - Iter [7050/150000]	lr: 5.000e-05, eta: 6:12:32, time: 0.198, data_time: 0.063, memory: 852, loss_flow: 142378.7334, loss: 142378.7334
+2022-09-20 22:08:35,652 - mmflow - INFO - Iter [7100/150000]	lr: 5.000e-05, eta: 6:12:17, time: 0.149, data_time: 0.010, memory: 852, loss_flow: 143867.6131, loss: 143867.6131
+2022-09-20 22:08:42,732 - mmflow - INFO - Iter [7150/150000]	lr: 5.000e-05, eta: 6:11:55, time: 0.142, data_time: 0.010, memory: 852, loss_flow: 134935.4095, loss: 134935.4095
+2022-09-20 22:08:49,638 - mmflow - INFO - Iter [7200/150000]	lr: 5.000e-05, eta: 6:11:29, time: 0.138, data_time: 0.009, memory: 852, loss_flow: 140581.7739, loss: 140581.7739
+2022-09-20 22:08:59,917 - mmflow - INFO - Iter [7250/150000]	lr: 5.000e-05, eta: 6:12:10, time: 0.206, data_time: 0.061, memory: 852, loss_flow: 136587.3227, loss: 136587.3227
+2022-09-20 22:09:07,017 - mmflow - INFO - Iter [7300/150000]	lr: 5.000e-05, eta: 6:11:48, time: 0.142, data_time: 0.009, memory: 852, loss_flow: 134871.0536, loss: 134871.0536
+2022-09-20 22:09:14,056 - mmflow - INFO - Iter [7350/150000]	lr: 5.000e-05, eta: 6:11:25, time: 0.141, data_time: 0.009, memory: 852, loss_flow: 136636.3984, loss: 136636.3984
+2022-09-20 22:09:20,748 - mmflow - INFO - Iter [7400/150000]	lr: 5.000e-05, eta: 6:10:56, time: 0.134, data_time: 0.009, memory: 852, loss_flow: 135205.8967, loss: 135205.8967
+2022-09-20 22:09:30,102 - mmflow - INFO - Iter [7450/150000]	lr: 5.000e-05, eta: 6:11:17, time: 0.187, data_time: 0.060, memory: 852, loss_flow: 142264.3767, loss: 142264.3767
+2022-09-20 22:09:37,259 - mmflow - INFO - Iter [7500/150000]	lr: 5.000e-05, eta: 6:10:57, time: 0.143, data_time: 0.010, memory: 852, loss_flow: 130599.4869, loss: 130599.4869
+2022-09-20 22:09:44,542 - mmflow - INFO - Iter [7550/150000]	lr: 5.000e-05, eta: 6:10:39, time: 0.146, data_time: 0.009, memory: 852, loss_flow: 137607.2767, loss: 137607.2767
+2022-09-20 22:09:51,815 - mmflow - INFO - Iter [7600/150000]	lr: 5.000e-05, eta: 6:10:22, time: 0.145, data_time: 0.009, memory: 852, loss_flow: 133160.5616, loss: 133160.5616
+2022-09-20 22:10:01,870 - mmflow - INFO - Iter [7650/150000]	lr: 5.000e-05, eta: 6:10:56, time: 0.201, data_time: 0.061, memory: 852, loss_flow: 143132.6466, loss: 143132.6466
+2022-09-20 22:10:09,440 - mmflow - INFO - Iter [7700/150000]	lr: 5.000e-05, eta: 6:10:43, time: 0.151, data_time: 0.010, memory: 852, loss_flow: 150067.7592, loss: 150067.7592
+2022-09-20 22:10:17,066 - mmflow - INFO - Iter [7750/150000]	lr: 5.000e-05, eta: 6:10:32, time: 0.152, data_time: 0.010, memory: 852, loss_flow: 136109.1414, loss: 136109.1414
+2022-09-20 22:10:24,027 - mmflow - INFO - Iter [7800/150000]	lr: 5.000e-05, eta: 6:10:09, time: 0.139, data_time: 0.009, memory: 852, loss_flow: 139809.1730, loss: 139809.1730
+2022-09-20 22:10:33,711 - mmflow - INFO - Iter [7850/150000]	lr: 5.000e-05, eta: 6:10:35, time: 0.194, data_time: 0.061, memory: 852, loss_flow: 139269.0817, loss: 139269.0817
+2022-09-20 22:10:40,809 - mmflow - INFO - Iter [7900/150000]	lr: 5.000e-05, eta: 6:10:14, time: 0.142, data_time: 0.010, memory: 852, loss_flow: 136606.9083, loss: 136606.9083
+2022-09-20 22:10:47,746 - mmflow - INFO - Iter [7950/150000]	lr: 5.000e-05, eta: 6:09:50, time: 0.139, data_time: 0.009, memory: 852, loss_flow: 132923.2794, loss: 132923.2794
+2022-09-20 22:10:54,748 - mmflow - INFO - Exp name: liteflownet2_kitti_2015_augmented.py
+2022-09-20 22:10:54,749 - mmflow - INFO - Iter [8000/150000]	lr: 5.000e-05, eta: 6:09:28, time: 0.140, data_time: 0.009, memory: 852, loss_flow: 134513.5834, loss: 134513.5834
+2022-09-20 22:11:04,931 - mmflow - INFO - Iter [8050/150000]	lr: 5.000e-05, eta: 6:10:02, time: 0.204, data_time: 0.061, memory: 852, loss_flow: 131349.7216, loss: 131349.7216
+2022-09-20 22:11:12,578 - mmflow - INFO - Iter [8100/150000]	lr: 5.000e-05, eta: 6:09:51, time: 0.153, data_time: 0.010, memory: 852, loss_flow: 143068.2806, loss: 143068.2806
+2022-09-20 22:11:19,657 - mmflow - INFO - Iter [8150/150000]	lr: 5.000e-05, eta: 6:09:31, time: 0.142, data_time: 0.009, memory: 852, loss_flow: 132946.0061, loss: 132946.0061
+2022-09-20 22:11:26,733 - mmflow - INFO - Iter [8200/150000]	lr: 5.000e-05, eta: 6:09:10, time: 0.142, data_time: 0.010, memory: 852, loss_flow: 133745.5287, loss: 133745.5287
+2022-09-20 22:11:36,536 - mmflow - INFO - Iter [8250/150000]	lr: 5.000e-05, eta: 6:09:36, time: 0.196, data_time: 0.061, memory: 852, loss_flow: 137751.4603, loss: 137751.4603
+2022-09-20 22:11:43,604 - mmflow - INFO - Iter [8300/150000]	lr: 5.000e-05, eta: 6:09:16, time: 0.141, data_time: 0.009, memory: 852, loss_flow: 144991.6111, loss: 144991.6111
+2022-09-20 22:11:51,280 - mmflow - INFO - Iter [8350/150000]	lr: 5.000e-05, eta: 6:09:05, time: 0.154, data_time: 0.010, memory: 852, loss_flow: 134047.4409, loss: 134047.4409
+2022-09-20 22:11:58,237 - mmflow - INFO - Iter [8400/150000]	lr: 5.000e-05, eta: 6:08:43, time: 0.139, data_time: 0.009, memory: 852, loss_flow: 133821.1762, loss: 133821.1762
+2022-09-20 22:12:07,400 - mmflow - INFO - Iter [8450/150000]	lr: 5.000e-05, eta: 6:08:58, time: 0.183, data_time: 0.060, memory: 852, loss_flow: 132945.8364, loss: 132945.8364
+2022-09-20 22:12:14,364 - mmflow - INFO - Iter [8500/150000]	lr: 5.000e-05, eta: 6:08:36, time: 0.139, data_time: 0.010, memory: 852, loss_flow: 130835.6697, loss: 130835.6697
+2022-09-20 22:12:21,515 - mmflow - INFO - Iter [8550/150000]	lr: 5.000e-05, eta: 6:08:17, time: 0.143, data_time: 0.010, memory: 852, loss_flow: 139708.3450, loss: 139708.3450
+2022-09-20 22:12:28,667 - mmflow - INFO - Iter [8600/150000]	lr: 5.000e-05, eta: 6:07:58, time: 0.143, data_time: 0.010, memory: 852, loss_flow: 130718.6119, loss: 130718.6119
+2022-09-20 22:12:38,315 - mmflow - INFO - Iter [8650/150000]	lr: 5.000e-05, eta: 6:08:21, time: 0.193, data_time: 0.061, memory: 852, loss_flow: 130585.2177, loss: 130585.2177
+2022-09-20 22:12:45,237 - mmflow - INFO - Iter [8700/150000]	lr: 5.000e-05, eta: 6:07:58, time: 0.138, data_time: 0.009, memory: 852, loss_flow: 137147.6802, loss: 137147.6802
+2022-09-20 22:12:52,149 - mmflow - INFO - Iter [8750/150000]	lr: 5.000e-05, eta: 6:07:36, time: 0.138, data_time: 0.009, memory: 852, loss_flow: 131482.5431, loss: 131482.5431
+2022-09-20 22:12:58,842 - mmflow - INFO - Iter [8800/150000]	lr: 5.000e-05, eta: 6:07:10, time: 0.134, data_time: 0.009, memory: 852, loss_flow: 132903.1277, loss: 132903.1277
+2022-09-20 22:13:08,966 - mmflow - INFO - Iter [8850/150000]	lr: 5.000e-05, eta: 6:07:39, time: 0.202, data_time: 0.062, memory: 852, loss_flow: 140770.8528, loss: 140770.8528
+2022-09-20 22:13:16,066 - mmflow - INFO - Iter [8900/150000]	lr: 5.000e-05, eta: 6:07:20, time: 0.142, data_time: 0.010, memory: 852, loss_flow: 127533.1998, loss: 127533.1998
+2022-09-20 22:13:23,142 - mmflow - INFO - Iter [8950/150000]	lr: 5.000e-05, eta: 6:07:01, time: 0.141, data_time: 0.009, memory: 852, loss_flow: 142520.4000, loss: 142520.4000
+2022-09-20 22:13:30,249 - mmflow - INFO - Exp name: liteflownet2_kitti_2015_augmented.py
+2022-09-20 22:13:30,250 - mmflow - INFO - Iter [9000/150000]	lr: 5.000e-05, eta: 6:06:42, time: 0.142, data_time: 0.010, memory: 852, loss_flow: 139946.3925, loss: 139946.3925
+2022-09-20 22:13:39,768 - mmflow - INFO - Iter [9050/150000]	lr: 5.000e-05, eta: 6:07:01, time: 0.190, data_time: 0.063, memory: 852, loss_flow: 130484.8602, loss: 130484.8602
+2022-09-20 22:13:46,982 - mmflow - INFO - Iter [9100/150000]	lr: 5.000e-05, eta: 6:06:44, time: 0.144, data_time: 0.010, memory: 852, loss_flow: 137248.1935, loss: 137248.1935
+2022-09-20 22:13:54,303 - mmflow - INFO - Iter [9150/150000]	lr: 5.000e-05, eta: 6:06:29, time: 0.146, data_time: 0.010, memory: 852, loss_flow: 128618.7831, loss: 128618.7831
+2022-09-20 22:14:01,180 - mmflow - INFO - Iter [9200/150000]	lr: 5.000e-05, eta: 6:06:07, time: 0.138, data_time: 0.009, memory: 852, loss_flow: 129382.6530, loss: 129382.6530
+2022-09-20 22:14:10,966 - mmflow - INFO - Iter [9250/150000]	lr: 5.000e-05, eta: 6:06:29, time: 0.196, data_time: 0.061, memory: 852, loss_flow: 122801.6630, loss: 122801.6630
+2022-09-20 22:14:18,487 - mmflow - INFO - Iter [9300/150000]	lr: 5.000e-05, eta: 6:06:17, time: 0.150, data_time: 0.010, memory: 852, loss_flow: 136209.2909, loss: 136209.2909
+2022-09-20 22:14:25,578 - mmflow - INFO - Iter [9350/150000]	lr: 5.000e-05, eta: 6:05:58, time: 0.142, data_time: 0.010, memory: 852, loss_flow: 142645.5731, loss: 142645.5731
+2022-09-20 22:14:33,039 - mmflow - INFO - Iter [9400/150000]	lr: 5.000e-05, eta: 6:05:45, time: 0.149, data_time: 0.010, memory: 852, loss_flow: 135046.4661, loss: 135046.4661
+2022-09-20 22:14:42,523 - mmflow - INFO - Iter [9450/150000]	lr: 5.000e-05, eta: 6:06:02, time: 0.190, data_time: 0.060, memory: 852, loss_flow: 135982.5744, loss: 135982.5744
+2022-09-20 22:14:49,664 - mmflow - INFO - Iter [9500/150000]	lr: 5.000e-05, eta: 6:05:45, time: 0.143, data_time: 0.010, memory: 852, loss_flow: 128786.4905, loss: 128786.4905
+2022-09-20 22:14:57,166 - mmflow - INFO - Iter [9550/150000]	lr: 5.000e-05, eta: 6:05:32, time: 0.150, data_time: 0.010, memory: 852, loss_flow: 136673.6327, loss: 136673.6327
+2022-09-20 22:15:04,331 - mmflow - INFO - Iter [9600/150000]	lr: 5.000e-05, eta: 6:05:15, time: 0.143, data_time: 0.010, memory: 852, loss_flow: 127671.2872, loss: 127671.2872
+2022-09-20 22:15:14,401 - mmflow - INFO - Iter [9650/150000]	lr: 5.000e-05, eta: 6:05:40, time: 0.201, data_time: 0.061, memory: 852, loss_flow: 134801.0781, loss: 134801.0781
+2022-09-20 22:15:22,034 - mmflow - INFO - Iter [9700/150000]	lr: 5.000e-05, eta: 6:05:30, time: 0.153, data_time: 0.011, memory: 852, loss_flow: 132910.9844, loss: 132910.9844
+2022-09-20 22:15:29,398 - mmflow - INFO - Iter [9750/150000]	lr: 5.000e-05, eta: 6:05:15, time: 0.147, data_time: 0.010, memory: 852, loss_flow: 137777.2139, loss: 137777.2139
+2022-09-20 22:15:36,161 - mmflow - INFO - Iter [9800/150000]	lr: 5.000e-05, eta: 6:04:53, time: 0.135, data_time: 0.009, memory: 852, loss_flow: 140388.2272, loss: 140388.2272
+2022-09-20 22:15:45,446 - mmflow - INFO - Iter [9850/150000]	lr: 5.000e-05, eta: 6:05:06, time: 0.186, data_time: 0.059, memory: 852, loss_flow: 140344.0005, loss: 140344.0005
+2022-09-20 22:15:52,359 - mmflow - INFO - Iter [9900/150000]	lr: 5.000e-05, eta: 6:04:45, time: 0.138, data_time: 0.009, memory: 852, loss_flow: 147314.7894, loss: 147314.7894
+2022-09-20 22:15:59,469 - mmflow - INFO - Iter [9950/150000]	lr: 5.000e-05, eta: 6:04:28, time: 0.142, data_time: 0.009, memory: 852, loss_flow: 132510.9066, loss: 132510.9066
+2022-09-20 22:16:06,292 - mmflow - INFO - Saving checkpoint at 10000 iterations
+[                                                  ] 0/400, elapsed: 0s, ETA:Traceback (most recent call last):
+  File "tools/train.py", line 208, in <module>
+    main()
+  File "tools/train.py", line 197, in main
+    train_model(
+  File "/home/s.starace/FlowNets/mmflow/mmflow/apis/train.py", line 238, in train_model
+    runner.run(data_loaders, cfg.workflow)
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/runner/iter_based_runner.py", line 144, in run
+    iter_runner(iter_loaders[i], **kwargs)
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/runner/iter_based_runner.py", line 70, in train
+    self.call_hook('after_train_iter')
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/runner/base_runner.py", line 317, in call_hook
+    getattr(hook, fn_name)(self)
+  File "/home/s.starace/FlowNets/mmflow/mmflow/core/evaluation/eval_hooks.py", line 54, in after_train_iter
+    self.evaluate(runner)
+  File "/home/s.starace/FlowNets/mmflow/mmflow/core/evaluation/eval_hooks.py", line 66, in evaluate
+    results_metrics = single_gpu_online_evaluation(
+  File "/home/s.starace/FlowNets/mmflow/mmflow/core/evaluation/evaluation.py", line 68, in single_gpu_online_evaluation
+    batch_results = model(test_mode=True, **data)
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/mmcv/parallel/data_parallel.py", line 51, in forward
+    return super().forward(*inputs, **kwargs)
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/torch/nn/parallel/data_parallel.py", line 166, in forward
+    return self.module(*inputs[0], **kwargs[0])
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/s.starace/FlowNets/mmflow/mmflow/models/flow_estimators/base.py", line 61, in forward
+    return self.forward_test(*args, **kwargs)
+  File "/home/s.starace/FlowNets/mmflow/mmflow/models/flow_estimators/liteflownet.py", line 91, in forward_test
+    return self.decoder.forward_test(
+  File "/home/s.starace/FlowNets/mmflow/mmflow/models/decoders/liteflownet_decoder.py", line 705, in forward_test
+    flow_pred = self.forward(
+  File "/home/s.starace/FlowNets/mmflow/mmflow/models/decoders/liteflownet_decoder.py", line 612, in forward
+    flowM = self.decoders[level]['NetM'](
+  File "/home/s.starace/.conda/envs/openmmlabMim/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/s.starace/FlowNets/mmflow/mmflow/models/decoders/liteflownet_decoder.py", line 187, in forward
+    return upflow[:, :2, ...] + res_flow
+RuntimeError: The size of tensor a (48) must match the size of tensor b (47) at non-singleton dimension 2
