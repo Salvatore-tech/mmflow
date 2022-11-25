@@ -1,3 +1,5 @@
+kitti_aug_data_root = './data/KITTI_AUG'
+kitti_aug_dataset_type = 'KITTI2015AUG'
 img_norm_cfg = dict(
     mean=[127.5, 127.5, 127.5], std=[127.5, 127.5, 127.5], to_rgb=False)
 
@@ -36,8 +38,8 @@ kitti_train_pipeline = [
         ])
 ]
 kitti_train = dict(
-    type='KITTI2015',
-    data_root='./data/KITTI_2015',
+    type=kitti_aug_dataset_type,
+    data_root=kitti_aug_data_root,
     pipeline=kitti_train_pipeline,
     test_mode=False)
 
@@ -57,12 +59,6 @@ kitti_test_pipeline = [
         ])
 ]
 
-kitti2015_val_test = dict(
-    type='KITTI2015',
-    data_root='data/KITTI_2015',
-    pipeline=kitti_test_pipeline,
-    test_mode=True)
-
 data = dict(
     train_dataloader=dict(
         samples_per_gpu=2,
@@ -77,5 +73,5 @@ data = dict(
         persistent_workers=True),
     test_dataloader=dict(samples_per_gpu=1, workers_per_gpu=2, shuffle=False),
     train=kitti_train,
-    val=kitti2015_val_test,
-    test=kitti2015_val_test)
+    val=[],
+    test=[])

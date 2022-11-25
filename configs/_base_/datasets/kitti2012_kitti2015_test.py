@@ -18,19 +18,17 @@ kitti_test_pipeline = [
 
 kitti2015_val_test = dict(
     type='KITTI2015',
-    data_root='data/kitti2015',
+    data_root='data/KITTI_2015',
     pipeline=kitti_test_pipeline,
     test_mode=True)
 
-kitti2012_val_test = dict(
-    type='KITTI2012',
-    data_root='data/kitti2012',
-    pipeline=kitti_test_pipeline,
-    test_mode=True)
+# kitti2012_val_test = dict(
+#     type='KITTI2012',
+#     data_root='data/kitti2012',
+#     pipeline=kitti_test_pipeline,
+#     test_mode=True)
 
 data = dict(
     test_dataloader=dict(samples_per_gpu=1, workers_per_gpu=2, shuffle=False),
     test=dict(
-        type='ConcatDataset',
-        datasets=[kitti2012_val_test, kitti2015_val_test],
-        separate_eval=True))
+        datasets=[kitti2012_val_test, kitti2015_val_test]))

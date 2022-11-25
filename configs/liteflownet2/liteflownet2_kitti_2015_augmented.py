@@ -1,5 +1,5 @@
 _base_ = [
-    '../_base_/datasets/caddy_pwcnet.py',
+    '../_base_/datasets/kitti2015_augmented.py',
     '../_base_/default_runtime.py'
 ]
 model = dict(
@@ -69,8 +69,8 @@ optimizer_config = dict(grad_clip=None)
 lr_config = dict(
     policy='step', by_epoch=False, gamma=0.5, step=[200000, 300000, 400000])
 runner = dict(type='IterBasedRunner', max_iters=500000)
-checkpoint_config = dict(by_epoch=False, interval=10000)
+checkpoint_config = dict(by_epoch=False, interval=5000)
 evaluation = dict(interval=10000, metric='EPE')
 
-# Train on FlyingChairs and FlyingThings3D_subset, and finetune on KITTI
+# Finetune on KITTI_AUG
 load_from = 'checkpoints/liteflownet2/liteflownet2_ft_4x1_600k_sintel_kitti_320x768.pth'  # noqa

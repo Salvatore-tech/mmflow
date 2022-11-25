@@ -35,13 +35,8 @@ kitti_train_pipeline = [
             'erase_bounds', 'erase_num', 'scale_factor'
         ])
 ]
-kitti_train = dict(
-    type='KITTI2015',
-    data_root='./data/KITTI_2015',
-    pipeline=kitti_train_pipeline,
-    test_mode=False)
 
-kitti_test_pipeline = [
+test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', sparse=True),
     dict(type='InputPad', exponent=3),
@@ -57,10 +52,17 @@ kitti_test_pipeline = [
         ])
 ]
 
+kitti_train = dict(
+    type='KITTI2015AUG',
+    data_root='data/KITTI_AUG',
+    pipeline=kitti_train_pipeline,
+    test_mode=False)
+
+
 kitti2015_val_test = dict(
-    type='KITTI2015',
-    data_root='data/KITTI_2015',
-    pipeline=kitti_test_pipeline,
+    type='KITTI2015AUG',
+    data_root='data/KITTI_AUG',
+    pipeline=test_pipeline,
     test_mode=True)
 
 data = dict(
@@ -79,3 +81,4 @@ data = dict(
     train=kitti_train,
     val=kitti2015_val_test,
     test=kitti2015_val_test)
+

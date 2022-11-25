@@ -1,5 +1,5 @@
 _base_ = [
-    '../_base_/datasets/kitti2012_kitti2015_320x896.py',
+    '../_base_/datasets/kitti2015_pwcnet_augmented.py',
     '../_base_/schedules/pwcnet_ft_300k_schedule.py',
     '../_base_/default_runtime.py'
 ]
@@ -54,5 +54,6 @@ model = dict(
 
 # Train on FlyingChairs and FlyingThings3D_subset, and finetune on KITTI
 # load_from = 'https://download.openmmlab.com/mmflow/pwcnet/pwcnet_8x1_sfine_flyingthings3d_subset_384x768.pth'  # noqa
-load_from = 'checkpoints/pwcnet/pwcnet_8x1_sfine_flyingthings3d_subset_384x768.pth'  # noqa
-#resume_from = 'work_dir/pwcnetKitti2015_resumed/latest.pth'
+# load_from = './checkpoints/pwcnet_8x1_sfine_flyingthings3d_subset_384x768.pth'  # noqa
+#load_from = 'checkpoints/pwcnet/pwcnet_8x1_sfine_flyingthings3d_subset_384x768.pth'
+resume_from = 'work_dir/pwcnetKitti_finetuned_kittiaug/latest.pth'

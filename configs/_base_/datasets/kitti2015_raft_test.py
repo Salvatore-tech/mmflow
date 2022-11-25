@@ -18,10 +18,10 @@ kitti_test_pipeline = [
 
 kitti2015_val_test = dict(
     type='KITTI2015',
-    data_root='data/kitti2015',
+    data_root='data/KITTI_2015',
     pipeline=kitti_test_pipeline,
     test_mode=True)
 
 data = dict(
-    test_dataloader=dict(samples_per_gpu=1, workers_per_gpu=2, shuffle=False),
+    test_dataloader=dict(samples_per_gpu=1, workers_per_gpu=1, shuffle=False),
     test=kitti2015_val_test)

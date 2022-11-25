@@ -120,7 +120,7 @@ kitti_train_pipeline = [
 ]
 kitti_train = dict(
     type='KITTI2015',
-    data_root='data/kitti2015',
+    data_root='data/KITTI_2015',
     pipeline=kitti_train_pipeline,
     test_mode=False)
 kitti_train_x200 = dict(type='RepeatDataset', times=200, dataset=kitti_train)

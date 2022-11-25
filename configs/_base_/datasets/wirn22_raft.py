@@ -1,10 +1,12 @@
+dataset_type = 'WIRN22'
+data_root = '/home/s.starace/Dataset/WIRN2022/work_dir'
+
 img_norm_cfg = dict(
     mean=[127.5, 127.5, 127.5], std=[127.5, 127.5, 127.5], to_rgb=False)
 
-crop_size = (288, 960)
+crop_size = (960, 540)
 
-# KITTI config
-kitti_train_pipeline = [
+wirn22_train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', sparse=True),
     dict(
@@ -35,16 +37,16 @@ kitti_train_pipeline = [
             'erase_bounds', 'erase_num', 'scale_factor'
         ])
 ]
-kitti_train = dict(
-    type='KITTI2015',
-    data_root='./data/KITTI_2015',
-    pipeline=kitti_train_pipeline,
+wirn22_train = dict(
+    type=dataset_type,
+    data_root=data_root,
+    pipeline=wirn22_train_pipeline,
     test_mode=False)
 
-kitti_test_pipeline = [
+wirn22_test_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='LoadAnnotations', sparse=True),
-    dict(type='InputPad', exponent=3),
+    dict(type='LoadAnnotations', sparse=False),
+    dict(type='InputResize', exponent=6),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='TestFormatBundle'),
     dict(
@@ -53,22 +55,22 @@ kitti_test_pipeline = [
         meta_keys=[
             'flow_gt', 'valid', 'filename1', 'filename2', 'ori_filename1',
             'ori_filename2', 'ori_shape', 'img_shape', 'img_norm_cfg',
-            'scale_factor', 'pad_shape', 'pad'
+            'scale_factor', 'pad_shape'
         ])
 ]
 
-kitti2015_val_test = dict(
-    type='KITTI2015',
-    data_root='data/KITTI_2015',
-    pipeline=kitti_test_pipeline,
+wirn22_val_test = dict(
+    type=dataset_type,
+    data_root=data_root,
+    pipeline=wirn22_test_pipeline,
     test_mode=True)
 
 data = dict(
     train_dataloader=dict(
-        samples_per_gpu=2,
-        workers_per_gpu=5,
+        samples_per_gpu=1,
+        workers_per_gpu=2,
         drop_last=True,
-        shuffle=True,
+        shuffle=False,
         persistent_workers=True),
     val_dataloader=dict(
         samples_per_gpu=1,
@@ -76,6 +78,6 @@ data = dict(
         shuffle=False,
         persistent_workers=True),
     test_dataloader=dict(samples_per_gpu=1, workers_per_gpu=2, shuffle=False),
-    train=kitti_train,
-    val=kitti2015_val_test,
-    test=kitti2015_val_test)
+    train=wirn22_train,
+    val=wirn22_val_test,
+    test=wirn22_val_test)

@@ -1,6 +1,5 @@
 _base_ = [
-    '../_base_/models/raft.py',
-    '../_base_/datasets/sintel_cleanx100_sintel_fianlx100_kitti2015x200_hd1kx5_flyingthings3d_raft_384x768.py',  # noqa
+    '../_base_/models/raft.py', '../_base_/datasets/kitti2015AUG_raft_288x960.py',
     '../_base_/default_runtime.py'
 ]
 
@@ -29,14 +28,13 @@ optimizer_config = dict(grad_clip=dict(max_norm=1.))
 lr_config = dict(
     policy='OneCycle',
     max_lr=0.000125,
-    total_steps=100100,
+    total_steps=50100,
     pct_start=0.05,
     anneal_strategy='linear')
 
-runner = dict(type='IterBasedRunner', max_iters=100000)
-checkpoint_config = dict(by_epoch=False, interval=10000)
-evaluation = dict(interval=10000, metric='EPE')
+runner = dict(type='IterBasedRunner', max_iters=50000)
+checkpoint_config = dict(by_epoch=False, interval=5000)
+evaluation = dict(interval=5000, metric='EPE')
 
-# Train on FlyingChairs and FlyingThings3D, and finetune on
-# and Sintel, KITTI2015 and HD1K
-load_from = 'checkpoints/raft/raft_8x2_100k_mixed_368x768.pth'  # noqa
+# Load model training on mixed datasets and finetune it on KITTI2015
+#load_from = 'checkpoints/raft/raft_8x2_100k_mixed_368x768.pth'  # noqa

@@ -9,5 +9,5 @@ lr_config = dict(
     gamma=0.5,
     step=[100000, 150000, 200000, 250000])
 runner = dict(type='IterBasedRunner', max_iters=300000)
-checkpoint_config = dict(by_epoch=False, interval=50000)
-evaluation = dict(interval=50000, metric='EPE')
+checkpoint_config = dict(by_epoch=False, interval=5000)
+evaluation = dict(interval=5000, metric='EPE')

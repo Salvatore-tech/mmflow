@@ -1,6 +1,8 @@
+data_root = '/home/s.starace/Dataset/dCADDY'
+dataset_type = 'CADDY'
 img_norm_cfg = dict(mean=[0., 0., 0.], std=[255., 255., 255.], to_rgb=False)
 
-crop_size = (320, 896)
+crop_size = (608, 448)
 
 global_transform = dict(
     translates=(0.02, 0.02),
@@ -31,8 +33,7 @@ sparse_train_pipeline = [
     dict(
         type='RandomAffine',
         global_transform=global_transform,
-        relative_transform=relative_transform,
-        check_bound=True),
+        relative_transform=relative_transform),
     dict(type='RandomCrop', crop_size=crop_size),
     dict(type='DefaultFormatBundle'),
     dict(
@@ -61,29 +62,47 @@ test_pipeline = [
         ])
 ]
 
-kitti2015_train = dict(
-    type='KITTI2015',
-    data_root='data/kitti2015',
+sintel_test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations'),
+    dict(type='InputPad', exponent=3),
+    dict(type='Normalize', **img_norm_cfg),
+    dict(type='TestFormatBundle'),
+    dict(
+        type='Collect',
+        keys=['imgs'],
+        meta_keys=[
+            'flow_gt', 'filename1', 'filename2', 'ori_filename1',
+            'ori_filename2', 'ori_shape', 'img_shape', 'img_norm_cfg',
+            'scale_factor', 'pad_shape', 'pad'
+        ])
+]
+
+caddy_train = dict(
+    type=dataset_type,
+    data_root=data_root,
     pipeline=sparse_train_pipeline,
     test_mode=False)
 
 kitti2015_val_test = dict(
     type='KITTI2015',
-    data_root='data/kitti2015',
+    data_root='data/KITTI_2015',
     pipeline=test_pipeline,
     test_mode=True)
 
-kitti2012_train = dict(
-    type='KITTI2012',
-    data_root='data/kitti2012',
-    pipeline=sparse_train_pipeline,
-    test_mode=False),
+sintel_clean_test = dict(
+    type='Sintel',
+    pipeline=sintel_test_pipeline,
+    data_root='data/Sintel',
+    test_mode=True,
+    pass_style='clean')
+sintel_final_test = dict(
+    type='Sintel',
+    pipeline=sintel_test_pipeline,
+    data_root='data/Sintel',
+    test_mode=True,
+    pass_style='final')
 
-kitti2012_val_test = dict(
-    type='KITTI2012',
-    data_root='data/kitti2012',
-    pipeline=test_pipeline,
-    test_mode=True)
 
 data = dict(
     train_dataloader=dict(
@@ -98,12 +117,14 @@ data = dict(
         shuffle=False,
         persistent_workers=True),
     test_dataloader=dict(samples_per_gpu=1, workers_per_gpu=5, shuffle=False),
-    train=[kitti2015_train, kitti2012_train],
+    train=[caddy_train],
     val=dict(
         type='ConcatDataset',
-        datasets=[kitti2015_val_test],
+        datasets=[kitti2015_val_test, sintel_clean_test, sintel_final_test],
         separate_eval=True),
     test=dict(
         type='ConcatDataset',
-        datasets=[kitti2015_val_test],
-        separate_eval=True))
+
+        datasets=[kitti2015_val_test, sintel_clean_test, sintel_final_test],
+        separate_eval=True)
+)
