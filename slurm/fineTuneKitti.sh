@@ -1,0 +1,1 @@
+python tools/train.py configs/liteflownet2/liteflownet2_kitti_2015_augmented.py --work-dir work_dir/liteflownet2_new
